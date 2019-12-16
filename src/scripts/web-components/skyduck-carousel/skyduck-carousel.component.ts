@@ -123,6 +123,14 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             || verticalSwipePixels < (maxVerticalSwipePixels * -1);
     }
 
+    private _onCurrentSlideChange(): void {
+        this.dispatchEvent(new CustomEvent('slidechange', {
+            detail: {
+                currentSlide: this._currentSlide,
+            },
+        }));
+    }
+
     private _onResize() {
         this._setTouchActive(true);
         this._setContainerStyle();
@@ -242,10 +250,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         this.scrollIntoView({ behavior: this._scrollBehavior });
     }
 
-    private _setCarouselHeightToSlideHeight() {
-        this.style.height = `${this._currentSlide.el.offsetHeight + this._getSlideSelectorsHeight()}px`;
-    }
-
     private _registerEvents() {
         window.addEventListener('resize', this._onResize.bind(this));
 
@@ -263,6 +267,10 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         });
     }
 
+    private _setCarouselHeightToSlideHeight() {
+        this.style.height = `${this._currentSlide.el.offsetHeight + this._getSlideSelectorsHeight()}px`;
+    }
+
     private _setContainerStyle(): Promise<any> {
         this._container.style.width = `${this.offsetWidth}px`;
         Array.from(this._container.children).forEach((slide: HTMLElement) => {
@@ -272,14 +280,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         this._setCarouselHeightToSlideHeight();
 
         return Promise.resolve();
-    }
-
-    private _onCurrentSlideChange(): void {
-        this.dispatchEvent(new CustomEvent('slidechange', {
-            detail: {
-                currentSlide: this._currentSlide,
-            },
-        }));
     }
 
     private _setCurrentSlide(slideIndex: number) {
@@ -340,12 +340,8 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         this._container.style.transform = `translateX(${translateX}px)`;
     }
 
-    public set scrollbehavior(val: 'auto'|'smooth') {
-        this._scrollBehavior = val;
-    }
-
-    public get scrollbehavior(): 'auto'|'smooth' {
-        return this._scrollBehavior;
+    public get currentSlide(): number {
+        return this._currentSlide.id;
     }
 
     public set currentSlide(slideNumber: number) {
@@ -358,6 +354,14 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         this._setCurrentSlide(slideIndex);
         this._slideIntoView(this._currentSlide);
         this.scrollIntoView({ behavior: this._scrollBehavior });
+    }
+
+    public set scrollbehavior(val: 'auto'|'smooth') {
+        this._scrollBehavior = val;
+    }
+
+    public get scrollbehavior(): 'auto'|'smooth' {
+        return this._scrollBehavior;
     }
 
     protected async connectedCallback() {
@@ -390,8 +394,11 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         this._setCurrentSlide(0);
         this._container = this._slidesSlot.assignedNodes()[0] as HTMLElement;
 
-
-        await this._setContainerStyle();
+        setTimeout(() => {
+            // Timeout neccessary or _setContainerStyle() will be called before
+            // this element is actually appended to the document
+            this._setContainerStyle();
+        });
     }
 
     protected attributeChangedCallback(name: string, _oldVal: any, newVal: any) {
