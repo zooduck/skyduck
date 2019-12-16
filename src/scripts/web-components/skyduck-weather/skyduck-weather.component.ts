@@ -20,6 +20,12 @@ import { DistanceBetweenPoints } from './utils/distance-between-points';
 import { Spinner } from './css-icons/spinner/spinner';
 
 const tagName = 'skyduck-weather';
+const geolocationBlockedByUserMessage = `
+Geolocation permission has been blocked
+as the user has dismissed the permission prompt.
+This can be reset in Page Info which can be accessed
+by clicking the lock icon next to the URL.
+`.trim();
 
 /* eslint-enable */
 class HTMLSkyduckWeatherElement extends HTMLElement {
@@ -56,6 +62,9 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         navigator.geolocation.getCurrentPosition((position) => {
             this._position = position;
         }, (err) => {
+            if (err.code === 1) {
+                return alert (geolocationBlockedByUserMessage);
+            }
             alert(err.message);
         });
     }
