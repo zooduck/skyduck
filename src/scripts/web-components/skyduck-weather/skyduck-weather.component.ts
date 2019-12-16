@@ -386,6 +386,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 
     private _getLoader(): HTMLElement {
+
         const loader = this._domParser.parseFromString(`
             <div class="loader" id="skyduck-loader">
                 <div class="loader-info">
@@ -414,7 +415,10 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 
     private _getSpinner(): HTMLElement {
-        return new Spinner().html;
+        const spinner = new Spinner().html;
+        spinner.classList.add('loader__spinner');
+
+        return spinner;
     }
 
     private _getStyle(): HTMLStyleElement {

@@ -111,9 +111,10 @@ a:hover {
 .loader__error {
     display: none;
     text-align: center;
-    border: solid 3px var(--white);
+    border: solid 3px var(--red);
     padding: 10px;
     max-width: 450px;
+    color: var(--red);
 }
 :host(.--error) .loader__error {
     display: block;
@@ -128,6 +129,9 @@ a:hover {
     text-overflow: ellipsis;
     overflow: hidden;
     width: calc(100vw - 20px);
+}
+:host(.--error) .loader__spinner {
+    display: none;
 }
 
 .header {
