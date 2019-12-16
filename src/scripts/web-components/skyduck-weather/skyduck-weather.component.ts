@@ -55,6 +55,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
 
         navigator.geolocation.getCurrentPosition((position) => {
             this._position = position;
+        }, (err) => {
+            alert(err.message);
         });
     }
 
