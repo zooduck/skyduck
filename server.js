@@ -36,7 +36,7 @@ database.connect().then((result) => {
 
 
 const serverConfig = {
-    port: 3333,
+    port: process.env.PORT || 3333, // process.env.port (heroku port)
 };
 
 server.listen(serverConfig.port, () => {
