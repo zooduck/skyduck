@@ -137,7 +137,7 @@ a:hover {
 .header {
     position: relative;
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr auto;
     align-items: center;
     color: var(--skyblue);
     padding: 10px 10px 0 10px;
@@ -145,7 +145,7 @@ a:hover {
 .header-title-container {
     position: relative;
     display: flex;
-    align-items: baseline;
+    align-items: center;
 }
 .header-title-container__title {
     font-family: 'Luckiest Guy', cursive;
@@ -160,6 +160,9 @@ a:hover {
     height: 100%;
     background: var(--white);
     transform: rotate(45deg);
+}
+.header__skyduck-logo {
+    width: 220px;
 }
 .header__location-icon {
     align-self: start;
