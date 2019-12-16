@@ -1,6 +1,6 @@
 *.html
 *.css
-favicon.ico
+*.ico
 *.scss
 *.test.*
 *.jpg
