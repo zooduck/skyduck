@@ -1,14 +1,15 @@
 /* eslint-disable no-console */
 const axios = require('axios');
-const fs = require('fs');
 const bingGeocodeEndpoint = 'http://dev.virtualearth.net/REST/v1/Locations/';
+const fs = require('fs');
+const path = require('path');
 
 let db;
 
 const root = {
     path: '/',
     callback: (_request, response) => {
-        response.status(200).send({ message: 'Connection Success' });
+        response.status(200).sendFile(path.join(__dirname) + 'index.html');
     }
 };
 
