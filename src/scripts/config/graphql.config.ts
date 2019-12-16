@@ -1,5 +1,5 @@
 export const graphqlConfig = {
-    uri: 'http://localhost:3333/graphql',
+    uri: '/graphql',
     options: {
         method: 'POST',
         headers: {
