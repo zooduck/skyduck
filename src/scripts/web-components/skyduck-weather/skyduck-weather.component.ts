@@ -22,10 +22,10 @@ import { Spinner } from './css-icons/spinner/spinner';
 const tagName = 'skyduck-weather';
 const geolocationBlockedByUserMessage = `
 Geolocation permission has been blocked
-as the user has dismissed the permission prompt.
-This can be reset in Page Info which can be accessed
-by clicking the lock icon next to the URL.
-`.trim();
+ as the user has dismissed the permission prompt.
+ This can be reset in Page Info which can be accessed
+ by clicking the lock icon next to the URL.
+`.trim().replace(/\n/g, '');
 
 /* eslint-enable */
 class HTMLSkyduckWeatherElement extends HTMLElement {
