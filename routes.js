@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+require('dotenv').config();
 const axios = require('axios');
 const bingGeocodeEndpoint = 'http://dev.virtualearth.net/REST/v1/Locations/';
 const fs = require('fs');

@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-require('dotenv').config();
 const express = require('express');
 const expressGraphql = require('express-graphql');
 const { buildSchema } = require('graphql');

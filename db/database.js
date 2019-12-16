@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+require('dotenv').config();
 const mongodb = require('mongodb').MongoClient;
 const mongodbURI = process.env.MONGODB_URI.replace(/<dbuser>/, process.env.MONGODB_USER).replace(/<dbpassword>/, process.env.MONGODB_PASSWORD);
 
