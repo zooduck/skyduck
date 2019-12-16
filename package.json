@@ -7,7 +7,8 @@
     "prebuild": "node clean && npm run lint",
     "build": "parcel build src/index.html",
     "lint": "eslint ./src/**/*.*",
-    "start": "parcel watch src/index.html",
+    "watch": "parcel watch src/index.html",
+    "start": "node server.js",
     "test": "jest --coverage"
   },
   "author": "zooduck",
