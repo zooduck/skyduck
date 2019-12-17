@@ -1,10 +1,10 @@
 export const isTap = (lastPointerdownEvent: PointerEvent, pointerupEvent: PointerEvent): boolean => {
-    // if (pointerupEvent.buttons === 2) { // right mouse button
-    //     return false;
-    // }
+    if (pointerupEvent.button === 2) { // right mouse button
+        return false;
+    }
 
     const maxInterval = 250;
-    const maxDistance = 0;
+    const maxDistance = 10;
     const distance = (lastPointerdownEvent.clientX - pointerupEvent.clientX);
     const positiveDistance = distance < 0 ? (distance * -1) : distance;
 
