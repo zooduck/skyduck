@@ -144,6 +144,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             return;
         }
 
+        this._setCurrentSlide(nextSlide.index);
         this._slideIntoView(nextSlide);
     }
 
@@ -160,6 +161,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             return;
         }
 
+        this._setCurrentSlide(nextSlide.index);
         this._slideIntoView(nextSlide);
     }
 
@@ -325,8 +327,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
 
         this._slideTo(offsetX);
         this._currentOffsetX = offsetX;
-
-        this._setCurrentSlide(slide.index);
     }
 
     private _slideTo(offsetX: number) {
@@ -351,8 +351,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             return;
         }
 
-        this._setCurrentSlide(slideIndex);
-        this._slideIntoView(this._currentSlide);
+        this._slideIntoView(this._slides[slideIndex]);
         this.scrollIntoView({ behavior: this._scrollBehavior });
     }
 
@@ -383,8 +382,11 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         if (this.querySelector('[slot=slide-selectors]')) {
             Array.from(this.querySelector('[slot=slide-selectors]').children)
                 .map((item: HTMLElement, i: number) => {
-                    item.addEventListener('pointerdown', () => {
+                    item.addEventListener('pointerup', (e: PointerEvent) => {
+                        e.preventDefault();
+
                         this._setCurrentSlide(i);
+                        this._slideIntoView(this._currentSlide);
                     });
                 });
 

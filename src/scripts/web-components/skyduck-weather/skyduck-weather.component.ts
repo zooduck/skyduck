@@ -150,6 +150,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         this.shadowRoot.querySelector('#clubListLink')
             .addEventListener('pointerdown', (e) => {
                 e.preventDefault();
+
                 this._getClubs();
             });
 
@@ -252,7 +253,9 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
                 <a class="club-list-item__site-link" href="${club.site}" target="_blank">${club.site.replace(/https?:\/\//, '')}</a>
             </li>`, 'text/html').body.firstChild as HTMLElement;
 
-        clubListItem.addEventListener('click', () => {
+        clubListItem.addEventListener('pointerup', (e: PointerEvent) => {
+            e.preventDefault();
+
             const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
             this.club = clubName;
         });
@@ -412,7 +415,9 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
-        loader.addEventListener('click', () => {
+        loader.addEventListener('pointerup', (e: PointerEvent) => {
+            e.preventDefault();
+
             if (this._forecast && this._error) {
                 this._error = '';
                 this.classList.remove(this._modifierClasses.error);

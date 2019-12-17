@@ -215,20 +215,12 @@ export class SkyduckWeatherElements {
     private _buildForecastSlideSelectorsSlot(): HTMLElement {
         const days = this._dailyForecast.weather.daily.data;
 
-        const averageRatingTabs: HTMLElement[] = days.map((day, i: number) => {
+        const averageRatingTabs: HTMLElement[] = days.map((day) => {
             const averageRatingModifier = this._getAverageRatingModifier(day.hourly);
 
             const forecastSlideSelector = this._domParser.parseFromString(`
                 <div class="forecast-slide-selectors__item ${averageRatingModifier}"></div>
             `, 'text/html').body.firstChild as HTMLElement;
-
-            forecastSlideSelector.addEventListener('pointerdown', (e: PointerEvent) => {
-                e.preventDefault();
-
-                const slideNumber = i + 1;
-                this._forecastCarousel.currentSlide = slideNumber;
-
-            });
 
             return forecastSlideSelector;
         });
