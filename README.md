@@ -1,6 +1,9 @@
 # skyduck
 Weather forecasting tool for skydivers.
 
+### v0.0.1-alpha is now live
+https://skyduck.herokuapp.com
+
 ![alt text](https://github.com/zooduck/screenshots/blob/master/skyduck/v0.0.1-alpha/skyduck-v0.0.1-alpha.png)
 
 ### Usage
