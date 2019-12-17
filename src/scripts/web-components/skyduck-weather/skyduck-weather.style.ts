@@ -220,7 +220,7 @@ a:hover {
     display: grid;
     grid-template-columns: repeat(8, auto);
     gap: 5px;
-    height: 40px;
+    height: 60px;
     max-width: 450px;
     margin: 0 auto;
     padding: 20px 10px 0 10px;
@@ -444,6 +444,7 @@ a:hover {
 }
 .club-list-item__name {
     cursor: pointer;
+    justify-self: left;
 }
 .club-list-item__name:hover {
     text-decoration: underline;
