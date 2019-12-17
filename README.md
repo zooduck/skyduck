@@ -1,5 +1,5 @@
 # skyduck
-Weather forecasting tool for skydivers
+Weather forecasting tool for skydivers.
 
 ![alt text](https://github.com/zooduck/screenshots/blob/master/skyduck/v0.0.1-alpha/skyduck-v0.0.1-alpha.png)
 
