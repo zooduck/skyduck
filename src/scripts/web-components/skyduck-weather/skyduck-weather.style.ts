@@ -423,6 +423,7 @@ a:hover {
 .club-list-container {
     padding: 10px;
     user-select: text;
+    cursor: default;
 }
 .club-list-container__country {
     background-color: #eee;
@@ -440,6 +441,12 @@ a:hover {
 .club-list-item {
     display: grid;
     gap: 5px;
+}
+.club-list-item__name {
+    cursor: pointer;
+}
+.club-list-item__name:hover {
+    text-decoration: underline;
 }
 .club-list-item__site-link {
     justify-self: left;

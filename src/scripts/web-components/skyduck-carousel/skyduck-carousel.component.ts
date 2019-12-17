@@ -1,4 +1,5 @@
 import { style } from './skyduck-carousel.style';
+import { isTap } from './utils/is-tap';
 
 interface Slide {
     id: number;
@@ -13,7 +14,7 @@ interface TouchData {
 }
 
 interface PointerEvents {
-    pointerdown: number[];
+    pointerdown: PointerEvent[];
 }
 
 const tagName = 'skyduck-carousel';
@@ -109,11 +110,11 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             return false;
         }
 
-        const secondToLastPointerDownTime = this._pointerEvents.pointerdown.slice(-2, -1)[0];
-        const lastPointerDownTime = this._pointerEvents.pointerdown.slice(-1)[0];
+        const secondToLastPointerdownTime = this._pointerEvents.pointerdown.slice(-2, -1)[0].timeStamp;
+        const lastPointerdownTime = this._pointerEvents.pointerdown.slice(-1)[0].timeStamp;
         const maxTimeBetweenPointerDown = 250;
 
-        return (lastPointerDownTime - secondToLastPointerDownTime) < maxTimeBetweenPointerDown;
+        return (lastPointerdownTime - secondToLastPointerdownTime) < maxTimeBetweenPointerDown;
     }
 
     private _isVerticalSwipe(verticalSwipePixels: number) {
@@ -171,9 +172,10 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         const clientX = e.clientX;
         const clientY = e.clientY;
 
+        this._pointerEvents.pointerdown.push(e);
+
         if (e.path[0].parentNode.getAttribute('slot') !== 'slide-selectors') {
             this._setTouchActive(true);
-            this._pointerEvents.pointerdown.push(new Date().getTime());
         }
 
         this._touchStartData = {
@@ -248,7 +250,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         }
 
         this._setCarouselHeightToSlideHeight();
-
         this.scrollIntoView({ behavior: this._scrollBehavior });
     }
 
@@ -385,8 +386,16 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
                     item.addEventListener('pointerup', (e: PointerEvent) => {
                         e.preventDefault();
 
+                        const lastPointerdownEvent = this._pointerEvents.pointerdown.slice(-1)[0];
+                        const pointerupEvent = e;
+
+                        if (!isTap(lastPointerdownEvent, pointerupEvent)) {
+                            return;
+                        }
+
                         this._setCurrentSlide(i);
                         this._slideIntoView(this._currentSlide);
+                        this.scrollIntoView({ behavior: this._scrollBehavior });
                     });
                 });
 
@@ -397,8 +406,14 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         this._container = this._slidesSlot.assignedNodes()[0] as HTMLElement;
 
         setTimeout(() => {
-            // Timeout neccessary or _setContainerStyle() will be called before
-            // this element is actually appended to the document
+            // Timeout neccessary or this._setContainerStyle() will be called
+            // before the element has loaded.
+            // ---------------------------------------------------------------------------------
+            // According to MDN: The connectedCallback lifecycle callback is invoked each time
+            // the custom element is appended into a document-connected element. This will
+            // happen each time the node is moved, and may happen before the element's contents
+            // have been fully parsed.
+            // ----------------------------------------------------------------------------------
             this._setContainerStyle();
         });
     }

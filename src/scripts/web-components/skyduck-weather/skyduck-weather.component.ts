@@ -18,6 +18,11 @@ import { graphqlConfig } from '../../config/graphql.config';
 import { skydiveClubsQuery } from './graphql-queries/skydive-clubs-query';
 import { DistanceBetweenPoints } from './utils/distance-between-points';
 import { Spinner } from './css-icons/spinner/spinner';
+import { isTap } from './utils/is-tap';
+
+interface PointerEvents {
+    pointerdown: PointerEvent[];
+}
 
 const tagName = 'skyduck-weather';
 const geolocationBlockedByUserMessage = `
@@ -43,6 +48,9 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         error: '--error',
     };
     private _onSearchSubmit: EventListener;
+    private _pointerEvents: PointerEvents = {
+        pointerdown: [],
+    };
     private _position: Position;
     private _location: string;
     private _latLonSpin: LatLonSpin;
@@ -180,6 +188,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             .addEventListener('pointerdown', (e) => {
                 e.preventDefault();
 
+                this._pointerEvents.pointerdown.push(e);
+
                 const searchInput = this.shadowRoot.querySelector('zooduck-input') as HTMLInputElement;
 
                 if (!searchInput) {
@@ -253,8 +263,17 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
                 <a class="club-list-item__site-link" href="${club.site}" target="_blank">${club.site.replace(/https?:\/\//, '')}</a>
             </li>`, 'text/html').body.firstChild as HTMLElement;
 
-        clubListItem.addEventListener('pointerup', (e: PointerEvent) => {
+        const clubListItemName = clubListItem.querySelector('.club-list-item__name');
+
+        clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
             e.preventDefault();
+
+            const pointerupEvent = e;
+            const lastPointerdownEvent = this._pointerEvents.pointerdown.slice(-1)[0];
+
+            if (!isTap(lastPointerdownEvent, pointerupEvent)) {
+                return;
+            }
 
             const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
             this.club = clubName;
