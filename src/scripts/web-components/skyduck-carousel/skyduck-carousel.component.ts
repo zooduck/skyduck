@@ -272,7 +272,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     }
 
     private _setContainerStyle(): Promise<any> {
-        this._container.style.width = `${this.offsetWidth}px`;
+        // this._container.style.width = `${this.offsetWidth}px`;
         Array.from(this._container.children).forEach((slide: HTMLElement) => {
             this._setSlideStyle(slide);
         });

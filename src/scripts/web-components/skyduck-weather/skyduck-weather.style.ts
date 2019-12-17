@@ -169,6 +169,22 @@ a:hover {
     cursor: pointer;
 }
 
+.search {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+}
+.search__radios {
+    display: grid;
+    grid-row-gap: 5px;
+}
+.search__club-list-link {
+    cursor: pointer;
+    justify-self: left;
+}
+
 .club-info-grid {
     display: grid;
     grid-row-gap: 10px;
@@ -193,6 +209,11 @@ a:hover {
 .club-info-grid-location-info-header__local-time {
     color: var(--gray);
     white-space: nowrap;
+}
+
+#forecastCarousel {
+    max-width: 768px;
+    margin: 0 auto;
 }
 
 .forecast-slide-selectors {
@@ -221,22 +242,6 @@ a:hover {
 }
 .forecast-slide-selectors__item.--green {
     background-color: var(--green);
-}
-
-.search {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-}
-.search__radios {
-    display: grid;
-    grid-row-gap: 5px;
-}
-.search__club-list-link {
-    cursor: pointer;
-    justify-self: left;
 }
 
 .forecast-grid {
@@ -304,11 +309,13 @@ a:hover {
     background-size: cover;
     background-repeat: no-repeat;
 }
+
 @media (min-aspect-ratio: 1/1) {
     .forecast-grid-forecast__weather-photo {
-        min-height: calc(100vw / 3);
+        min-height: calc(768px / 4);
     }
 }
+
 .forecast-grid-forecast__time {
     margin: 0 0 10px 10px;
     background-color: rgba(255, 255, 255, .8);
