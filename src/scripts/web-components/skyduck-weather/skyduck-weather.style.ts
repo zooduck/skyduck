@@ -363,8 +363,8 @@ a:hover {
     grid-column: 2;
     grid-row: 1 / span 2;
     display: grid;
-    grid-template-columns: repeat(3, auto);
-    grid-template-rows: 80px auto;
+    grid-template-columns: repeat(3, minmax(55px, auto));
+    grid-template-rows: repeat(2, auto);
     grid-column-gap: 5px;
     align-self: end;
 }
