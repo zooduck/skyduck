@@ -14,7 +14,7 @@ Search can be made by club (if it exists in the database) or by location. You ca
 - Bing Maps (Geocode)
 - Google Maps (Embed)
 
-## Dependencies
+### Dependencies
 - luxon
 - dotenv
 - full-icu
