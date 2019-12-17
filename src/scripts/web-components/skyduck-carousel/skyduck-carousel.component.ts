@@ -364,9 +364,10 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         return this._scrollBehavior;
     }
 
-    protected async connectedCallback() {
+    protected connectedCallback() {
         // Required "slides" slot
-        if (!this.querySelector('[slot=slides]')) {
+        const requiredSlottedContent = this.querySelector('[slot=slides]');
+        if (!requiredSlottedContent || !requiredSlottedContent.children.length) {
             throw Error(`${tagName} failed to render. No slotted content for "slides" was found.`);
         }
 

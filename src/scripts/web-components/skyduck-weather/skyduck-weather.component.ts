@@ -19,9 +19,17 @@ import { skydiveClubsQuery } from './graphql-queries/skydive-clubs-query';
 import { DistanceBetweenPoints } from './utils/distance-between-points';
 import { Spinner } from './css-icons/spinner/spinner';
 import { isTap } from './utils/is-tap';
+import { wait } from './utils/wait';
 
 interface PointerEvents {
     pointerdown: PointerEvent[];
+}
+
+type ClubListSortedByCountry = {
+    [key: string]: {
+        furthestDZDistance: number;
+        list: SkydiveClub[];
+    }
 }
 
 const tagName = 'skyduck-weather';
@@ -35,12 +43,15 @@ Geolocation permission has been blocked
 /* eslint-enable */
 class HTMLSkyduckWeatherElement extends HTMLElement {
     private _club: string;
-    private _clubs: any;
+    private _clubs: ClubListSortedByCountry;
+    private _nearestClub: SkydiveClub;
+    private _defaultClub = 'skydive algarve';
     private _domParser: DOMParser;
     private _error: string;
     private _forecast: DailyForecast;
     private _geocodeData: GeocodeData;
     private _googleMapsKey: string;
+    private _hasLoaded = false;
     private _imagesReady = false;
     private _isSearchInProgress = false;
     private _modifierClasses: ModifierClasses = {
@@ -58,7 +69,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     private _version: string;
     private _weather: SkyduckWeather;
 
-    constructor() {
+    constructor () {
         super();
 
         this.attachShadow({ mode: 'open' });
@@ -66,15 +77,6 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         this._domParser = new DOMParser();
         this._latLonSpin = new LatLonSpin();
         this._weather = new SkyduckWeather();
-
-        navigator.geolocation.getCurrentPosition((position) => {
-            this._position = position;
-        }, (err) => {
-            if (err.code === 1) {
-                return alert (geolocationBlockedByUserMessage);
-            }
-            alert(err.message);
-        });
     }
 
     static get observedAttributes() {
@@ -121,7 +123,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             return;
         }
 
-        const clubListCarousel = this._getClubList();
+        const clubListCarousel = this._getClubListCarousel();
         this._addEventsToCarousel(clubListCarousel);
         this.shadowRoot.appendChild(clubListCarousel);
     }
@@ -159,7 +161,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             .addEventListener('pointerdown', (e) => {
                 e.preventDefault();
 
-                this._getClubs();
+                this._showClubList();
             });
 
         this.shadowRoot.querySelector('.header__location-icon')
@@ -201,7 +203,14 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 
     private _clearContent(): void {
-        this.shadowRoot.innerHTML = '';
+        Array.from(this.shadowRoot.children).forEach((child: HTMLElement) => {
+            const isStyleTag = /style/i.test(child.nodeName);
+            const isLoader = /skyduckLoader/.test(child.id);
+            if (!isStyleTag && !isLoader) {
+                child.parentNode.removeChild(child);
+            }
+        });
+
         this.classList.remove(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
     }
@@ -282,9 +291,28 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         return clubListItem;
     }
 
+    private _getClubListCountries(): string[] {
+        const clubListCountries = Object.keys(this._clubs);
+
+        if (!this._nearestClub) {
+            return clubListCountries;
+        }
+
+        const nearestCountryIndex = clubListCountries.findIndex((country: string) => {
+            return country === this._nearestClub.country;
+        });
+
+        const nearestCountryKey = clubListCountries.splice(nearestCountryIndex, 1)[0];
+
+        clubListCountries.unshift(nearestCountryKey);
+
+        return clubListCountries;
+    }
+
     /* eslint-disable indent */
     private _getClubListContainers(): HTMLElement[] {
-        const clubListContainers = Object.keys(this._clubs).map((country) => {
+        const clubListCountries = this._getClubListCountries();
+        const clubListContainers = clubListCountries.map((country) => {
             const numberOfClubs = this._clubs[country].list.length;
             const clubListCountry = `<h2 class="club-list-container__country">${country} (${numberOfClubs})</h2>`;
             const clubList = this._domParser.parseFromString(`
@@ -307,7 +335,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         return clubListContainers;
     }
 
-    private _getClubList(): HTMLElement {
+    private _getClubListCarousel(): HTMLElement {
         const clubListCarousel = this._domParser.parseFromString(`
             <skyduck-carousel id="clubListCarousel">
                 <div slot="slides"></div>
@@ -316,70 +344,12 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
 
         const slidesSlot = clubListCarousel.querySelector('[slot=slides]');
         const slides = this._getClubListContainers();
+
         slides.forEach((slide: HTMLElement) => {
             slidesSlot.appendChild(slide);
         });
 
         return clubListCarousel;
-    }
-
-    /* eslint-enable indent */
-    private async _getClubs(): Promise<any> {
-        try {
-            if (this._clubs) {
-                this._addClubListCarousel();
-
-                const clubList = this.shadowRoot.querySelector('#clubListCarousel');
-                clubList.scrollIntoView({ behavior: 'smooth' });
-
-                return this._clubs;
-            }
-
-            const graphqlResult = await fetch(graphqlConfig.uri, {
-                ...graphqlConfig.options,
-                body: JSON.stringify({
-                    query: skydiveClubsQuery,
-                }),
-            });
-
-            const json = await graphqlResult.json();
-            const clubs = json.data.clubs.map((club: SkydiveClub) => {
-                const distanceInMiles = this._position
-                    ? new DistanceBetweenPoints({
-                        from: {
-                            latDeg: this._position.coords.latitude,
-                            lonDeg: this._position.coords.longitude,
-                        },
-                        to: {
-                            latDeg: club.latitude,
-                            lonDeg: club.longitude,
-                        }
-                    }).miles
-                    : 0;
-
-                return {
-                    ...club,
-                    distance: distanceInMiles,
-                };
-            });
-
-            if (this._position) {
-                this._sortClubsByDistance(clubs);
-            } else {
-                this._sortClubsByName(clubs);
-            }
-
-            this._clubs = this._sortClubsByCountry(clubs);
-
-            this._addClubListCarousel();
-
-            const clubList = this.shadowRoot.querySelector('#clubListCarousel');
-            clubList.scrollIntoView({ behavior: 'smooth' });
-
-            return this._clubs;
-        } catch (err) {
-            throw new Error(err);
-        }
     }
 
     private async _getGoogleMapsKey(): Promise<string> {
@@ -419,9 +389,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 
     private _getLoader(): HTMLElement {
-
         const loader = this._domParser.parseFromString(`
-            <div class="loader" id="skyduck-loader">
+            <div class="loader" id="skyduckLoader">
                 <div class="loader-info">
                     <div id="loaderInfoLat"></div>
                     <div id="loaderInfoLon"></div>
@@ -463,6 +432,64 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         return styleEl;
     }
 
+    /* eslint-enable indent */
+    private async _initClubs(): Promise<void> {
+        try {
+            const graphqlResponse = await fetch(graphqlConfig.uri, {
+                ...graphqlConfig.options,
+                body: JSON.stringify({
+                    query: skydiveClubsQuery,
+                }),
+            });
+
+            if (!graphqlResponse.ok) {
+                throw Error(`(${graphqlResponse.status}) ${graphqlResponse.statusText}`);
+            }
+
+            const json = await graphqlResponse.json();
+            const clubs = json.data.clubs.map((club: SkydiveClub) => {
+                const distanceInMiles = this._position
+                    ? new DistanceBetweenPoints({
+                        from: {
+                            latDeg: this._position.coords.latitude,
+                            lonDeg: this._position.coords.longitude,
+                        },
+                        to: {
+                            latDeg: club.latitude,
+                            lonDeg: club.longitude,
+                        }
+                    }).miles
+                    : 0;
+
+                return {
+                    ...club,
+                    distance: distanceInMiles,
+                };
+            });
+
+            if (this._position) {
+                this._sortClubsByDistance(clubs);
+
+                this._nearestClub = clubs[0];
+
+                if (!this._club && !this._location) {
+                    this.club = this._nearestClub.name;
+                }
+            } else {
+                this._sortClubsByName(clubs);
+
+                if (!this._club && !this._location) {
+                    this.club = this._defaultClub;
+                }
+            }
+
+            this._clubs = this._sortClubsByCountry(clubs);
+        } catch (err) {
+            this._error = err;
+            this._setLoaderError();
+        }
+    }
+
     private async _loaderInfoDisplay(): Promise<void> {
         const { club, weather } = this._forecast;
         const delayBetweenInfoMessages = 500;
@@ -473,25 +500,25 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         const loaderInfoLocalTime = this.shadowRoot.querySelector('#loaderInfoLocalTime');
 
         this._latLonSpin.apply(loaderInfoLat, 'Lat:&nbsp;');
-        await this._wait(delayBetweenInfoMessages);
+        await wait(delayBetweenInfoMessages);
         this._latLonSpin.setContent(loaderInfoLat, `Lat: ${weather.latitude.toString().substr(0, 9)}`);
 
         this._latLonSpin.apply(loaderInfoLon, 'Lon:&nbsp;');
-        await this._wait(delayBetweenInfoMessages);
+        await wait(delayBetweenInfoMessages);
         this._latLonSpin.setContent(loaderInfoLon, `Lon: ${weather.longitude.toString().substr(0, 9)}`);
 
         loaderInfoPlace.innerHTML = `Place: ${club.place}`;
-        await this._wait(delayBetweenInfoMessages);
+        await wait(delayBetweenInfoMessages);
 
         loaderInfoIANA.innerHTML = `IANA: ${weather.timezone}`;
-        await this._wait(delayBetweenInfoMessages);
+        await wait(delayBetweenInfoMessages);
 
         const locationTime = DateTime.local()
             .setZone(this._forecast.weather.timezone)
             .toLocaleString(DateTime.TIME_24_SIMPLE);
 
         loaderInfoLocalTime.innerHTML = `Local Time: ${locationTime}`;
-        await this._wait(delayBetweenInfoMessages);
+        await wait(delayBetweenInfoMessages);
     }
 
     private _loadImage(src: string) {
@@ -541,20 +568,16 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             await this._getImages();
         }
 
+        const minTimeToDisplaySpinner = 500;
+        await wait(minTimeToDisplaySpinner);
+
         if (this._error) {
-            const minTimeToDisplaySpinner = 1000;
-
-            await this._wait(minTimeToDisplaySpinner);
-
-            this.classList.add(this._modifierClasses.error);
-
-            const loaderError =  this.shadowRoot.querySelector('#loaderError');
-            loaderError.innerHTML = this._error;
+            this._setLoaderError();
 
             return;
         }
 
-        if (options.useLoader) {
+        if (options.useLoader && this._hasLoaded) {
             await this._loaderInfoDisplay();
         }
 
@@ -568,16 +591,28 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         this.shadowRoot.appendChild(forecast);
         this.shadowRoot.appendChild(footer);
 
-        if (this._clubs) {
-            this._getClubs();
-        }
+        this._addClubListCarousel();
 
         this._addEventListeners();
 
         this.classList.add(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
 
+        this._hasLoaded = true;
+
         this.scrollIntoView();
+    }
+
+    private _setLoaderError() {
+        this.classList.add(this._modifierClasses.error);
+
+        const loaderError =  this.shadowRoot.querySelector('#loaderError');
+        loaderError.innerHTML = this._error;
+    }
+
+    private _showClubList() {
+        const clubList = this.shadowRoot.querySelector('#clubListCarousel');
+        clubList.scrollIntoView({ behavior: 'smooth' });
     }
 
     private _sortClubsByName(clubs: SkydiveClub[]): void {
@@ -630,9 +665,6 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     private async _updateContent(): Promise<void> {
         this._clearContent();
 
-        this.shadowRoot.appendChild(this._getStyle());
-        this.shadowRoot.appendChild(this._getLoader());
-
         if (!this.club && !this._geocodeData) {
             this._setContent();
 
@@ -654,9 +686,25 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         }
     }
 
-    private _wait(delay: number): Promise<void> {
-        return new Promise((resolve) => {
-            setTimeout(resolve, delay);
+    protected async _init() {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            this._position = position;
+
+            this.shadowRoot.appendChild(this._getStyle());
+            this.shadowRoot.appendChild(this._getLoader());
+
+            await this._initClubs();
+        }, async (err) => {
+            const errorMessage = err.code === 1
+                ? geolocationBlockedByUserMessage
+                : err.message;
+
+            alert(errorMessage);
+
+            this.shadowRoot.appendChild(this._getStyle());
+            this.shadowRoot.appendChild(this._getLoader());
+
+            await this._initClubs();
         });
     }
 
@@ -669,6 +717,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     protected async connectedCallback() {
         const versionResponse = await fetch('/version');
         this._version = await versionResponse.text();
+
+        await this._init();
     }
 }
 
