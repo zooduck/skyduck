@@ -246,7 +246,7 @@ a:hover {
 
 .forecast-grid {
     display: grid;
-    grid-template-rows: auto repeat(3, 1fr);
+    grid-template-rows: repeat(4, auto);
     grid-template-columns: 100%;
     grid-row-gap: 10px;
     padding: 10px;
@@ -349,7 +349,6 @@ a:hover {
     flex-grow: 1;
     margin-right: 10px;
     word-break: break-word;
-    height: 100%;
 }
 @media (min-width: 768px) {
     .forecast-grid-forecast-weather__type {
