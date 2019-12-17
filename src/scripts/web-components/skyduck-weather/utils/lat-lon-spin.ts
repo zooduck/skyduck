@@ -31,11 +31,13 @@ export class LatLonSpin {
 
     private _removeSpin(el: HTMLElement): void {
         const data = this._els.find((item) => item.el === el);
+        const elIndex = this._els.findIndex((item) => item.el === el);
 
         if (!data) {
             return;
         }
 
+        this._els.splice(elIndex, 1);
         clearInterval(data.interval);
     }
 

@@ -32,6 +32,10 @@ type ClubListSortedByCountry = {
     }
 }
 
+type LoaderMessageElements = {
+    [key: string]: HTMLElement;
+}
+
 const tagName = 'skyduck-weather';
 const geolocationBlockedByUserMessage = `
 Geolocation permission has been blocked
@@ -54,6 +58,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     private _hasLoaded = false;
     private _imagesReady = false;
     private _isSearchInProgress = false;
+    private _loaderMessageElements: LoaderMessageElements;
     private _modifierClasses: ModifierClasses = {
         ready: '--ready',
         error: '--error',
@@ -210,6 +215,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
                 child.parentNode.removeChild(child);
             }
         });
+
+        this._resetLoaderMessages();
 
         this.classList.remove(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
@@ -415,6 +422,14 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             }
         });
 
+        this._loaderMessageElements = {
+            loaderInfoLat: loader.querySelector('#loaderInfoLat'),
+            loaderInfoLon: loader.querySelector('#loaderInfoLon'),
+            loaderInfoPlace: loader.querySelector('#loaderInfoPlace'),
+            loaderInfoIANA: loader.querySelector('#loaderInfoIANA'),
+            loaderInfoLocalTime: loader.querySelector('#loaderInfoLocalTime'),
+        };
+
         return loader as HTMLElement;
     }
 
@@ -493,11 +508,14 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     private async _loaderInfoDisplay(): Promise<void> {
         const { club, weather } = this._forecast;
         const delayBetweenInfoMessages = 500;
-        const loaderInfoLat = this.shadowRoot.querySelector('#loaderInfoLat') as HTMLElement;
-        const loaderInfoLon = this.shadowRoot.querySelector('#loaderInfoLon') as HTMLElement;
-        const loaderInfoPlace = this.shadowRoot.querySelector('#loaderInfoPlace');
-        const loaderInfoIANA = this.shadowRoot.querySelector('#loaderInfoIANA');
-        const loaderInfoLocalTime = this.shadowRoot.querySelector('#loaderInfoLocalTime');
+
+        const {
+            loaderInfoLat,
+            loaderInfoLon,
+            loaderInfoPlace,
+            loaderInfoIANA,
+            loaderInfoLocalTime
+        } = this._loaderMessageElements;
 
         this._latLonSpin.apply(loaderInfoLat, 'Lat:&nbsp;');
         await wait(delayBetweenInfoMessages);
@@ -526,6 +544,12 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             const img = new Image();
             img.onload = resolve;
             img.src = src;
+        });
+    }
+
+    private _resetLoaderMessages() {
+        Array.from(Object.keys(this._loaderMessageElements)).forEach((key: string) => {
+            this._loaderMessageElements[key].innerHTML = '';
         });
     }
 
