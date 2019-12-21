@@ -7,7 +7,7 @@ Weather forecasting tool for skydivers.
 https://skyduck.herokuapp.com
 
 ### Usage
-Search can be made by club (if it exists in the database) or by location. You can also view a list of all clubs, sorted by country and distance, and tap on any club for a forecast of the weather at that club's location. Finally, tapping on the location icon (top right) will return a weather forecast based on your current location.
+Club forecasts are available by clicking on any club name in the club list (currently limited to UK clubs only). Alternatively, you can use the "Location Search" to get a forecast for any location in the world. You can also get a forecast for your current location by clicking the location icon (assuming you have Geolocation enabled in your browser).
 
 ### APIs
 - Dark Sky
