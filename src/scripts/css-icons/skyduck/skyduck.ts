@@ -38,14 +38,14 @@ export class SkyduckIcon extends BaseIcon {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 50%;
+                clip-path: circle();
                 background-color: var(--skyduck-icon-color);
                 grid-column: 1 / span 15;
                 grid-row: 1 / span 15;
             }
             .skyduck-grid__beak {
                 z-index: 2;
-                border-radius: 50%;
+                clip-path: circle();
                 background-color: var(--skyduck-icon-background-color);
                 grid-column: 1 / span 11;
                 grid-row: 1 / span 11;
@@ -55,7 +55,7 @@ export class SkyduckIcon extends BaseIcon {
             .skyduck-grid__eye-right {
                 z-index: 3;
                 background-color: var(--skyduck-icon-background-color);
-                border-radius: 50%;
+                clip-path: circle();
             }
             .skyduck-grid__eye-right {
                 grid-column: 3 / span 2;

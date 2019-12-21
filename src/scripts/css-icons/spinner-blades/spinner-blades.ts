@@ -37,7 +37,7 @@ export class SpinnerBlades extends BaseIcon {
                 width: var(--spinner-blades-size);
                 height: var(--spinner-blades-size);
                 background-color: var(--spinner-blades-background-color);
-                border-radius: 50%;
+                clip-path: circle();
             }
 
             :host(.--spin) {
@@ -65,7 +65,7 @@ export class SpinnerBlades extends BaseIcon {
                 border: solid calc(var(--spinner-blades-size) * .13) var(--spinner-blades-color);
                 left: 50%;
                 top: 50%;
-                border-radius: 50%;
+                clip-path: circle();
                 transform: translate(-50%, -50%);
                 background-color: var(--spinner-blades-background-color);
             }

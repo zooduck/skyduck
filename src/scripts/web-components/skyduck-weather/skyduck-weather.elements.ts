@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { weatherRatings } from './utils/weather-ratings';
-import '../skyduck-radio/skyduck-radio.component';
+// import '../skyduck-radio/skyduck-radio.component';
 import '../skyduck-carousel/skyduck-carousel.component';
 /* eslint-disable */
 import {
@@ -9,19 +9,20 @@ import {
     ForecastData,
     ColorModifiersData,
     ColorModifiers,
-    SearchType,
     DailyForecast,
     Rating,
     WeatherImageMap
 } from './interfaces/index';
 import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel.component';
 import { weatherImageMap } from './utils/weather-image-map';
-import { SkyduckIcon } from './css-icons/skyduck/skyduck';
-import { LocationIcon } from './css-icons/location/location';
-import { CircleIcon, Toggle } from './css-icons/index';
 import * as images from '../../../assets/img/*.png';
+import {
+    SkyduckIcon,
+    LocationIcon,
+    CircleIcon,
+    Toggle
+} from '../../css-icons/index';
 /* eslint-enable */
-
 export class SkyduckWeatherElements {
     private _dailyForecast: DailyForecast;
     private _domParser: DOMParser;

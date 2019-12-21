@@ -4,7 +4,6 @@ import { SkyduckWeather } from './skyduck-weather';
 /* eslint-disable */
 import {
     ModifierClasses,
-    SearchType,
     SetContentOptions,
     WeatherElements,
     DailyForecast,
@@ -20,7 +19,7 @@ import { DistanceBetweenPoints } from './utils/distance-between-points';
 import { isTap } from './utils/is-tap';
 import { wait } from './utils/wait';
 import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel.component'; // eslint-disable-line no-unused-vars
-import { SpinnerBlades, SkyduckInFlightIcon } from './css-icons/index';
+import { SkyduckInFlightIcon } from '../../css-icons/index';
 
 interface PointerEvents {
     pointerdown: PointerEvent[];
@@ -385,9 +384,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             });
             imageLinks.forEach(async (link) => {
                 try {
-                    const response = await fetch(link.url, {
-                        mode: 'cors',
-                    });
+                    const request = new Request(link.url);
+                    const response = await fetch(request);
 
                     if (response.ok) {
                         await this._loadImage(link.url);

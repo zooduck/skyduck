@@ -62,7 +62,7 @@
     width: calc(var(--toggle-icon-base-width) * .375);
     height: calc(var(--toggle-icon-base-width) * .375);
     background-color: #fff;
-    border-radius: 50%;
+    clip-path: circle();
     transition: all .25s;
   }
   .toggle-icon input[type=checkbox] {

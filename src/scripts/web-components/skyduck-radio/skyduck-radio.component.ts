@@ -1,30 +1,137 @@
 class SkyduckRadio extends HTMLElement {
-    private _name: string;
-    private _value: string;
-    private _checked: boolean;
+    private _hasLoaded = false;
+    private _name = '';
+    private _rawInput: HTMLInputElement;
+    private _size = '24';
+    private _value = '';
+    private _checked = false;
 
     constructor() {
         super();
 
-        this._name = this.getAttribute('name');
-        this._value = this.getAttribute('value');
-        this._checked = this.hasAttribute('checked');
+        this._buildRawInput();
+    }
+
+    static get observedAttributes() {
+        return [
+            'checked',
+            'name',
+            'size',
+            'value',
+        ];
+    }
+
+    public set checked(val: boolean) {
+        this._checked = val || typeof(val) === 'string'
+            ? true
+            : false;
+
+        if (!this._hasLoaded) {
+            return;
+        }
+
+        this._update();
     }
 
     public get checked(): boolean {
-        return this.querySelector('input').checked;
+        return this._checked;
+    }
+
+    public set name(val: string) {
+        this._name = val;
+
+        if (!this._hasLoaded) {
+            return;
+        }
+
+        this._update();
     }
 
     public get name(): string {
-        return  this._name;
+        return this._name;
+    }
+
+    public set size(val: string) {
+        this._size = val;
+
+        if (!this._hasLoaded) {
+            return;
+        }
+
+        this._update();
+    }
+
+    public get size(): string {
+        return this._size;
+    }
+
+    public set value(val: string) {
+        this._value = val;
+
+        if (!this._hasLoaded) {
+            return;
+        }
+
+        this._update();
     }
 
     public get value(): string {
         return this._value;
     }
 
-    private _getStyle(): HTMLStyleElement {
+    private _buildRawInput(): void {
+        this._rawInput = new DOMParser().parseFromString(`
+            <input type="radio" name="${this._name}" value="${this._value}" />
+        `, 'text/html').body.firstChild as HTMLInputElement;
+
+        this._rawInput.checked = this._checked;
+
+        if (this._checked) {
+            this._rawInput.setAttribute('checked', '');
+        }
+
+        this._rawInput.addEventListener('change', () => {
+            this._checked = this._rawInput.checked;
+        });
+    }
+
+    private _render(): void {
+        this.innerHTML = '';
+
         const style = document.createElement('style');
+        this.appendChild(style);
+
+        this._updateStyle();
+
+        const html = new DOMParser().parseFromString(`
+            <label class="zooduck-radio">
+                    <i class="zooduck-radio__icon --off"></i>
+                    <i class="zooduck-radio__icon --on"></i>
+                    <span id="zooduckRadioValue" class="zooduck-radio__value">${this._value}</span>
+            </label>
+        `, 'text/html').body.firstChild;
+
+        html.insertBefore(this._rawInput, html.childNodes[0]);
+
+        this.appendChild(html);
+    }
+
+    private _update() {
+        this._updateValue();
+        this._updateRawInput();
+        this._updateStyle();
+    }
+
+    private _updateRawInput(): void {
+        this._rawInput.name = this._name;
+        this._rawInput.value = this._value;
+        this._rawInput.checked = this._checked;
+    }
+
+    private _updateStyle(): void {
+        const style = this.querySelector('style');
+        const size = parseInt(this._size, 10);
+
         style.textContent = `
             .zooduck-radio {
                 display: grid;
@@ -41,10 +148,10 @@ class SkyduckRadio extends HTMLElement {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: var(--size, 24px);
-                height: var(--size, 24px);
+                width: ${size}px;
+                height: ${size}px;
                 border: solid var(--color, #bbb);
-                border-width: calc(var(--size, 24px) / 8);
+                border-width: calc(${size}px / 8);
                 border-radius: 50%;
             }
             .zooduck-radio__icon.--on {
@@ -59,7 +166,7 @@ class SkyduckRadio extends HTMLElement {
                 transform: translate(-50%, -50%);
                 width: 50%;
                 height: 50%;
-                border-radius: 50%;
+                clip-path: circle();
                 background-color: var(--color, #bbb);
             }
             input[type=radio] {
@@ -74,44 +181,21 @@ class SkyduckRadio extends HTMLElement {
                 display: none;
             }
         `;
-
-        return style;
     }
 
-    private _buildRawInput(): HTMLInputElement {
-        const input = new DOMParser().parseFromString(`
-            <input type="radio" name="${this._name}" value="${this._value}" />
-        `, 'text/html').body.firstChild as HTMLInputElement;
+    private _updateValue() {
+        this.querySelector('#zooduckRadioValue').innerHTML = this._value;
+    }
 
-        input.checked = this._checked;
-
-        if (this._checked) {
-            input.setAttribute('checked', '');
+    protected attributeChangedCallback(name: string, _oldVal: string, newVal: string) {
+        if (this[name] !== newVal) {
+            this[name] = newVal;
         }
-
-        return input;
-    }
-
-    private _render() {
-        this.innerHTML = '';
-
-        const style = this._getStyle();
-        this.appendChild(style);
-
-        const html = new DOMParser().parseFromString(`
-            <label class="zooduck-radio">
-                    ${this._buildRawInput().outerHTML}
-                    <i class="zooduck-radio__icon --off"></i>
-                    <i class="zooduck-radio__icon --on"></i>
-                    <span class="zooduck-radio__value">${this._value}</span>
-            </label>
-        `, 'text/html').body.firstChild;
-
-        this.appendChild(html);
     }
 
     protected connectedCallback() {
         this._render();
+        this._update();
 
         this.dispatchEvent(new CustomEvent('load', {
             detail: {
@@ -120,6 +204,8 @@ class SkyduckRadio extends HTMLElement {
                 checked: this._checked,
             }
         }));
+
+        this._hasLoaded = true;
     }
 }
 

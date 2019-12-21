@@ -34,7 +34,7 @@
     width: var(--size);
     height: var(--size);
     background-color: var(--background-color);
-    border-radius: 50%;
+    clip-path: circle();
 }
 
 .spinner-blades__part {
@@ -58,7 +58,7 @@
     border: solid calc(var(--size) * .13) var(--color);
     left: 50%;
     top: 50%;
-    border-radius: 50%;
+    clip-path: circle();
     transform: translate(-50%, -50%);
     background-color: var(--background-color);
 }

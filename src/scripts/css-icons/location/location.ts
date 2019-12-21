@@ -24,7 +24,7 @@ export class LocationIcon extends BaseIcon {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 50%;
+                clip-path: circle();
                 width: 80%;
                 height: 80%;
                 z-index: 1;
@@ -35,7 +35,7 @@ export class LocationIcon extends BaseIcon {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 50%;
+                clip-path: circle();
                 width: 70%;
                 height: 70%;
                 background-color: var(--location-icon-background-color);
@@ -43,7 +43,7 @@ export class LocationIcon extends BaseIcon {
             .location-icon__point {
                 width: 60%;
                 height: 60%;
-                border-radius: 50%;
+                clip-path: circle();
                 background-color: var(--location-icon-color);
             }
             .location-icon__x-bar,

@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  clip-path: circle();
   background-color: #222;
   grid-column: 1 / span 15;
   grid-row: 1 / span 15;
@@ -30,14 +30,14 @@
 .skyduck-icon__beak {
   width: 60%;
   height: 60%;
-  border-radius: 50%;
+  clip-path: circle();
   background-color: #fff;
 }
 .skyduck-icon__eye-left,
 .skyduck-icon__eye-right {
   z-index: 1;
   background-color: #fff;
-  border-radius: 50%;
+  clip-path: circle();
 }
 .skyduck-icon__eye-right {
   grid-column: 4 / span 2;

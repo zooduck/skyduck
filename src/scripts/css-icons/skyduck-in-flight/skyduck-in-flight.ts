@@ -75,6 +75,16 @@ export class SkyduckInFlightIcon extends BaseIcon {
                 grid-row: 23 / span 4;
                 animation-duration: .15s;
             }
+
+            .skyduck-in-flight-grid {
+                position: relative;
+                width: var(--skyduck-speed-size);
+                height: var(--skyduck-speed-size);
+                display: grid;
+                grid-template-columns: repeat(20, 5%);
+                grid-template-rows: repeat(20, 5%);
+                transform: rotate(-25deg);
+            }
             .skyduck-in-flight-grid__wing-left {
                 z-index: 0;
                 grid-row: 3 / span 4;
@@ -88,20 +98,20 @@ export class SkyduckInFlightIcon extends BaseIcon {
                 grid-column: 4 / span 4;
                 background-color: var(--skyduck-speed-color-duck);
                 transform: skewY(-30deg);
-                }
+            }
             .skyduck-in-flight-grid__body {
                 z-index: 1;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 50%;
+                clip-path: circle();
                 background-color: var(--skyduck-speed-color-duck);
                 grid-column: 1 / span 15;
                 grid-row: 1 / span 15;
             }
             .skyduck-in-flight-grid__beak {
                 z-index: 2;
-                border-radius: 50%;
+                clip-path: circle();
                 background-color: var(--skyduck-speed-background-color-duck);
                 grid-column: 1 / span 11;
                 grid-row: 1 / span 11;
@@ -111,8 +121,7 @@ export class SkyduckInFlightIcon extends BaseIcon {
             .skyduck-in-flight-grid__eye-right {
                 z-index: 3;
                 background-color: var(--skyduck-speed-background-color-duck);
-                border-radius: 50%;
-                    clip-path: polygon(80% 0%, 0% 100%, 0% 100%, 100% 100%);
+                clip-path: polygon(80% 0%, 0% 100%, 0% 100%, 100% 100%);
             }
             .skyduck-in-flight-grid__eye-right {
                 grid-column: 3 / span 2;
@@ -122,7 +131,6 @@ export class SkyduckInFlightIcon extends BaseIcon {
                 grid-column: 7 / span 2;
                 grid-row: 4 / span 2;
             }
-
         `;
     }
 
