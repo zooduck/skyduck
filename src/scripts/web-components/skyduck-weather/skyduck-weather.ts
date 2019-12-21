@@ -1,11 +1,10 @@
 import { graphqlConfig } from '../../config/graphql.config';
 import { darkSkyQuery } from './graphql-queries/dark-sky-query';
 import { DateTime } from 'luxon';
-import { DailyForecast, GeocodeData, HourlyData, SkydiveClub } from './interfaces/index'; // eslint-disable-line no-unused-vars
+import { DailyForecast, GeocodeData, HourlyData, SkydiveClub, DailyData } from './interfaces/index'; // eslint-disable-line no-unused-vars
 import { skydiveClubQuery } from './graphql-queries/skydive-club-query';
 
 export class SkyduckWeather {
-    private _hourlyData: any;
     private _dailyData: any;
     private _skydiveClub: SkydiveClub;
 
@@ -17,7 +16,7 @@ export class SkyduckWeather {
         return parseInt((fraction * 100).toString(), 10);
     }
 
-    private _formatDailyData(dailyData: any, timezone: string): any {
+    private _formatDailyData(dailyData: DailyData[], hourlyData: HourlyData[], timezone: string): any {
         return dailyData.map((dailyItem: any) => {
             return {
                 ...dailyItem,
@@ -25,7 +24,7 @@ export class SkyduckWeather {
                 timeString: this._getTZTimeString(dailyItem.time, timezone).substr(0, 2),
                 sunriseTimeString: this._getTZTimeString(dailyItem.sunriseTime, timezone),
                 sunsetTimeString: this._getTZTimeString(dailyItem.sunsetTime, timezone),
-                day: this._getTZTime(dailyItem.time, timezone).weekdayShort,
+                day: this._getTZDateTime(dailyItem.time, timezone).weekdayShort,
                 cloudCover: this._fractionToPercent(dailyItem.cloudCover),
                 precipProbability: this._fractionToPercent(dailyItem.precipProbability),
                 temperatureMin: this._floatToInt(dailyItem.temperatureMin),
@@ -38,38 +37,41 @@ export class SkyduckWeather {
                 windGust: this._floatToInt(dailyItem.windGust),
                 windSpeed: this._floatToInt(dailyItem.windSpeed),
                 visibility: this._floatToInt(dailyItem.visibility),
-                hourly: this._hourlyData.filter((hourlyItem: HourlyData) => {
+                hourly: hourlyData.filter((hourlyItem: HourlyData) => {
+                    // Include hourly data from 2 hours before sunrise until 2 hours after sunset
                     const hourlyItemDate = this._getTZDateString(hourlyItem.time, timezone);
                     const dailyItemDate = this._getTZDateString(dailyItem.time, timezone);
+                    const hourlyItemHour = this._getTZDateTime(hourlyItem.time, timezone).hour;
+                    const sunriseHour = this._roundHour(this._getTZDateTime(dailyItem.sunriseTime, timezone));
+                    const sunsetHour = this._roundHour(this._getTZDateTime(dailyItem.sunsetTime, timezone));
+                    const requiredHoursBeforeSunrise = sunriseHour - 2;
+                    const requiredHoursAfterSunset = sunsetHour + 2;
 
-                    return hourlyItemDate === dailyItemDate;
+                    return hourlyItemDate === dailyItemDate
+                        && hourlyItemHour >= requiredHoursBeforeSunrise
+                        && hourlyItemHour <= requiredHoursAfterSunset;
+                }).map((hourlyItem: HourlyData) => {
+                    return this._formatHourlyData(hourlyItem, timezone);
                 }),
             };
         });
     }
 
-    private _formatHourlyData(hourlyData: HourlyData[], timezone: string): any {
-        return hourlyData.filter((item: any) => {
-            const local = DateTime.fromSeconds(item.time || 0);
-            const tz = local.setZone(timezone);
-
-            return tz.hour === 9 || tz.hour === 12 || tz.hour === 15;
-        }).map((hourlyItem: HourlyData) => {
-            return {
-                ...hourlyItem,
-                dateString: this._getTZDateString(hourlyItem.time, timezone).substr(0, 5),
-                timeString: this._getTZTimeString(hourlyItem.time, timezone).substr(0, 2),
-                day: this._getTZTime(hourlyItem.time, timezone).weekdayShort,
-                cloudCover: this._fractionToPercent(hourlyItem.cloudCover),
-                precipProbability: this._fractionToPercent(hourlyItem.precipProbability),
-                temperature: this._floatToInt(hourlyItem.temperature),
-                apparentTemperature: this._floatToInt(hourlyItem.apparentTemperature),
-                humidity: this._fractionToPercent(hourlyItem.humidity),
-                windGust: this._floatToInt(hourlyItem.windGust),
-                windSpeed: this._floatToInt(hourlyItem.windSpeed),
-                visibility:  this._floatToInt(hourlyItem.visibility),
-            };
-        });
+    private _formatHourlyData(hourlyData: HourlyData, timezone: string): any {
+        return {
+            ...hourlyData,
+            dateString: this._getTZDateString(hourlyData.time, timezone).substr(0, 5),
+            timeString: this._getTZTimeString(hourlyData.time, timezone).substr(0, 2),
+            day: this._getTZDateTime(hourlyData.time, timezone).weekdayShort,
+            cloudCover: this._fractionToPercent(hourlyData.cloudCover),
+            precipProbability: this._fractionToPercent(hourlyData.precipProbability),
+            temperature: this._floatToInt(hourlyData.temperature),
+            apparentTemperature: this._floatToInt(hourlyData.apparentTemperature),
+            humidity: this._fractionToPercent(hourlyData.humidity),
+            windGust: this._floatToInt(hourlyData.windGust),
+            windSpeed: this._floatToInt(hourlyData.windSpeed),
+            visibility:  this._floatToInt(hourlyData.visibility),
+        };
     }
 
     public async getDailyForecastByClub(name: string): Promise<DailyForecast> {
@@ -138,12 +140,12 @@ export class SkyduckWeather {
     }
 
     private _getTZDateString(timeInSeconds: number, timezone: string): string {
-        const tzTime = this._getTZTime(timeInSeconds, timezone);
+        const tzTime = this._getTZDateTime(timeInSeconds, timezone);
 
         return tzTime.toLocaleString(DateTime.DATE_SHORT);
     }
 
-    private _getTZTime(timeInSeconds: number, timezone: string): DateTime {
+    private _getTZDateTime(timeInSeconds: number, timezone: string): DateTime {
         const localTime = DateTime.fromSeconds(timeInSeconds || 0);
         const tzTime = localTime.setZone(timezone);
 
@@ -151,7 +153,7 @@ export class SkyduckWeather {
     }
 
     private _getTZTimeString(timeInSeconds: number, timezone: string): string {
-        const tzTime = this._getTZTime(timeInSeconds, timezone);
+        const tzTime = this._getTZDateTime(timeInSeconds, timezone);
 
         return tzTime.toLocaleString(DateTime.TIME_24_SIMPLE);
     }
@@ -171,9 +173,13 @@ export class SkyduckWeather {
 
             const json = await graphqlResult.json();
 
-            const timezone = json.data.weather.timezone;
-            this._hourlyData = this._formatHourlyData(json.data.weather.hourly.data, timezone);
-            this._dailyData = this._formatDailyData(json.data.weather.daily.data, timezone);
+            const {
+                daily: rawDailyData,
+                hourly: rawHourlyData,
+                timezone
+            } = json.data.weather;
+
+            this._dailyData = this._formatDailyData(rawDailyData.data, rawHourlyData.data, timezone);
 
             return {
                 query,
@@ -220,6 +226,13 @@ export class SkyduckWeather {
         } catch (err) {
             throw new Error(err);
         }
+    }
+
+    private _roundHour(dt: DateTime): number {
+        const decimalMinute = dt.minute / 60;
+        const decimalHour = dt.hour + decimalMinute;
+
+        return Math.round(decimalHour);
     }
 
     private async _updateWeatherDatabase(darkSkyData: DailyForecast, method: 'POST'|'PUT'): Promise<any> {

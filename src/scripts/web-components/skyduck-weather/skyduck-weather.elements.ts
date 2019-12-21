@@ -18,31 +18,29 @@ import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel
 import { weatherImageMap } from './utils/weather-image-map';
 import { SkyduckIcon } from './css-icons/skyduck/skyduck';
 import { LocationIcon } from './css-icons/location/location';
-import { CircleIcon } from './css-icons/index';
+import { CircleIcon, Toggle } from './css-icons/index';
 import * as images from '../../../assets/img/*.png';
 /* eslint-enable */
 
 export class SkyduckWeatherElements {
     private _dailyForecast: DailyForecast;
-    private _defaultSearchType: string;
     private _domParser: DOMParser;
     private _forecastCarousel: HTMLSkyduckCarouselElement;
     private _googleMapsKey: string;
     private _imageMap: WeatherImageMap;
     private _requestTime: string;
+    private _defaultForecastHours = [9, 12, 15];
     private _version: string;
 
     constructor(
         dailyForecast: DailyForecast,
         googleMapsKey: string,
-        defaultSearchType: SearchType,
         version: string) {
         this._dailyForecast = dailyForecast;
         this._requestTime = DateTime
             .fromMillis(dailyForecast.weather.requestTime)
             .toLocaleString(DateTime.DATETIME_SHORT)
             .replace(',', '');
-        this._defaultSearchType = defaultSearchType;
         this._domParser = new DOMParser();
         this._googleMapsKey = googleMapsKey;
         this._imageMap = weatherImageMap;
@@ -66,15 +64,21 @@ export class SkyduckWeatherElements {
             dateString,
             summary,
             sunriseTimeString,
+            sunsetTime,
             sunsetTimeString,
+            temperatureMin,
+            temperatureMax,
             hourly,
         } = dayForecast;
 
-        const hours = hourly.map((hour: HourlyData) => {
-            return this._buildForecastHour(hour);
+        const defaultSummary = 'Partly potato with a chance of twilight sparkle.';
+
+        const hours = hourly.map((hour: HourlyData, hourlyDataIndex: number) => {
+            return this._buildForecastHour(hour, hourlyDataIndex);
         });
 
         const averageRatingModifier = this._getAverageRatingModifier(hourly);
+        const sunsetColorModifier = `--${weatherRatings.sunset(sunsetTime, this._dailyForecast.weather.timezone)}`;
 
         const forecast = this._domParser.parseFromString(`
             <div class="forecast-grid">
@@ -83,15 +87,21 @@ export class SkyduckWeatherElements {
                         <h2>${day}</h2>
                         <h1 class="forecast-grid-header-date__date-string">${dateString}</h1>
                     </div>
-                    <span class="forecast-grid-header__summary">${summary || ''}</span>
+                    <span class="forecast-grid-header__summary">${summary || defaultSummary}</span>
                     <div class="forecast-grid-header-sun-info">
                         <h3 class="forecast-grid-header-sun-info__item">Rise: ${sunriseTimeString}</h3>
-                        <h3 class="forecast-grid-header-sun-info__item --sunset">Set: ${sunsetTimeString}</h3>
+                        <h3 class="forecast-grid-header-sun-info__item --sunset ${sunsetColorModifier}">Set: ${sunsetTimeString}</h3>
+                    </div>
+                    <div class="forecast-grid-header__temperature-summary">
+                        <h2>${temperatureMin} - ${temperatureMax}&deg;</h2>
                     </div>
                 </div>
-                ${hours.join('')}
             </div>
         `, 'text/html').body.firstChild;
+
+        hours.forEach((hour: HTMLElement) => {
+            forecast.appendChild(hour);
+        });
 
         return forecast as HTMLElement;
     }
@@ -108,6 +118,7 @@ export class SkyduckWeatherElements {
 
         const slidesSlot = document.createElement('div');
         slidesSlot.setAttribute('slot', 'slides');
+        slidesSlot.className = 'forecast-slides';
 
         forecastSlides.forEach((slide) => {
             slidesSlot.appendChild(slide);
@@ -133,12 +144,11 @@ export class SkyduckWeatherElements {
         return carousel as HTMLSkyduckCarouselElement;
     }
 
-    private _buildForecastHour(hourlyData: HourlyData): string {
+    private _buildForecastHour(hourlyData: HourlyData, hourlyDataIndex: number): HTMLElement {
         const {
             timeString,
             icon,
             summary,
-            temperature,
             precipType,
             precipProbability,
             cloudCover,
@@ -150,18 +160,14 @@ export class SkyduckWeatherElements {
         const colorModifiers = this._getColorModifiers(hourlyData);
         const averageRatingModifier = this._getAverageRatingModifier([hourlyData]);
 
-        const cloudCoverIcon = new CircleIcon().html;
-        const windSpeedIcon = new CircleIcon().html;
-        const windGustIcon = new CircleIcon().html;
-        const precipProbabilityIcon = new CircleIcon().html;
+        const isMode3h = this._defaultForecastHours.includes(parseInt(timeString, 10));
+        const forecastDisplayModeModifier = isMode3h ? '--3h' : '--24h';
 
-        cloudCoverIcon.classList.add(colorModifiers.cloudCover);
-        windSpeedIcon.classList.add(colorModifiers.windSpeed);
-        windGustIcon.classList.add(colorModifiers.windGust);
-        precipProbabilityIcon.classList.add(colorModifiers.precipProbability);
+        const hourlyModeAnimationDelay = (hourlyDataIndex) * .10;
+        const hourlyModeAnimationDelayStyle = `animation-delay: ${hourlyModeAnimationDelay}s;`;
 
-        const forecastHour = `
-            <div class="forecast-grid-forecast">
+        const forecastHour = this._domParser.parseFromString(`
+            <div class="forecast-grid-forecast ${forecastDisplayModeModifier}" style="${hourlyModeAnimationDelayStyle}">
                 <div class="forecast-grid-forecast__weather-photo" style="background-image: url('${weatherImagePath}')"></div>
 
                 <h2 class="forecast-grid-forecast__time ${averageRatingModifier}">
@@ -170,29 +176,20 @@ export class SkyduckWeatherElements {
 
                 <div class="forecast-grid-forecast-weather">
                     <h4 class="forecast-grid-forecast-weather__type">${summary || ''}</h4>
-                    <h2 class="forecast-grid-forecast-weather__temperature">${temperature}&deg;</h2>
                 </div>
 
                 <div class="forecast-data-grid">
-                    <div class="forecast-data-grid__type">
-                        <!--<i class="icon-circle ${colorModifiers.cloudCover}"></i>-->
-                        ${cloudCoverIcon.outerHTML}
-                        <span>cloud</span>
+                    <div class="forecast-data-grid-type --cloud-cover">
+                        <span class="forecast-data-grid-type__text">cloud</span>
                     </div>
-                    <div class="forecast-data-grid__type --wind-speed">
-                        <!--<i class="icon-circle ${colorModifiers.windSpeed}"></i>-->
-                        ${windSpeedIcon.outerHTML}
-                        <span>wind</span>
+                    <div class="forecast-data-grid-type --wind-speed">
+                        <span class="forecast-data-grid-type__text">wind</span>
                     </div>
-                    <div class="forecast-data-grid__type">
-                        <!--<i class="icon-circle ${colorModifiers.windGust}"></i>-->
-                        ${windGustIcon.outerHTML}
-                        <span>gust</span>
+                    <div class="forecast-data-grid-type --wind-gust">
+                        <span class="forecast-data-grid-type__text">gust</span>
                     </div>
-                    <div class="forecast-data-grid__type">
-                        <!--<i class="icon-circle ${colorModifiers.precipProbability}"></i>-->
-                        ${precipProbabilityIcon.outerHTML}
-                        <span>${precipType || 'rain'}</span>
+                    <div class="forecast-data-grid-type --precip-type">
+                        <span class="forecast-data-grid-type__text">${precipType || 'rain'}</span>
                     </div>
 
                     <div class="forecast-data-grid__data ${colorModifiers.cloudCover}">${cloudCover}%</div>
@@ -207,7 +204,22 @@ export class SkyduckWeatherElements {
                     <div class="forecast-data-grid__data ${colorModifiers.precipProbability}">${precipProbability}%</div>
                 </div>
             </div>
-        `;
+        `, 'text/html').body.firstChild as HTMLElement;
+
+        Array.from(forecastHour.querySelectorAll('.forecast-data-grid-type')).forEach((child: HTMLElement) => {
+            const { classList } = child;
+            const circleIcon = new CircleIcon(30).html;
+            const colorModifier = classList.contains('--cloud-cover')
+                ? colorModifiers.cloudCover
+                : classList.contains('--wind-speed')
+                    ? colorModifiers.windSpeed
+                    : classList.contains('--wind-gust')
+                        ? colorModifiers.windGust
+                        : colorModifiers.precipProbability;
+
+            circleIcon.classList.add(colorModifier);
+            child.insertBefore(circleIcon, child.childNodes[0]);
+        });
 
         return forecastHour;
     }
@@ -272,13 +284,13 @@ export class SkyduckWeatherElements {
         `, 'text/html').body.firstChild;
 
         // header.insertBefore(this._buildSkyduckIcon(), header.childNodes[0]);
-        header.appendChild(this._buildLocationIcon());
 
         return header as HTMLElement;
     }
 
     private _buildLocationIcon(): HTMLElement {
-        const locationIcon = new LocationIcon().html;
+        const locationIcon = new LocationIcon(40, 'lightgray').html;
+        locationIcon.setAttribute('id', 'getForecastForCurrentLocationCtrl');
         locationIcon.classList.add('header__location-icon');
 
         return locationIcon;
@@ -327,20 +339,33 @@ export class SkyduckWeatherElements {
     private _buildSearch(): HTMLElement {
         const search = this._domParser.parseFromString(`
             <div class="search">
-                <zooduck-input label="Search" placeholder="e.g. skydive spain, headcorn..."></zooduck-input>
-                <form class="search__radios">
-                    <skyduck-radio name="searchType" value="club" ${this._defaultSearchType === 'club' ? 'checked' : ''}></skyduck-radio>
-                    <skyduck-radio name="searchType" value="location" ${this._defaultSearchType === 'location' ? 'checked' : ''}></skyduck-radio>
-                </form>
-                <a id="clubListLink" class="search__club-list-link">All Clubs</a>
+                <zooduck-input label="Location Search" placeholder="e.g. Perris, CA 92570, USA"></zooduck-input>
             </div>
         `, 'text/html').body.firstChild;
+
+        search.appendChild(this._buildLocationIcon());
 
         return search as HTMLElement;
     }
 
     private _buildSkyduckIcon(): HTMLElement {
         return new SkyduckIcon().html;
+    }
+
+    private _buildForecastDisplayModeToggle(): HTMLElement {
+        const toggle = new Toggle(70, 'var(--lightskyblue)', '3h', '24h').html;
+        toggle.classList.add('controls__forecast-display-mode-toggle');
+        toggle.setAttribute('id', 'forecastDisplayModeToggle');
+
+        const toggleContainer = this._domParser.parseFromString(`
+            <div class="controls">
+                <h4 id="clubListCtrl" class="controls__view-club-list">Clubs</h4>
+            </div>
+        `, 'text/html').body.firstChild as HTMLElement;
+
+        toggleContainer.appendChild(toggle);
+
+        return toggleContainer;
     }
 
     private _formatPlace(place: string): string {
@@ -395,6 +420,10 @@ export class SkyduckWeatherElements {
         this._forecastCarousel = this._buildForecastCarousel();
 
         return this._forecastCarousel;
+    }
+
+    public get forecastDisplayModeToggle(): HTMLElement {
+        return this._buildForecastDisplayModeToggle();
     }
 
     public get header(): HTMLElement {

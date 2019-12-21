@@ -17,9 +17,10 @@ import { DateTime } from 'luxon';
 import { graphqlConfig } from '../../config/graphql.config';
 import { skydiveClubsQuery } from './graphql-queries/skydive-clubs-query';
 import { DistanceBetweenPoints } from './utils/distance-between-points';
-import { Spinner } from './css-icons/spinner/spinner';
 import { isTap } from './utils/is-tap';
 import { wait } from './utils/wait';
+import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel.component'; // eslint-disable-line no-unused-vars
+import { SpinnerBlades, SkyduckInFlightIcon } from './css-icons/index';
 
 interface PointerEvents {
     pointerdown: PointerEvent[];
@@ -70,7 +71,6 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     private _position: Position;
     private _location: string;
     private _latLonSpin: LatLonSpin;
-    private _searchType: SearchType = 'club';
     private _version: string;
     private _weather: SkyduckWeather;
 
@@ -143,34 +143,27 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
 
             this._isSearchInProgress = true;
 
-            this.scrollIntoView();
-
-            const searchTypeFormData = new FormData(this.shadowRoot.querySelector('.search__radios'));
-            this._searchType = searchTypeFormData.get('searchType') as SearchType;
-
-            switch (this._searchType) {
-            case 'club':
-                this.club = value;
-                break;
-            case 'location':
-                this.location = value;
-                break;
-            default: // do nothing
-            }
+            this.location = value;
         };
+
+        this.addEventListener('pointerdown', (e: PointerEvent) => {
+            e.preventDefault();
+
+            this._pointerEvents.pointerdown.push(e);
+        });
 
         this.shadowRoot.querySelector('zooduck-input')
             .addEventListener('keypress:enter', this._onSearchSubmit);
 
-        this.shadowRoot.querySelector('#clubListLink')
-            .addEventListener('pointerdown', (e) => {
+        this.shadowRoot.querySelector('#clubListCtrl')
+            .addEventListener('pointerup', (e) => {
                 e.preventDefault();
 
                 this._showClubList();
             });
 
-        this.shadowRoot.querySelector('.header__location-icon')
-            .addEventListener('pointerdown', async (e) => {
+        this.shadowRoot.querySelector('#getForecastForCurrentLocationCtrl')
+            .addEventListener('pointerup', async (e) => {
                 e.preventDefault();
 
                 if (!this._position) {
@@ -185,6 +178,18 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
                     throw Error(err);
                 }
             });
+
+
+        const forecastDisplayModeToggle = this.shadowRoot.querySelector('#forecastDisplayModeToggle');
+        forecastDisplayModeToggle.addEventListener('pointerup', (e: PointerEvent) => {
+            e.preventDefault();
+
+            const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLSkyduckCarouselElement;
+
+            forecastCarousel.classList.toggle('--forecast-display-mode-24h');
+
+            forecastCarousel.updateCarouselHeight();
+        });
 
         const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLElement;
         this._addEventsToCarousel(forecastCarousel);
@@ -379,13 +384,19 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
                 };
             });
             imageLinks.forEach(async (link) => {
-                const response = await fetch(link.url);
+                try {
+                    const response = await fetch(link.url, {
+                        mode: 'cors',
+                    });
 
-                if (response.ok) {
-                    await this._loadImage(link.url);
+                    if (response.ok) {
+                        await this._loadImage(link.url);
+                    }
+                } catch (err) {
+                    console.error(err); // eslint-disable-line no-console
+                } finally {
+                    imagesLoaded.push(link);
                 }
-
-                imagesLoaded.push(link);
 
                 if (imagesLoaded.length === imageLinks.length) {
                     this._imagesReady = true;
@@ -406,9 +417,11 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
                     <div id="loaderInfoLocalTime"></div>
                 </div>
                 <div id="loaderError" class="loader__error"></div>
-                ${this._getSpinner().outerHTML}
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
+
+        const spinner = this._getSpinner();
+        loader.appendChild(spinner);
 
         loader.addEventListener('pointerup', (e: PointerEvent) => {
             e.preventDefault();
@@ -434,7 +447,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 
     private _getSpinner(): HTMLElement {
-        const spinner = new Spinner().html;
+        const spinner = new SkyduckInFlightIcon(100, 'var(--lightskyblue)').html;
         spinner.classList.add('loader__spinner');
 
         return spinner;
@@ -525,10 +538,10 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         await wait(delayBetweenInfoMessages);
         this._latLonSpin.setContent(loaderInfoLon, `Lon: ${weather.longitude.toString().substr(0, 9)}`);
 
-        loaderInfoPlace.innerHTML = `Place: ${club.place}`;
+        loaderInfoPlace.innerHTML = `${club.place}`;
         await wait(delayBetweenInfoMessages);
 
-        loaderInfoIANA.innerHTML = `IANA: ${weather.timezone}`;
+        loaderInfoIANA.innerHTML = `${weather.timezone}`;
         await wait(delayBetweenInfoMessages);
 
         const locationTime = DateTime.local()
@@ -592,7 +605,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             await this._getImages();
         }
 
-        const minTimeToDisplaySpinner = 500;
+        const minTimeToDisplaySpinner = this._hasLoaded ? 500 : 2000;
         await wait(minTimeToDisplaySpinner);
 
         if (this._error) {
@@ -606,12 +619,26 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         }
 
         const googleMapsKey = await this._getGoogleMapsKey();
-        const weatherElements: WeatherElements = new SkyduckWeatherElements(this._forecast, googleMapsKey, this._searchType, this._version);
-        const {header, locationInfo, search, forecast, footer } = weatherElements;
+
+        const weatherElements: WeatherElements = new SkyduckWeatherElements(
+            this._forecast,
+            googleMapsKey,
+            this._version
+        );
+
+        const {
+            header,
+            locationInfo,
+            search,
+            forecast,
+            forecastDisplayModeToggle,
+            footer
+        } = weatherElements;
 
         this.shadowRoot.appendChild(header);
         this.shadowRoot.appendChild(search);
         this.shadowRoot.appendChild(locationInfo);
+        this.shadowRoot.appendChild(forecastDisplayModeToggle);
         this.shadowRoot.appendChild(forecast);
         this.shadowRoot.appendChild(footer);
 
@@ -743,6 +770,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         this._version = await versionResponse.text();
 
         await this._init();
+
+        this.dispatchEvent(new CustomEvent('load'));
     }
 }
 

@@ -113,9 +113,9 @@ class SkyduckRadio extends HTMLElement {
     protected connectedCallback() {
         this._render();
 
-        this.dispatchEvent(new CustomEvent('ready', {
+        this.dispatchEvent(new CustomEvent('load', {
             detail: {
-                nam: this._name,
+                name: this._name,
                 value: this._value,
                 checked: this._checked,
             }

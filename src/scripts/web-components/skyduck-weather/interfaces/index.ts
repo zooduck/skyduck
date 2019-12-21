@@ -20,6 +20,27 @@ export interface ColorModifiersData {
     visibility: number;
 }
 
+export interface DailyData {
+    time: number;
+    sunriseTime: number;
+    sunsetTime: number;
+    summary: string;
+    icon: string;
+    precipProbability: number;
+    precipType: string;
+    temperatureMin: number;
+    temperatureMax: number;
+    apparentTemperatureMin: number;
+    apparentTemperatureMax: number;
+    humidity: number;
+    windSpeed: number;
+    windGust: number;
+    windBearing: number;
+    cloudCover: number;
+    visibility: number;
+    hourly: HourlyData[];
+}
+
 export interface DailyForecast {
     query: string;
     club: SkydiveClub;
@@ -49,13 +70,16 @@ export interface ForecastData {
     precipProbability: number;
     summary: string;
     temperature: number;
-    timezone: string;
+    temperatureMin: number;
+    temperatureMax: number;
     timeString: string;
     visibility: number;
     windBearing: number;
     windGust: number;
     windSpeed: number;
+    sunriseTime: number;
     sunriseTimeString: string;
+    sunsetTime: number;
     sunsetTimeString: string;
 }
 
@@ -108,6 +132,7 @@ export interface SkydiveClub {
 export interface WeatherElements {
     footer: HTMLElement;
     forecast: HTMLElement;
+    forecastDisplayModeToggle: HTMLElement;
     locationInfo: HTMLElement;
     header: HTMLElement;
     search: HTMLElement;

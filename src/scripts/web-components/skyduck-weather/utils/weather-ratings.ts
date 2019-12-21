@@ -1,4 +1,5 @@
 import { Ratings, Rating } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { DateTime } from 'luxon';
 
 export const weatherRatings = (() => {
     const _getDominantColor = (ratings: Rating[], mode: 'optimist'|'realist') => {
@@ -51,6 +52,9 @@ export const weatherRatings = (() => {
     };
 
     return {
+        average(ratings: Ratings[]) {
+            return _getMostDominantRating(ratings);
+        },
         cloudCover(cloudCover: number): Rating {
             return cloudCover < 50
                 ? 'green'
@@ -75,6 +79,16 @@ export const weatherRatings = (() => {
                     ? 'amber'
                     : 'red';
         },
+        sunset(sunsetTime: number, timezone: string): Rating {
+            const dt = DateTime.fromSeconds(sunsetTime).setZone(timezone);
+            const sunsetColorModifier = dt.hour < 16
+                ? 'red'
+                : dt.hour < 18
+                    ? 'amber'
+                    : 'green';
+
+            return sunsetColorModifier;
+        },
         visibility(visibility: number): Rating {
             return visibility >= 5
                 ? 'green'
@@ -82,8 +96,6 @@ export const weatherRatings = (() => {
                     ? 'amber'
                     : 'red';
         },
-        average(ratings: Ratings[]) {
-            return _getMostDominantRating(ratings);
-        }
+
     };
 })();

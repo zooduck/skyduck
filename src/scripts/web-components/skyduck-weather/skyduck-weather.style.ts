@@ -1,67 +1,22 @@
-import {
-    LocationIcon,
-    SkyduckIcon,
-    Spinner,
-    CircleIcon
-} from './css-icons/index';
-
-const spinner = new Spinner(30, 'var(--skyblue)');
-const skyduckIcon = new SkyduckIcon(50, 'var(--skyblue)');
-const locationIcon = new LocationIcon(30, 'var(--skyblue)');
-const circleIcon = new CircleIcon(30, 'var(--gray)');
-
 export const style = `
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Luckiest+Guy&display=swap');
-
-${circleIcon.style}
-.icon-circle.--red {
-    border-color: var(--red);
-}
-.icon-circle.--amber {
-    border-color: var(--amber);
-}
-.icon-circle.--green {
-    border-color: var(--green);
-}
-
-${locationIcon.style}
-
-${skyduckIcon.style}
-
-${spinner.style}
-
-* {
-    box-sizing: border-box;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5 {
-    margin: 0;
-}
-
-a {
-    color: cornflowerblue;
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
-}
 
 :host {
     position: relative;
     display: block;
     width: 100%;
+    max-width: 768px;
     min-height: 100vh;
+    margin: 0 auto;
     background-color: var(--white);
     user-select: none;
     overflow: hidden;
     font-family: Roboto, sans-serif;
-    font-size: 16px;
+    font-size: var(--font-size-base);
     color: var(--black);
+
+    --font-size-base: 16px;
 
     --red: rgb(255, 99, 71, .8);
     --amber: rgba(255, 165, 0, .8);
@@ -69,8 +24,9 @@ a:hover {
 
     --white: #fff;
     --black: #222;
+    --charcoal: #333;
     --pink: hotpink;
-    --skyblue: lightskyblue;
+    --lightskyblue: lightskyblue;
     --gray: #999;
     --lightgray: lightgray;
 }
@@ -86,22 +42,45 @@ a:hover {
 }
 @media (min-width: 1024px) {
     :host {
-        font-size: 24px;
+        font-size: 22px;
     }
 }
 
+* {
+    box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    margin: 0;
+    color: var(--charcoal);
+}
+
+a {
+    color: cornflowerblue;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
 .loader {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     z-index: 99;
-    display: flex;
+    display: grid;
+    grid-template-rows: auto 55vh;
+    gap: 50px;
     justify-content: center;
-    align-items: center;
+    justify-items: center;
     width: 100%;
     height: 100vh;
     background-color: var(--white);
-    color: var(--gray);
+    color: var(--lightskyblue);
     padding: 10px;
     font-size: 1.2em;
 }
@@ -110,6 +89,7 @@ a:hover {
 }
 .loader__error {
     display: none;
+    align-self: start;
     text-align: center;
     border: solid 3px var(--red);
     padding: 10px;
@@ -120,15 +100,18 @@ a:hover {
     display: block;
 }
 .loader-info {
-    position: absolute;
-    top: 10px;
-    left: 10px;
+    grid-row: 1;
+    align-self: end;
+    width: 200px;
+    text-align: center;
 }
 .loader-info__place {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    width: calc(100vw - 20px);
+}
+.loader__spinner {
+    grid-row: 2;
 }
 :host(.--error) .loader__spinner {
     display: none;
@@ -139,7 +122,7 @@ a:hover {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
-    color: var(--skyblue);
+    color: var(--lightskyblue);
     padding: 10px 10px 0 10px;
 }
 .header-title-container {
@@ -165,7 +148,6 @@ a:hover {
     width: 220px;
 }
 .header__location-icon {
-    align-self: start;
     cursor: pointer;
 }
 
@@ -179,10 +161,6 @@ a:hover {
 .search__radios {
     display: grid;
     grid-row-gap: 5px;
-}
-.search__club-list-link {
-    cursor: pointer;
-    justify-self: left;
 }
 
 .club-info-grid {
@@ -211,9 +189,32 @@ a:hover {
     white-space: nowrap;
 }
 
-#forecastCarousel {
-    max-width: 768px;
-    margin: 0 auto;
+.controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    margin: 10px;
+    color: var(--white);
+}
+.controls__view-club-list {
+    justify-self: left;
+    cursor: pointer;
+    background-color: var(--lightskyblue);
+    color: #fff;
+    width: 100px;
+    height: 60px;
+    font-size: var(--font-size-base);
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    clip-path: polygon(100% 0%, 50% 100%, 0% 0%);
+}
+.controls__view-club-list:hover {
+    text-decoration: underline;
+}
+.controls__forecast-display-mode-toggle {
+    justify-self: right;
 }
 
 .forecast-slide-selectors {
@@ -246,10 +247,13 @@ a:hover {
 
 .forecast-grid {
     display: grid;
-    grid-template-rows: repeat(4, auto);
+    grid-template-rows: repeat(2, 0fr) repeat(3, auto);
     grid-template-columns: 100%;
     grid-row-gap: 10px;
     padding: 10px;
+}
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid {
+    grid-template-rows: 0fr auto;
 }
 :host(:not(.--ready)) .forecast-grid {
     display: none;
@@ -261,7 +265,7 @@ a:hover {
     gap: 10px;
     align-items: center;
     border-left: solid 10px var(--lightgray);
-    padding-left: 10px;
+    padding: 0 0 10px 10px;
 }
 .forecast-grid-header.--red {
     border-color: var(--red);
@@ -282,7 +286,14 @@ a:hover {
 }
 .forecast-grid-header__summary {
     grid-row: 2;
-    grid-column: 1 / span 2;
+    grid-column: 1;
+}
+.forecast-grid-header__temperature-summary {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    justify-items: right;
+    gap: 5px;
 }
 .forecast-grid-header-sun-info__item {
     text-align: right;
@@ -295,23 +306,75 @@ a:hover {
     color: var(--gray);
     font-size: 24px;
 }
-.forecast-grid-forecast {
+.forecast-grid-header-sun-info__item.--sunset.--red {
+    background-color: var(--red);
+    color: var(--white);
+}
+.forecast-grid-header-sun-info__item.--sunset.--amber {
+    background-color: var(--amber);
+    color: var(--black);
+}
+.forecast-grid-header-sun-info__item.--sunset.--green {
+    background-color: var(--green);
+    color: var(--white);
+}
+.forecast-grid-forecast,
+.forecast-grid-forecast.--24h {
     position: relative;
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: 1fr auto;
-    grid-column-gap: 10px;
+    gap: 10px;
+}
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast,
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
+    grid-template-columns: repeat(2, 1fr);
+}
+.forecast-grid-forecast.--24h {
+    height: 0px;
+    overflow: hidden;
+    grid-column: 1;
+    grid-row: 2;
+}
+@keyframes slideOnHourlyForecast {
+    0% {
+        transform: translateX(-100vw);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast,
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
+    animation: slideOnHourlyForecast .25s both;
+}
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
+    height: auto;
+    grid-column: auto;
+    grid-row: auto;
 }
 .forecast-grid-forecast__weather-photo {
     grid-column: 1 / span 2;
     grid-row: 1;
-    background-position: center;
+    background-position: 75% center;
     background-size: cover;
     background-repeat: no-repeat;
 }
+@media (min-width: 768px) {
+    #forecastCarousel:not(.--forecast-display-mode-24h) .forecast-grid-forecast__weather-photo {
+        background-position: 25% center;
+    }
+}
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast__weather-photo {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    background-position: 50% center;
+}
 
 @media (min-aspect-ratio: 1/1) {
-    .forecast-grid-forecast__weather-photo {
+    #forecastCarousel:not(.--forecast-display-mode-24h) .forecast-grid-forecast__weather-photo {
         min-height: calc(768px / 4);
     }
 }
@@ -325,8 +388,11 @@ a:hover {
     padding: 10px;
     justify-self: left;
 }
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast__time {
+    grid-row: 1 / span 2;
+}
 .forecast-grid-forecast__time span {
-    border-bottom: solid 5px #222;
+    border-bottom: solid 5px var(--lightgray);
 }
 .forecast-grid-forecast__time.--red span {
     border-color: var(--red);
@@ -342,8 +408,11 @@ a:hover {
     grid-row: 2;
     display: flex;
     align-items: center;
-    padding: 5px 0;
-    overflow: hidden;
+}
+#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast-weather {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: end;
 }
 .forecast-grid-forecast-weather__type {
     flex-grow: 1;
@@ -355,9 +424,7 @@ a:hover {
         font-size: 22px;
     }
 }
-.forecast-grid-forecast-weather__temperature {
-    align-self: start;
-}
+
 .forecast-data-grid {
     grid-column: 2;
     grid-row: 1 / span 2;
@@ -367,14 +434,24 @@ a:hover {
     grid-column-gap: 5px;
     align-self: end;
 }
-.forecast-data-grid__type {
+#forecastCarousel.--forecast-display-mode-24h .forecast-data-grid {
+    grid-row: 2;
+    grid-template-rows: auto;
+    align-self: auto;
+    padding-right: 6px;
+}
+.forecast-data-grid-type {
     display: grid;
+    gap: 5px;
     justify-items: center;
     align-items: center;
     background: rgba(255, 255, 255, .8);
     padding: 10px;
 }
-.forecast-data-grid__type.--wind-speed {
+#forecastCarousel.--forecast-display-mode-24h .forecast-data-grid-type {
+    box-shadow: 2px 2px 6px var(--lightgray);
+}
+.forecast-data-grid-type.--wind-speed {
     display: none;
 }
 .forecast-data-grid__data {
@@ -402,7 +479,7 @@ a:hover {
     .forecast-data-grid {
         grid-template-columns: repeat(4, auto);
     }
-    .forecast-data-grid__type.--wind-speed {
+    .forecast-data-grid-type.--wind-speed {
         display: grid;
     }
     .forecast-data-grid__data.--wind-speed {
@@ -471,5 +548,15 @@ a:hover {
 .club-list-item-distance__miles {
     white-space: nowrap;
     font-size: 22px;
+}
+
+.icon-circle.--red {
+    border-color: var(--red);
+}
+.icon-circle.--amber {
+    border-color: var(--amber);
+}
+.icon-circle.--green {
+    border-color: var(--green);
 }
 `;

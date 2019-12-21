@@ -174,7 +174,11 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
 
         this._pointerEvents.pointerdown.push(e);
 
-        if (e.path[0].parentNode.getAttribute('slot') !== 'slide-selectors') {
+        const originalTarget = e.path
+            ? e.path[0]
+            : e.originalTarget;
+
+        if (!originalTarget || originalTarget.parentNode.getAttribute('slot') !== 'slide-selectors') {
             this._setTouchActive(true);
         }
 
@@ -300,6 +304,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         const slideStyles = {
             width: '100%',
             height: '100%',
+            overflow: 'hidden',
             'min-height': `calc(100vh - ${this._getSlideSelectorsHeight()}px)`,
             'flex-shrink': '0',
         };
@@ -364,6 +369,10 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         return this._scrollBehavior;
     }
 
+    public updateCarouselHeight() {
+        this._setCarouselHeightToSlideHeight();
+    }
+
     protected connectedCallback() {
         // Required "slides" slot
         const requiredSlottedContent = this.querySelector('[slot=slides]');
@@ -395,6 +404,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
                         }
 
                         this._setCurrentSlide(i);
+                        this._setCarouselHeightToSlideHeight();
                         this._slideIntoView(this._currentSlide);
                         this.scrollIntoView({ behavior: this._scrollBehavior });
                     });
@@ -416,6 +426,8 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             // have been fully parsed.
             // ----------------------------------------------------------------------------------
             this._setContainerStyle();
+
+            this.dispatchEvent(new CustomEvent('load'));
         });
     }
 
