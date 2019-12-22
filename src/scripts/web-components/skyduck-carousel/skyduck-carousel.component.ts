@@ -1,5 +1,6 @@
 import { style } from './skyduck-carousel.style';
 import { isTap } from './utils/is-tap';
+import  './prototype/Number/to-positive';
 
 interface Slide {
     id: number;
@@ -117,13 +118,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         return (lastPointerdownTime - secondToLastPointerdownTime) < maxTimeBetweenPointerDown;
     }
 
-    private _isVerticalSwipe(verticalSwipePixels: number) {
-        const maxVerticalSwipePixels = 50;
-
-        return verticalSwipePixels > maxVerticalSwipePixels
-            || verticalSwipePixels < (maxVerticalSwipePixels * -1);
-    }
-
     private _onCurrentSlideChange(): void {
         this.dispatchEvent(new CustomEvent('slidechange', {
             detail: {
@@ -202,19 +196,14 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
 
         this._touchMoveInProgress = true;
 
-        const clientX = e.clientX;
-        const clientY = e.clientY;
-
-        const verticalSwipePixels = this._touchStartData.clientY - clientY;
-
-        if (this._isVerticalSwipe(verticalSwipePixels)) {
+        if (this._touchMoveStartedOnYAxis(e)) {
             this._setTouchActive(false);
             this._slideIntoView(this._currentSlide);
 
             return;
         }
 
-        const swipeDistance = clientX - this._touchStartData.clientX;
+        const swipeDistance = e.clientX - this._touchStartData.clientX;
         const currentX = parseInt((swipeDistance + this._currentOffsetX).toString(), 10);
 
         this._slideTo(currentX);
@@ -348,6 +337,13 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
                 : offsetX;
 
         this._container.style.transform = `translateX(${translateX}px)`;
+    }
+
+    private _touchMoveStartedOnYAxis(touchMoveData: PointerEvent) {
+        const verticalSwipePixels = (this._touchStartData.clientY - touchMoveData.clientY).toPositive();
+        const horizontalSwipePixels = (this._touchStartData.clientX - touchMoveData.clientX).toPositive();
+
+        return verticalSwipePixels > 0 && horizontalSwipePixels < 1;
     }
 
     public get currentSlide(): number {
