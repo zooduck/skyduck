@@ -205,11 +205,9 @@ export class SkyduckWeatherElements {
                     <div class="forecast-data-grid__data ${colorModifiers.cloudCover}">${cloudCover}%</div>
                     <div class="forecast-data-grid__data ${colorModifiers.windSpeed} --wind-speed">
                         <span>${windSpeed}</span>
-                        <small>mph</small>
                     </div>
                     <div class="forecast-data-grid__data ${colorModifiers.windGust}">
                         <span>${windGust}</span>
-                        <small>mph</small>
                     </div>
                     <div class="forecast-data-grid__data ${colorModifiers.precipProbability}">${precipProbability}%</div>
                 </div>
