@@ -1,5 +1,6 @@
 import { style } from './skyduck-carousel.style';
 import  './prototype/Number/to-positive';
+import { wait } from '../skyduck-weather/utils/wait';
 
 interface Slide {
     id: number;
@@ -32,7 +33,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _slidesSlot: HTMLSlotElement;
     private _slideSelectors: HTMLElement;
     private _slideSelectorsSlot: HTMLSlotElement;
-    private _touchActive: boolean;
     private _touchMoveInProgress = false;
     private _touchStartData: TouchData = {
         time: 0,
@@ -66,6 +66,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
 
     static get observedAttributes(): string[] {
         return [
+            'currentslide',
             'scrollbehavior',
         ];
     }
@@ -245,7 +246,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         }
 
         this._setCarouselHeightToSlideHeight();
-        this.scrollIntoView({ behavior: this._scrollBehavior });
     }
 
     private _registerEvents() {
@@ -269,7 +269,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     }
 
     private _setContainerStyle(): Promise<any> {
-        // this._container.style.width = `${this.offsetWidth}px`;
         Array.from(this._container.children).forEach((slide: HTMLElement) => {
             this._setSlideStyle(slide);
         });
@@ -307,24 +306,28 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _setTouchActive(bool: boolean) {
         switch (bool) {
         case true:
-            this._container.classList.add('--touch-active');
+            this.classList.add('--touch-active');
             break;
         case false:
             this._touchMoveInProgress = false;
-            this._container.classList.remove('--touch-active');
+            this.classList.remove('--touch-active');
             break;
         default: // do nothing
         }
     }
 
-    private _slideIntoView(slide: Slide) {
+    private _slideIntoView(slide: Slide, animate = true) {
         const offsetX = this._getPrecedingSlideWidths(slide) * -1;
+
+        if (!animate) {
+            this.classList.add('--no-animate');
+        }
 
         this._slideTo(offsetX);
         this._currentOffsetX = offsetX;
     }
 
-    private _slideTo(offsetX: number) {
+    private async _slideTo(offsetX: number) {
         const maxNegativeOffsetX = this._getMaxNegativeOffsetX();
         const translateX = offsetX > this._maxOffsetX
             ? 0
@@ -333,6 +336,10 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
                 : offsetX;
 
         this._container.style.transform = `translateX(${translateX}px)`;
+
+        await wait(this._transitionSpeedInMillis);
+
+        this.classList.remove('--no-animate');
     }
 
     private _touchMoveStartedOnYAxis(touchMoveData: PointerEvent): boolean {
@@ -344,19 +351,21 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         return verticalSwipePixels > minRecognisedYAxisPixels && horizontalSwipePixels < minRecognisedXAxisPixels;
     }
 
-    public get currentSlide(): number {
+    public get currentslide(): number {
         return this._currentSlide.id;
     }
 
-    public set currentSlide(slideNumber: number) {
+    public set currentslide(slideNumber: number) {
         const slideIndex = slideNumber - 1;
+        const requestedSlide = this._slides[slideIndex];
 
-        if (!this._slides[slideIndex]) {
+        if (!requestedSlide) {
             return;
         }
 
-        this._slideIntoView(this._slides[slideIndex]);
-        this.scrollIntoView({ behavior: this._scrollBehavior });
+
+        this._setCurrentSlide(requestedSlide.index);
+        this._slideIntoView(requestedSlide, false);
     }
 
     public set scrollbehavior(val: 'auto'|'smooth') {
@@ -390,14 +399,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         // Optional "slide-selectors" slot
         const slideSelectorsSlot = this.querySelector('[slot=slide-selectors]');
         if (slideSelectorsSlot) {
-            slideSelectorsSlot.addEventListener('pointerup', (e: PointerEvent) => {
-                e.preventDefault();
-
-                this._setTouchActive(false);
-                this._setCarouselHeightToSlideHeight();
-                this._slideIntoView(this._currentSlide);
-                this.scrollIntoView({ behavior: this._scrollBehavior });
-            });
             Array.from(this.querySelector('[slot=slide-selectors]').children)
                 .map((item: HTMLElement, i: number) => {
                     item.addEventListener('pointerup', (e: PointerEvent) => {
@@ -411,7 +412,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
                         this._setTouchActive(false);
                         this._setCarouselHeightToSlideHeight();
                         this._slideIntoView(this._currentSlide);
-                        this.scrollIntoView({ behavior: this._scrollBehavior });
                     });
                 });
 

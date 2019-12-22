@@ -59,6 +59,12 @@ h5 {
     color: var(--charcoal);
 }
 
+ul {
+    list-style-type: none;
+    margin-block-start: 0;
+    padding-inline-start: 0;
+}
+
 a {
     color: cornflowerblue;
     text-decoration: none;
@@ -152,23 +158,17 @@ a:hover {
 }
 
 .search {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 10px;
     padding: 10px;
-}
-.search__radios {
-    display: grid;
-    grid-row-gap: 5px;
 }
 
 .club-info-grid {
     display: grid;
+    grid-template-columns: 1fr auto;
     grid-row-gap: 10px;
     padding: 0 10px;
 }
 .club-info-grid__map {
+    grid-column: 1 / span 2;
     width: 100%;
     background-color: #eee;
 }
@@ -179,14 +179,11 @@ a:hover {
     justify-self: start;
     margin-top: 10px;
 }
-.club-info-grid-location-info-header {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-column-gap: 10px;
-}
-.club-info-grid-location-info-header__local-time {
+
+.local-time-and-units-info-grid {
     color: var(--gray);
     white-space: nowrap;
+    text-align: right;
 }
 
 .controls {
@@ -429,7 +426,7 @@ a:hover {
     grid-column: 2;
     grid-row: 1 / span 2;
     display: grid;
-    grid-template-columns: repeat(3, minmax(55px, auto));
+    grid-template-columns: repeat(3, auto);
     grid-template-rows: repeat(2, auto);
     grid-column-gap: 5px;
     align-self: end;
@@ -451,7 +448,7 @@ a:hover {
 #forecastCarousel.--forecast-display-mode-24h .forecast-data-grid-type {
     box-shadow: 2px 2px 6px var(--lightgray);
 }
-.forecast-data-grid-type.--wind-speed {
+.forecast-data-grid-type.--landscape-only {
     display: none;
 }
 zooduck-icon-circle .icon-circle {
@@ -473,7 +470,7 @@ zooduck-icon-circle .icon-circle {
     align-items: center;
     padding: 10px;
 }
-.forecast-data-grid__data.--wind-speed {
+.forecast-data-grid__data.--landscape-only {
     display: none;
 }
 .forecast-data-grid__data.--red {
@@ -489,12 +486,12 @@ zooduck-icon-circle .icon-circle {
 }
 @media (min-width: 640px) {
     .forecast-data-grid {
-        grid-template-columns: repeat(4, auto);
+        grid-template-columns: repeat(5, auto);
     }
-    .forecast-data-grid-type.--wind-speed {
+    .forecast-data-grid-type.--landscape-only {
         display: grid;
     }
-    .forecast-data-grid__data.--wind-speed {
+    .forecast-data-grid__data.--landscape-only {
         display: flex;
     }
 }

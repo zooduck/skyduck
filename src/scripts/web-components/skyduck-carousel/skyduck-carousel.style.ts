@@ -10,8 +10,14 @@ export const style = (transitionSpeedInMillis: number): string => {
         ::slotted([slot=slides]) {
             display: flex;
         }
-        ::slotted([slot=slides]:not(.--touch-active)) {
+        ::slotted([slot=slides]) {
             transition: all ${transitionSpeedInMillis}ms;
+        }
+        :host(.--touch-active) ::slotted([slot=slides]) {
+            transition: none;
+        }
+        :host(.--no-animate) ::slotted([slot=slides]) {
+            transition: none;
         }
     `;
 };

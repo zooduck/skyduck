@@ -146,6 +146,7 @@ export class SkyduckWeatherElements {
             precipType,
             precipProbability,
             cloudCover,
+            visibility,
             windSpeed,
             windGust,
         } = hourlyData;
@@ -173,28 +174,35 @@ export class SkyduckWeatherElements {
                 </div>
 
                 <div class="forecast-data-grid">
-                    <div class="forecast-data-grid-type --cloud-cover">
+                    <div class="forecast-data-grid-type">
                         <zooduck-icon-circle
                             size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.cloudCover}">
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">cloud</span>
                     </div>
-                    <div class="forecast-data-grid-type --wind-speed">
+                    <div class="forecast-data-grid-type --landscape-only">
+                        <zooduck-icon-circle
+                            size="22"
+                            class="forecast-data-grid-type__icon ${colorModifiers.visibility}">
+                        </zooduck-icon-circle>
+                        <span class="forecast-data-grid-type__text">vis</span>
+                    </div>
+                    <div class="forecast-data-grid-type --landscape-only">
                         <zooduck-icon-circle
                             size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.windSpeed}">
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">wind</span>
                     </div>
-                    <div class="forecast-data-grid-type --wind-gust">
+                    <div class="forecast-data-grid-type">
                         <zooduck-icon-circle
                             size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.windGust}">
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">gust</span>
                     </div>
-                    <div class="forecast-data-grid-type --precip-type">
+                    <div class="forecast-data-grid-type">
                         <zooduck-icon-circle
                             size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.precipProbability}">
@@ -203,7 +211,8 @@ export class SkyduckWeatherElements {
                     </div>
 
                     <div class="forecast-data-grid__data ${colorModifiers.cloudCover}">${cloudCover}%</div>
-                    <div class="forecast-data-grid__data ${colorModifiers.windSpeed} --wind-speed">
+                    <div class="forecast-data-grid__data ${colorModifiers.visibility} --landscape-only">${visibility}</div>
+                    <div class="forecast-data-grid__data ${colorModifiers.windSpeed} --landscape-only">
                         <span>${windSpeed}</span>
                     </div>
                     <div class="forecast-data-grid__data ${colorModifiers.windGust}">
@@ -282,13 +291,29 @@ export class SkyduckWeatherElements {
         return header as HTMLElement;
     }
 
+    private _buildLocalTimeAndUnitsInfo(): HTMLElement {
+        const { weather } = this._dailyForecast;
+        const locationTime = DateTime.local()
+            .setZone(weather.timezone)
+            .toLocaleString(DateTime.TIME_24_SIMPLE);
+
+        const localTimeAndUnitsInfoGrid = this._domParser.parseFromString(`
+            <ul class="local-time-and-units-info-grid">
+                <li>Local time: ${locationTime}</li>
+                <li>miles, mph, celsius</li>
+            </ul>
+        `, 'text/html').body.firstChild;
+
+        return localTimeAndUnitsInfoGrid as HTMLElement;
+    }
+
     private _buildLocationIcon(): HTMLElement {
         const locationIcon = this._domParser.parseFromString(`
             <zooduck-icon-location
                 id="getForecastForCurrentLocation"
                 class="header__location-icon"
-                size="40"
-                color="var(--lightgray)"></zooduck-icon-location>
+                size="38"
+                color="var(--lightskyblue)"></zooduck-icon-location>
         `, 'text/html').body.firstChild;
 
         return locationIcon as HTMLElement;
@@ -299,15 +324,13 @@ export class SkyduckWeatherElements {
         locationInfo.className = 'club-info-grid';
         locationInfo.appendChild(this._buildGoogleMap());
         locationInfo.appendChild(this._buildPlace());
+        locationInfo.appendChild(this._buildLocalTimeAndUnitsInfo());
 
         return locationInfo;
     }
 
     private _buildPlace(): HTMLElement {
-        const { countryRegion, club, weather } = this._dailyForecast;
-        const locationTime = DateTime.local()
-            .setZone(weather.timezone)
-            .toLocaleString(DateTime.TIME_24_SIMPLE);
+        const { countryRegion, club } = this._dailyForecast;
         const name = countryRegion
             ? club.place.split(',')[0]
             : club.name;
@@ -315,19 +338,16 @@ export class SkyduckWeatherElements {
             ? club.place.substr(name.length).concat(',').concat(countryRegion)
             : club.place;
         const title = `
-            <div class="club-info-grid-location-info-header">
-                <h3>${name}</h3>
-                <span class="club-info-grid-location-info-header__local-time">Local Time: ${locationTime}</span>
-            </div>
+            <h3>${name}</h3>
         `;
-        const site = club.site
+        const siteLink = club.site
             ? `<a class="club-info-grid-location-info__site-link" href="${club.site}" target="_blank">${club.site.replace(/https?:\/+/, '')}</a>`
             : '';
         const placeEl = this._domParser.parseFromString(`
             <div class="club-info-grid-location-info">
                 ${title}
                 ${this._formatPlace(place)}
-                ${site}
+                ${siteLink}
             </div>
         `, 'text/html').body.firstChild;
 
