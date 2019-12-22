@@ -117,6 +117,13 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         return (lastPointerdownTime - secondToLastPointerdownTime) < maxTimeBetweenPointerDown;
     }
 
+    private _isTouchMoveRecognised(touchMoveData: PointerEvent): boolean {
+        const minRecognisedYAxisPixels = 5;
+        const horizontalSwipePixels = (this._touchStartData.clientX - touchMoveData.clientX).toPositive();
+
+        return horizontalSwipePixels > minRecognisedYAxisPixels;
+    }
+
     private _onCurrentSlideChange(): void {
         this.dispatchEvent(new CustomEvent('slidechange', {
             detail: {
@@ -178,6 +185,10 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
 
     private _onTouchMove(e: PointerEvent) {
         e.preventDefault();
+
+        if (!this._isTouchMoveRecognised(e)) {
+            return;
+        }
 
         this._touchMoveInProgress = true;
 
@@ -324,7 +335,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         this._container.style.transform = `translateX(${translateX}px)`;
     }
 
-    private _touchMoveStartedOnYAxis(touchMoveData: PointerEvent) {
+    private _touchMoveStartedOnYAxis(touchMoveData: PointerEvent): boolean {
         const minRecognisedYAxisPixels = 5;
         const minRecognisedXAxisPixels = 1;
         const verticalSwipePixels = (this._touchStartData.clientY - touchMoveData.clientY).toPositive();
