@@ -273,6 +273,7 @@ export class SkyduckWeatherElements {
                     <small>${this._version}</small>
                     <!-- <span class="header-title-container__title-stripe"></span> -->
                 </div>
+                ${this._buildLocationIcon().outerHTML}
             </div>
         `, 'text/html').body.firstChild;
 
@@ -340,14 +341,12 @@ export class SkyduckWeatherElements {
             </div>
         `, 'text/html').body.firstChild;
 
-        search.appendChild(this._buildLocationIcon());
-
         return search as HTMLElement;
     }
 
     private _buildSkyduckIcon(): HTMLElement {
         const skyduckIcon = this._domParser.parseFromString(`
-            <zooduck-icon-skyduck size="60"></zooduck-icon-skyduck>
+            <zooduck-icon-skyduck size="60" color="var(--lightskyblue)"></zooduck-icon-skyduck>
 
         `, 'text/html').body.firstChild;
 
