@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon';
 import { weatherRatings } from './utils/weather-ratings';
-// import '../skyduck-radio/skyduck-radio.component';
 import '../skyduck-carousel/skyduck-carousel.component';
 /* eslint-disable */
 import {
@@ -16,12 +15,6 @@ import {
 import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel.component';
 import { weatherImageMap } from './utils/weather-image-map';
 import * as images from '../../../assets/img/*.png';
-import {
-    SkyduckIcon,
-    LocationIcon,
-    CircleIcon,
-    Toggle
-} from '../../css-icons/index';
 /* eslint-enable */
 export class SkyduckWeatherElements {
     private _dailyForecast: DailyForecast;
@@ -181,15 +174,31 @@ export class SkyduckWeatherElements {
 
                 <div class="forecast-data-grid">
                     <div class="forecast-data-grid-type --cloud-cover">
+                        <zooduck-icon-circle
+                            size="30"
+                            class="forecast-data-grid-type__icon ${colorModifiers.cloudCover}">
+                        </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">cloud</span>
                     </div>
                     <div class="forecast-data-grid-type --wind-speed">
+                        <zooduck-icon-circle
+                            size="30"
+                            class="forecast-data-grid-type__icon ${colorModifiers.windSpeed}">
+                        </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">wind</span>
                     </div>
                     <div class="forecast-data-grid-type --wind-gust">
+                        <zooduck-icon-circle
+                            size="30"
+                            class="forecast-data-grid-type__icon ${colorModifiers.windGust}">
+                        </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">gust</span>
                     </div>
                     <div class="forecast-data-grid-type --precip-type">
+                        <zooduck-icon-circle
+                            size="30"
+                            class="forecast-data-grid-type__icon ${colorModifiers.precipProbability}">
+                        </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">${precipType || 'rain'}</span>
                     </div>
 
@@ -206,21 +215,6 @@ export class SkyduckWeatherElements {
                 </div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
-
-        Array.from(forecastHour.querySelectorAll('.forecast-data-grid-type')).forEach((child: HTMLElement) => {
-            const { classList } = child;
-            const circleIcon = new CircleIcon(30).html;
-            const colorModifier = classList.contains('--cloud-cover')
-                ? colorModifiers.cloudCover
-                : classList.contains('--wind-speed')
-                    ? colorModifiers.windSpeed
-                    : classList.contains('--wind-gust')
-                        ? colorModifiers.windGust
-                        : colorModifiers.precipProbability;
-
-            circleIcon.classList.add(colorModifier);
-            child.insertBefore(circleIcon, child.childNodes[0]);
-        });
 
         return forecastHour;
     }
@@ -290,11 +284,15 @@ export class SkyduckWeatherElements {
     }
 
     private _buildLocationIcon(): HTMLElement {
-        const locationIcon = new LocationIcon(40, 'lightgray').html;
-        locationIcon.setAttribute('id', 'getForecastForCurrentLocationCtrl');
-        locationIcon.classList.add('header__location-icon');
+        const locationIcon = this._domParser.parseFromString(`
+            <zooduck-icon-location
+                id="getForecastForCurrentLocation"
+                class="header__location-icon"
+                size="40"
+                color="var(--lightgray)"></zooduck-icon-location>
+        `, 'text/html').body.firstChild;
 
-        return locationIcon;
+        return locationIcon as HTMLElement;
     }
 
     private _buildLocationInfo(): HTMLElement {
@@ -350,21 +348,28 @@ export class SkyduckWeatherElements {
     }
 
     private _buildSkyduckIcon(): HTMLElement {
-        return new SkyduckIcon().html;
+        const skyduckIcon = this._domParser.parseFromString(`
+            <zooduck-icon-skyduck size="60"></zooduck-icon-skyduck>
+
+        `, 'text/html').body.firstChild;
+
+        return skyduckIcon as HTMLElement;
     }
 
     private _buildForecastDisplayModeToggle(): HTMLElement {
-        const toggle = new Toggle(70, 'var(--lightskyblue)', '3h', '24h').html;
-        toggle.classList.add('controls__forecast-display-mode-toggle');
-        toggle.setAttribute('id', 'forecastDisplayModeToggle');
-
         const toggleContainer = this._domParser.parseFromString(`
             <div class="controls">
                 <h4 id="clubListCtrl" class="controls__view-club-list">Clubs</h4>
+                <zooduck-icon-toggle
+                    id="forecastDisplayModeToggle"
+                    class="controls__forecast-display-mode-toggle"
+                    size="70"
+                    toggleoncolor="var(--lightskyblue)"
+                    toggleontext="24h"
+                    toggleofftext="3h"
+                    fontfamily="Roboto, sans-serif"></zooduck-icon-toggle>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
-
-        toggleContainer.appendChild(toggle);
 
         return toggleContainer;
     }

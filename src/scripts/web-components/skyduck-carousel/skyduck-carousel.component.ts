@@ -178,7 +178,11 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             ? e.path[0]
             : e.originalTarget;
 
-        if (!originalTarget || originalTarget.parentNode.getAttribute('slot') !== 'slide-selectors') {
+        try {
+            if (originalTarget.parentNode.getAttribute('slot') !== 'slide-selectors') {
+                this._setTouchActive(true);
+            }
+        } catch (err) {
             this._setTouchActive(true);
         }
 

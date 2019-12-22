@@ -19,7 +19,6 @@ import { DistanceBetweenPoints } from './utils/distance-between-points';
 import { isTap } from './utils/is-tap';
 import { wait } from './utils/wait';
 import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel.component'; // eslint-disable-line no-unused-vars
-import { SkyduckInFlightIcon } from '../../css-icons/index';
 
 interface PointerEvents {
     pointerdown: PointerEvent[];
@@ -161,7 +160,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
                 this._showClubList();
             });
 
-        this.shadowRoot.querySelector('#getForecastForCurrentLocationCtrl')
+        this.shadowRoot.querySelector('#getForecastForCurrentLocation')
             .addEventListener('pointerup', async (e) => {
                 e.preventDefault();
 
@@ -445,10 +444,14 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 
     private _getSpinner(): HTMLElement {
-        const spinner = new SkyduckInFlightIcon(100, 'var(--lightskyblue)').html;
-        spinner.classList.add('loader__spinner');
+        const spinner = this._domParser.parseFromString(`
+            <zooduck-icon-skyduck-in-flight
+                class="loader__icon"
+                size="100"
+                color="var(--lightskyblue)"></zooduck-icon-skyduck-in-flight>
+        `, 'text/html').body.firstChild;
 
-        return spinner;
+        return spinner as HTMLElement;
     }
 
     private _getStyle(): HTMLStyleElement {

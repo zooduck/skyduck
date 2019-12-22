@@ -110,10 +110,10 @@ a:hover {
     text-overflow: ellipsis;
     overflow: hidden;
 }
-.loader__spinner {
+.loader__icon {
     grid-row: 2;
 }
-:host(.--error) .loader__spinner {
+:host(.--error) .loader__icon {
     display: none;
 }
 
@@ -454,6 +454,18 @@ a:hover {
 .forecast-data-grid-type.--wind-speed {
     display: none;
 }
+zooduck-icon-circle .icon-circle {
+    border-color: pink;
+}
+.forecast-data-grid-type__icon.--red {
+    --zooduck-icon-color: var(--red);
+}
+.forecast-data-grid-type__icon.--amber {
+    --zooduck-icon-color: var(--amber);
+}
+.forecast-data-grid-type__icon.--green {
+    --zooduck-icon-color: var(--green);
+}
 .forecast-data-grid__data {
     display: flex;
     flex-direction: column;
@@ -548,15 +560,5 @@ a:hover {
 .club-list-item-distance__miles {
     white-space: nowrap;
     font-size: 22px;
-}
-
-.icon-circle.--red {
-    border-color: var(--red);
-}
-.icon-circle.--amber {
-    border-color: var(--amber);
-}
-.icon-circle.--green {
-    border-color: var(--green);
 }
 `;
