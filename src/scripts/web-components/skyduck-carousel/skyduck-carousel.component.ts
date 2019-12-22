@@ -33,7 +33,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _slidesSlot: HTMLSlotElement;
     private _slideSelectors: HTMLElement;
     private _slideSelectorsSlot: HTMLSlotElement;
-    private _touchActive = false;
     private _touchMoveInProgress = false;
     private _touchStartData: TouchData = {
         time: 0,
@@ -127,7 +126,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     }
 
     private _onResize() {
-        this._setTouchActive(true);
+        this._setTouchActive(true); // to remove transition style
         this._setContainerStyle();
         this._slideIntoView(this._currentSlide);
     }
@@ -163,6 +162,8 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _onTouchStart(e: PointerEvent) {
         e.preventDefault();
 
+        this.addEventListener('pointermove', this._onTouchMove);
+
         const clientX = e.clientX;
         const clientY = e.clientY;
 
@@ -190,10 +191,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _onTouchMove(e: PointerEvent) {
         e.preventDefault();
 
-        if (!this._touchActive) {
-            return;
-        }
-
         this._touchMoveInProgress = true;
 
         if (this._touchMoveStartedOnYAxis(e)) {
@@ -212,6 +209,8 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _onTouchCancel(e: PointerEvent) {
         e.preventDefault();
 
+        this.removeEventListener('pointermove', this._onTouchMove);
+
         if (this._touchMoveInProgress) {
             this._setTouchActive(false);
             this._slideIntoView(this._currentSlide);
@@ -221,9 +220,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private async _onTouchEnd(e: PointerEvent) {
         e.preventDefault();
 
-        if (!this._touchActive) {
-            return;
-        }
+        this.removeEventListener('pointermove', this._onTouchMove);
 
         this._setTouchActive(false);
 
@@ -253,10 +250,9 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _registerEvents() {
         window.addEventListener('resize', this._onResize.bind(this));
 
-        this.onpointerdown = this._onTouchStart.bind(this);
-        this.onpointermove = this._onTouchMove.bind(this);
-        this.onpointerup = this._onTouchEnd.bind(this);
-        this.onpointercancel = this._onTouchCancel.bind(this);
+        this.addEventListener('pointerdown', this._onTouchStart);
+        this.addEventListener('pointerup', this._onTouchEnd);
+        this.addEventListener('pointercancel', this._onTouchCancel);
 
         this.addEventListener('pointerup', (e: PointerEvent) => {
             e.preventDefault();
@@ -309,11 +305,9 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _setTouchActive(bool: boolean) {
         switch (bool) {
         case true:
-            this._touchActive = true;
             this._container.classList.add('--touch-active');
             break;
         case false:
-            this._touchActive = false;
             this._touchMoveInProgress = false;
             this._container.classList.remove('--touch-active');
             break;
