@@ -1,5 +1,4 @@
 import { style } from './skyduck-carousel.style';
-import { isTap } from './utils/is-tap';
 import  './prototype/Number/to-positive';
 
 interface Slide {
@@ -33,6 +32,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     private _slidesSlot: HTMLSlotElement;
     private _slideSelectors: HTMLElement;
     private _slideSelectorsSlot: HTMLSlotElement;
+    private _touchActive: boolean;
     private _touchMoveInProgress = false;
     private _touchStartData: TouchData = {
         time: 0,
@@ -169,18 +169,6 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
 
         this._pointerEvents.pointerdown.push(e);
 
-        const originalTarget = e.path
-            ? e.path[0]
-            : e.originalTarget;
-
-        try {
-            if (originalTarget.parentNode.getAttribute('slot') !== 'slide-selectors') {
-                this._setTouchActive(true);
-            }
-        } catch (err) {
-            this._setTouchActive(true);
-        }
-
         this._touchStartData = {
             time: new Date().getTime(),
             clientX,
@@ -288,6 +276,7 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
         }
 
         this._currentSlide = this._slides[slideIndex];
+
         this._onCurrentSlideChange();
     }
 
@@ -388,20 +377,27 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             });
 
         // Optional "slide-selectors" slot
-        if (this.querySelector('[slot=slide-selectors]')) {
+        const slideSelectorsSlot = this.querySelector('[slot=slide-selectors]');
+        if (slideSelectorsSlot) {
+            slideSelectorsSlot.addEventListener('pointerup', (e: PointerEvent) => {
+                e.preventDefault();
+
+                this._setTouchActive(false);
+                this._setCarouselHeightToSlideHeight();
+                this._slideIntoView(this._currentSlide);
+                this.scrollIntoView({ behavior: this._scrollBehavior });
+            });
             Array.from(this.querySelector('[slot=slide-selectors]').children)
                 .map((item: HTMLElement, i: number) => {
                     item.addEventListener('pointerup', (e: PointerEvent) => {
                         e.preventDefault();
 
-                        const lastPointerdownEvent = this._pointerEvents.pointerdown.slice(-1)[0];
-                        const pointerupEvent = e;
-
-                        if (!isTap(lastPointerdownEvent, pointerupEvent)) {
+                        if (this._touchMoveInProgress) {
                             return;
                         }
 
                         this._setCurrentSlide(i);
+                        this._setTouchActive(false);
                         this._setCarouselHeightToSlideHeight();
                         this._slideIntoView(this._currentSlide);
                         this.scrollIntoView({ behavior: this._scrollBehavior });
