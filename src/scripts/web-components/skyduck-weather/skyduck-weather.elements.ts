@@ -175,28 +175,28 @@ export class SkyduckWeatherElements {
                 <div class="forecast-data-grid">
                     <div class="forecast-data-grid-type --cloud-cover">
                         <zooduck-icon-circle
-                            size="30"
+                            size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.cloudCover}">
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">cloud</span>
                     </div>
                     <div class="forecast-data-grid-type --wind-speed">
                         <zooduck-icon-circle
-                            size="30"
+                            size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.windSpeed}">
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">wind</span>
                     </div>
                     <div class="forecast-data-grid-type --wind-gust">
                         <zooduck-icon-circle
-                            size="30"
+                            size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.windGust}">
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">gust</span>
                     </div>
                     <div class="forecast-data-grid-type --precip-type">
                         <zooduck-icon-circle
-                            size="30"
+                            size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.precipProbability}">
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">${precipType || 'rain'}</span>
