@@ -200,6 +200,8 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
             return;
         }
 
+        this._setTouchActive(true);
+
         const swipeDistance = e.clientX - this._touchStartData.clientX;
         const currentX = parseInt((swipeDistance + this._currentOffsetX).toString(), 10);
 
