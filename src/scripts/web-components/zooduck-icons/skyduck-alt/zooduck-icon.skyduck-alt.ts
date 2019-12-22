@@ -1,8 +1,8 @@
 import { HTMLZooduckIconBaseElement } from '../base/zooduck-icon.base';
 
-const tagName = 'zooduck-icon-skyduck';
+const tagName = 'zooduck-icon-skyduck-alt';
 
-export class HTMLZooduckIconSkyduckElement extends HTMLZooduckIconBaseElement {
+export class HTMLZooduckIconSkyduckAltElement extends HTMLZooduckIconBaseElement {
     constructor() {
         super();
     }
@@ -16,14 +16,13 @@ export class HTMLZooduckIconSkyduckElement extends HTMLZooduckIconBaseElement {
 
     private _buildContent(): HTMLElement {
         const content = new DOMParser().parseFromString(`
-            <div class="skyduck-icon">
-                <div class="skyduck-icon__body">
-                    <div class="skyduck-icon__beak"></div>
-                </div>
-                <div class="skyduck-icon__wing-left"></div>
-                <div class="skyduck-icon__wing-right"></div>
-                <div class="skyduck-icon__eye-left"></div>
-                <div class="skyduck-icon__eye-right"></div>
+            <div class="skyduck-grid">
+                <div class="skyduck-grid__body"></div>
+                <div class="skyduck-grid__beak"></div>
+                <div class="skyduck-grid__wing-left"></div>
+                <div class="skyduck-grid__wing-right"></div>
+                <div class="skyduck-grid__eye-left"></div>
+                <div class="skyduck-grid__eye-right"></div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
@@ -32,7 +31,7 @@ export class HTMLZooduckIconSkyduckElement extends HTMLZooduckIconBaseElement {
 
     private _buildStyleContent(): string {
         const styleContent = `
-            .skyduck-icon {
+            .skyduck-grid {
                 position: relative;
                 width: var(--zooduck-icon-size);
                 height: var(--zooduck-icon-size);
@@ -40,19 +39,22 @@ export class HTMLZooduckIconSkyduckElement extends HTMLZooduckIconBaseElement {
                 grid-template-columns: repeat(20, 5%);
                 grid-template-rows: repeat(20, 5%);
             }
-            .skyduck-icon__wing-left {
+            .skyduck-grid__wing-left {
+                z-index: 0;
                 grid-row: 3 / span 4;
                 grid-column: 6 / span 14;
                 background-color: var(--zooduck-icon-color);
                 transform: skewY(-30deg) rotate(20deg);
             }
-            .skyduck-icon__wing-right {
+            .skyduck-grid__wing-right {
+                z-index: 0;
                 grid-row: 4 / span 15;
                 grid-column: 4 / span 4;
                 background-color: var(--zooduck-icon-color);
                 transform: skewY(-30deg);
             }
-            .skyduck-icon__body {
+            .skyduck-grid__body {
+                z-index: 1;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -61,24 +63,26 @@ export class HTMLZooduckIconSkyduckElement extends HTMLZooduckIconBaseElement {
                 grid-column: 1 / span 15;
                 grid-row: 1 / span 15;
             }
-            .skyduck-icon__beak {
-                width: 60%;
-                height: 60%;
-                clip-path: circle();
+            .skyduck-grid__beak {
+                z-index: 2;
                 background-color: var(--zooduck-icon-background-color);
+                grid-column: 1 / span 11;
+                grid-row: 1 / span 11;
+                border-radius: 50%;
+                clip-path: polygon(50% 60%, 100% 70%, 100% 100%, 30% 100%);
             }
-            .skyduck-icon__eye-left,
-            .skyduck-icon__eye-right {
-                z-index: 1;
+            .skyduck-grid__eye-left,
+            .skyduck-grid__eye-right {
+                z-index: 3;
                 background-color: var(--zooduck-icon-background-color);
                 clip-path: circle();
             }
-            .skyduck-icon__eye-right {
-                grid-column: 4 / span 2;
-                grid-row: 7 / span 2;
+            .skyduck-grid__eye-right {
+                grid-column: 3 / span 2;
+                grid-row: 5 / span 2;
             }
-            .skyduck-icon__eye-left {
-                grid-column: 8 / span 2;
+            .skyduck-grid__eye-left {
+                grid-column: 7 / span 2;
                 grid-row: 4 / span 2;
             }
         `;
@@ -95,4 +99,4 @@ export class HTMLZooduckIconSkyduckElement extends HTMLZooduckIconBaseElement {
     }
 }
 
-customElements.define(tagName, HTMLZooduckIconSkyduckElement);
+customElements.define(tagName, HTMLZooduckIconSkyduckAltElement);
