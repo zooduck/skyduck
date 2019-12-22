@@ -56,20 +56,6 @@ export class SpinnerBlades extends BaseIcon {
                 background-color: var(--spinner-blades-background-color);
             }
 
-            .spinner-blades__center {
-                box-sizing: content-box !important;
-                position: absolute;
-                z-index: 1;
-                width: calc(var(--spinner-blades-size) / 4);
-                height: calc(var(--spinner-blades-size) / 4);
-                border: solid calc(var(--spinner-blades-size) * .13) var(--spinner-blades-color);
-                left: 50%;
-                top: 50%;
-                clip-path: circle();
-                transform: translate(-50%, -50%);
-                background-color: var(--spinner-blades-background-color);
-            }
-
             .spinner-blades__part.--top-left {
                 transform: rotate(135deg) scale(.7);
             }

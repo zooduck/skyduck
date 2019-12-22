@@ -45,10 +45,10 @@ export class SkyduckIcon extends BaseIcon {
             }
             .skyduck-grid__beak {
                 z-index: 2;
-                clip-path: circle();
                 background-color: var(--skyduck-icon-background-color);
                 grid-column: 1 / span 11;
                 grid-row: 1 / span 11;
+                border-radius: 50%;
                 clip-path: polygon(50% 60%, 100% 70%, 100% 100%, 30% 100%);
             }
             .skyduck-grid__eye-left,

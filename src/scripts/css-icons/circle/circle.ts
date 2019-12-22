@@ -19,7 +19,7 @@ export class CircleIcon extends BaseIcon {
 
     public get html(): HTMLElement {
         const el = new DOMParser().parseFromString(`
-            <div class="icon-circle"></div>
+            <span class="icon-circle"></span>
         `, 'text/html').body.firstChild as HTMLElement;
 
         el.attachShadow({ mode: 'open' });

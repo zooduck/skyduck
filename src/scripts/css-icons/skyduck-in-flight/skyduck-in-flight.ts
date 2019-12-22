@@ -115,6 +115,7 @@ export class SkyduckInFlightIcon extends BaseIcon {
                 background-color: var(--skyduck-speed-background-color-duck);
                 grid-column: 1 / span 11;
                 grid-row: 1 / span 11;
+                border-radius: 50%;
                 clip-path: polygon(50% 60%, 100% 70%, 100% 100%, 30% 100%);
             }
             .skyduck-in-flight-grid__eye-left,

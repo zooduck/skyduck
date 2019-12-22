@@ -1,49 +1,49 @@
 .skyduck-icon {
-  position: relative;
-  width: 250px;
-  height: 250px;
-  display: grid;
-  grid-template-columns: repeat(20, 5%);
-  grid-template-rows: repeat(20, 5%);
+    position: relative;
+    width: 250px;
+    height: 250px;
+    display: grid;
+    grid-template-columns: repeat(20, 5%);
+    grid-template-rows: repeat(20, 5%);
 }
 .skyduck-icon__wing-left {
-  grid-row: 3 / span 4;
-  grid-column: 6 / span 14;
-  background-color: #222;
-  transform: skewY(-30deg) rotate(20deg);
+    grid-row: 3 / span 4;
+    grid-column: 6 / span 14;
+    background-color: #222;
+    transform: skewY(-30deg) rotate(20deg);
 }
 .skyduck-icon__wing-right {
-  grid-row: 4 / span 15;
-  grid-column: 4 / span 4;
-  background-color: #222;
-  transform: skewY(-30deg);
+    grid-row: 4 / span 15;
+    grid-column: 4 / span 4;
+    background-color: #222;
+    transform: skewY(-30deg);
 }
 .skyduck-icon__body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  clip-path: circle();
-  background-color: #222;
-  grid-column: 1 / span 15;
-  grid-row: 1 / span 15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: circle();
+    background-color: #222;
+    grid-column: 1 / span 15;
+    grid-row: 1 / span 15;
 }
 .skyduck-icon__beak {
-  width: 60%;
-  height: 60%;
-  clip-path: circle();
-  background-color: #fff;
+    width: 60%;
+    height: 60%;
+    clip-path: circle();
+    background-color: #fff;
 }
 .skyduck-icon__eye-left,
 .skyduck-icon__eye-right {
-  z-index: 1;
-  background-color: #fff;
-  clip-path: circle();
+    z-index: 1;
+    background-color: #fff;
+    clip-path: circle();
 }
 .skyduck-icon__eye-right {
-  grid-column: 4 / span 2;
-  grid-row: 7 / span 2;
+    grid-column: 4 / span 2;
+    grid-row: 7 / span 2;
 }
 .skyduck-icon__eye-left {
-  grid-column: 8 / span 2;
-  grid-row: 4 / span 2;
+    grid-column: 8 / span 2;
+    grid-row: 4 / span 2;
 }
