@@ -340,10 +340,12 @@ export class HTMLSkyduckCarouselElement extends HTMLElement {
     }
 
     private _touchMoveStartedOnYAxis(touchMoveData: PointerEvent) {
+        const minRecognisedYAxisPixels = 5;
+        const minRecognisedXAxisPixels = 1;
         const verticalSwipePixels = (this._touchStartData.clientY - touchMoveData.clientY).toPositive();
         const horizontalSwipePixels = (this._touchStartData.clientX - touchMoveData.clientX).toPositive();
 
-        return verticalSwipePixels > 0 && horizontalSwipePixels < 1;
+        return verticalSwipePixels > minRecognisedYAxisPixels && horizontalSwipePixels < minRecognisedXAxisPixels;
     }
 
     public get currentSlide(): number {
