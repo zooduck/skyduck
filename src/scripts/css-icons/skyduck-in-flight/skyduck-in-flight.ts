@@ -41,7 +41,7 @@ export class SkyduckInFlightIcon extends BaseIcon {
                 display: grid;
                 grid-template-rows: repeat(26, 1fr);
                 background-color: var(--skyduck-speed-background-color-airflow);
-                gap: 2.5%;
+                grid-gap: 2.5%;
                 overflow: hidden;
                 clip-path: polygon(75% 0%, 100% 100%, 0% 100%, 0% 0%);
             }

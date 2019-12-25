@@ -1,7 +1,6 @@
 export type ColorModifier = '--red'|'--amber'|'--green';
 export type SearchType = 'club'|'location';
 export type Rating = 'red'|'amber'|'green';
-export type Ratings = Rating[];
 
 export interface ColorModifiers {
     cloudCover: ColorModifier;

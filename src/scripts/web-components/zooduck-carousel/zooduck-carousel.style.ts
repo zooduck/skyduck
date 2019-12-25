@@ -1,4 +1,9 @@
-export const style = (transitionSpeedInMillis: number): string => {
+interface Options {
+    transitionSpeed: number;
+}
+
+export const style = (options: Options): string => {
+    const { transitionSpeed: transitionSpeedInMillis } = options;
     return `
         :host {
             display: block;

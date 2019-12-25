@@ -1,4 +1,4 @@
-import { SkydiveClub } from 'scripts/web-components/skyduck-weather/interfaces/index';
+import { SkydiveClub } from '../../src/scripts/web-components/skyduck/interfaces/index'; // eslint-disable-line no-unused-vars
 
 export const skydiveClubs: SkydiveClub[] = [
     {

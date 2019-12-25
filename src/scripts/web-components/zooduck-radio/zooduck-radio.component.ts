@@ -1,10 +1,12 @@
-class SkyduckRadio extends HTMLElement {
+const tagName = 'zooduck-radio';
+
+class HTMLZooduckRadioElement extends HTMLElement {
     private _hasLoaded = false;
     private _name = '';
     private _rawInput: HTMLInputElement;
     private _size = '24';
     private _value = '';
-    private _checked = false;
+    private _checked: any;
 
     constructor() {
         super();
@@ -21,10 +23,9 @@ class SkyduckRadio extends HTMLElement {
         ];
     }
 
-    public set checked(val: boolean) {
-        this._checked = val || typeof(val) === 'string'
-            ? true
-            : false;
+    public set checked(val: any) {
+        this._checked = val;
+        this._syncBoolAttr('checked', this._checked);
 
         if (!this._hasLoaded) {
             return;
@@ -33,12 +34,13 @@ class SkyduckRadio extends HTMLElement {
         this._update();
     }
 
-    public get checked(): boolean {
+    public get checked(): any {
         return this._checked;
     }
 
     public set name(val: string) {
         this._name = val;
+        this._syncStringAttr('name', val);
 
         if (!this._hasLoaded) {
             return;
@@ -53,6 +55,7 @@ class SkyduckRadio extends HTMLElement {
 
     public set size(val: string) {
         this._size = val;
+        this._syncStringAttr('size', val);
 
         if (!this._hasLoaded) {
             return;
@@ -67,6 +70,7 @@ class SkyduckRadio extends HTMLElement {
 
     public set value(val: string) {
         this._value = val;
+        this._syncStringAttr('value', val);
 
         if (!this._hasLoaded) {
             return;
@@ -77,6 +81,12 @@ class SkyduckRadio extends HTMLElement {
 
     public get value(): string {
         return this._value;
+    }
+
+    private _convertCheckedToBool(checked: string|boolean): boolean {
+        return typeof(checked) === 'string'
+            ? true
+            : checked;
     }
 
     private _buildRawInput(): void {
@@ -116,6 +126,20 @@ class SkyduckRadio extends HTMLElement {
         this.appendChild(html);
     }
 
+    private _syncBoolAttr(name: string, val: boolean) {
+        if (!val && typeof(val) !== 'string') {
+            this.removeAttribute(name);
+
+            return;
+        }
+
+        this.setAttribute(name, '');
+    }
+
+    private _syncStringAttr(name: string, val: string) {
+        this.setAttribute(name, val);
+    }
+
     private _update() {
         this._updateValue();
         this._updateRawInput();
@@ -125,7 +149,7 @@ class SkyduckRadio extends HTMLElement {
     private _updateRawInput(): void {
         this._rawInput.name = this._name;
         this._rawInput.value = this._value;
-        this._rawInput.checked = this._checked;
+        this._rawInput.checked = this._convertCheckedToBool(this._checked);
     }
 
     private _updateStyle(): void {
@@ -137,7 +161,7 @@ class SkyduckRadio extends HTMLElement {
                 display: grid;
                 grid-template-columns: auto 1fr;
                 align-items: center;
-                gap: 5px;
+                grid-gap: 5px;
                 cursor: pointer;
             }
             .zooduck-radio__value {
@@ -188,9 +212,11 @@ class SkyduckRadio extends HTMLElement {
     }
 
     protected attributeChangedCallback(name: string, _oldVal: string, newVal: string) {
-        if (this[name] !== newVal) {
-            this[name] = newVal;
+        if (newVal === null || this[name] === newVal) {
+            return;
         }
+
+        this[name] = newVal;
     }
 
     protected connectedCallback() {
@@ -209,4 +235,4 @@ class SkyduckRadio extends HTMLElement {
     }
 }
 
-customElements.define('skyduck-radio', SkyduckRadio);
+customElements.define(tagName, HTMLZooduckRadioElement);

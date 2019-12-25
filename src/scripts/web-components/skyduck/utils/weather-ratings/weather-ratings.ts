@@ -1,4 +1,4 @@
-import { Ratings, Rating } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { Rating } from '../../interfaces/index'; // eslint-disable-line no-unused-vars
 import { DateTime } from 'luxon';
 
 export const weatherRatings = (() => {
@@ -52,7 +52,7 @@ export const weatherRatings = (() => {
     };
 
     return {
-        average(ratings: Ratings[]) {
+        average(ratings: Rating[][]) {
             return _getMostDominantRating(ratings);
         },
         cloudCover(cloudCover: number): Rating {
@@ -73,9 +73,9 @@ export const weatherRatings = (() => {
             return this.windSpeed(windGust);
         },
         precipProbability(precipProbability: number): Rating {
-            return precipProbability <= 20
+            return precipProbability < 20
                 ? 'green'
-                : precipProbability <= 50
+                : precipProbability < 50
                     ? 'amber'
                     : 'red';
         },
@@ -90,9 +90,9 @@ export const weatherRatings = (() => {
             return sunsetColorModifier;
         },
         visibility(visibility: number): Rating {
-            return visibility >= 5
+            return visibility > 4
                 ? 'green'
-                : visibility >= 3
+                : visibility > 2
                     ? 'amber'
                     : 'red';
         },

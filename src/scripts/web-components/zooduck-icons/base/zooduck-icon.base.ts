@@ -1,3 +1,4 @@
+const tagName = 'zooduck-icon-base';
 export class HTMLZooduckIconBaseElement extends HTMLElement {
     private _content: HTMLElement;
     private _backgroundColor = '#fff';
@@ -33,6 +34,10 @@ export class HTMLZooduckIconBaseElement extends HTMLElement {
         `;
     }
 
+    private _syncAttr(name: string, val: string) {
+        this.setAttribute(name, val);
+    }
+
     private _updateStyle() {
         this._setVars();
         this._stylesheet.textContent = `${this._vars}${this._styleContent}`;
@@ -40,6 +45,7 @@ export class HTMLZooduckIconBaseElement extends HTMLElement {
 
     public set backgroundcolor(val: string) {
         this._backgroundColor = val;
+        this._syncAttr('backgroundcolor', val);
         this.update();
     }
 
@@ -49,6 +55,7 @@ export class HTMLZooduckIconBaseElement extends HTMLElement {
 
     public set color(val: string) {
         this._color = val;
+        this._syncAttr('color', val);
         this.update();
     }
 
@@ -58,6 +65,7 @@ export class HTMLZooduckIconBaseElement extends HTMLElement {
 
     public set size(val: string) {
         this._size = parseInt(val, 10).toString();
+        this._syncAttr('size', val);
         this.update();
     }
 
@@ -93,3 +101,5 @@ export class HTMLZooduckIconBaseElement extends HTMLElement {
         this[name] = newVal;
     }
 }
+
+customElements.define(tagName, HTMLZooduckIconBaseElement);

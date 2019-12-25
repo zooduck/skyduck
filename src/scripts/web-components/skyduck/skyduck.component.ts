@@ -1,5 +1,5 @@
-import { style } from './skyduck-weather.style';
-import { SkyduckWeatherElements } from './skyduck-weather.elements';
+import { style } from './skyduck.style';
+import { SkyduckWeatherElements } from './skyduck.elements';
 import { SkyduckWeather } from './skyduck-weather';
 /* eslint-disable */
 import {
@@ -16,12 +16,13 @@ import { DateTime } from 'luxon';
 import { graphqlConfig } from '../../config/graphql.config';
 import { skydiveClubsQuery } from './graphql-queries/skydive-clubs-query';
 import { DistanceBetweenPoints } from './utils/distance-between-points';
-import { isTap } from './utils/is-tap';
-import { wait } from './utils/wait';
-import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel.component'; // eslint-disable-line no-unused-vars
+import { isTap } from '../../utils/is-tap/is-tap';
+import { wait } from './utils/wait/wait';
+import { HTMLZooduckCarouselElement } from '../zooduck-carousel/zooduck-carousel.component'; // eslint-disable-line no-unused-vars
+import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details/pointer-event-details'; // eslint-disable-line no-unused-vars
 
 interface PointerEvents {
-    pointerdown: PointerEvent[];
+    pointerdown: EventDetails[];
 }
 
 type ClubListSortedByCountry = {
@@ -35,7 +36,7 @@ type LoaderMessageElements = {
     [key: string]: HTMLElement;
 }
 
-const tagName = 'skyduck-weather';
+const tagName = 'sky-duck';
 const geolocationBlockedByUserMessage = `
 Geolocation permission has been blocked
  as the user has dismissed the permission prompt.
@@ -44,11 +45,11 @@ Geolocation permission has been blocked
 `.trim().replace(/\n/g, '');
 
 /* eslint-enable */
-class HTMLSkyduckWeatherElement extends HTMLElement {
+class HTMLSkyDuckElement extends HTMLElement {
     private _club: string;
     private _clubs: ClubListSortedByCountry;
     private _nearestClub: SkydiveClub;
-    private _defaultClub = 'skydive algarve';
+    private _defaultClub: string;
     private _domParser: DOMParser;
     private _error: string;
     private _forecast: DailyForecast;
@@ -58,14 +59,10 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     private _imagesReady = false;
     private _isSearchInProgress = false;
     private _loaderMessageElements: LoaderMessageElements;
-    private _modifierClasses: ModifierClasses = {
-        ready: '--ready',
-        error: '--error',
-    };
+    private _modifierClasses: ModifierClasses;
     private _onSearchSubmit: EventListener;
-    private _pointerEvents: PointerEvents = {
-        pointerdown: [],
-    };
+    private _pointerEventDetails: PointerEventDetails;
+    private _pointerEvents: PointerEvents;
     private _position: Position;
     private _location: string;
     private _latLonSpin: LatLonSpin;
@@ -77,8 +74,17 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
 
         this.attachShadow({ mode: 'open' });
 
+        this._defaultClub = 'skydive algarve';
         this._domParser = new DOMParser();
         this._latLonSpin = new LatLonSpin();
+        this._modifierClasses = {
+            ready: '--ready',
+            error: '--error',
+        };
+        this._pointerEventDetails = new PointerEventDetails();
+        this._pointerEvents = {
+            pointerdown: [],
+        };
         this._weather = new SkyduckWeather();
     }
 
@@ -133,6 +139,8 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
 
     private _addEventListeners(): void {
         this._onSearchSubmit = (e: CustomEvent) => {
+            this._clearContent();
+
             const { value } = e.detail;
 
             if (!value || this._isSearchInProgress) {
@@ -144,11 +152,21 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
             this.location = value;
         };
 
-        this.addEventListener('pointerdown', (e: PointerEvent) => {
-            e.preventDefault();
-
-            this._pointerEvents.pointerdown.push(e);
-        });
+        if ('PointerEvent' in window) {
+            this.addEventListener('pointerdown', (e: PointerEvent) => {
+                const eventDetails = this._pointerEventDetails.fromPointer(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+            });
+        } else {
+            this.addEventListener('mousedown', (e: MouseEvent) => {
+                const eventDetails = this._pointerEventDetails.fromMouse(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+            });
+            this.addEventListener('touchstart', (e: TouchEvent) => {
+                const eventDetails = this._pointerEventDetails.fromTouch(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+            });
+        }
 
         this.shadowRoot.querySelector('zooduck-input')
             .addEventListener('keypress:enter', this._onSearchSubmit);
@@ -182,7 +200,7 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         forecastDisplayModeToggle.addEventListener('pointerup', (e: PointerEvent) => {
             e.preventDefault();
 
-            const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLSkyduckCarouselElement;
+            const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLZooduckCarouselElement;
 
             forecastCarousel.classList.toggle('--forecast-display-mode-24h');
 
@@ -194,21 +212,55 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 
     private _addEventsToCarousel(carousel: HTMLElement): void {
-        carousel
-            .addEventListener('pointerdown', (e) => {
-                e.preventDefault();
+        if ('PointerEvent' in window) {
+            carousel.addEventListener('pointerdown', (e: PointerEvent) => {
+                const eventDetails = this._pointerEventDetails.fromPointer(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
 
-                this._pointerEvents.pointerdown.push(e);
-
-                const searchInput = this.shadowRoot.querySelector('zooduck-input') as HTMLInputElement;
-
-                if (!searchInput) {
-                    return;
-                }
-
-                searchInput.blur();
+                this._blurSearchInput();
             });
+        } else {
+            carousel.addEventListener('mousedown', (e: MouseEvent) => {
+                const eventDetails = this._pointerEventDetails.fromMouse(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+
+                this._blurSearchInput();
+            });
+            carousel.addEventListener('touchstart', (e: TouchEvent) => {
+                const eventDetails = this._pointerEventDetails.fromTouch(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+
+                this._blurSearchInput();
+            });
+        }
+
+        // carousel
+        //     .addEventListener('pointerdown', (e) => {
+        //         e.preventDefault();
+
+        //         // this._pointerEvents.pointerdown.push(e);
+
+
+        //         const searchInput = this.shadowRoot.querySelector('zooduck-input') as HTMLInputElement;
+
+        //         if (!searchInput) {
+        //             return;
+        //         }
+
+        //         searchInput.blur();
+        //     });
     }
+
+    private _blurSearchInput() {
+        const searchInput = this.shadowRoot.querySelector('zooduck-input') as HTMLInputElement;
+
+        if (!searchInput) {
+            return;
+        }
+
+        searchInput.blur();
+    }
+
 
     private _clearContent(): void {
         Array.from(this.shadowRoot.children).forEach((child: HTMLElement) => {
@@ -256,6 +308,11 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
         }
     }
 
+    private _setClubToSelectedClubFromList(clubListItem: HTMLElement) {
+        const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
+        this.club = clubName;
+    }
+
     private _getClubListItem(country: string,  club: SkydiveClub): HTMLElement {
         const { furthestDZDistance } = this._clubs[country];
         const distanceFromCurrentLocation = club.distance;
@@ -284,19 +341,54 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
 
         const clubListItemName = clubListItem.querySelector('.club-list-item__name');
 
-        clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
-            e.preventDefault();
+        if ('PointerEvent' in window) {
+            clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromPointer(e);
+                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
 
-            const pointerupEvent = e;
-            const lastPointerdownEvent = this._pointerEvents.pointerdown.slice(-1)[0];
+                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
+                    return;
+                }
 
-            if (!isTap(lastPointerdownEvent, pointerupEvent)) {
-                return;
-            }
+                this._setClubToSelectedClubFromList(clubListItem);
+            });
+        } else {
+            clubListItemName.addEventListener('mouseup', (e: MouseEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromMouse(e);
+                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
 
-            const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
-            this.club = clubName;
-        });
+                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
+                    return;
+                }
+
+                this._setClubToSelectedClubFromList(clubListItem);
+            });
+
+            clubListItemName.addEventListener('touchend', (e: TouchEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromTouch(e);
+                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
+
+                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
+                    return;
+                }
+
+                this._setClubToSelectedClubFromList(clubListItem);
+            });
+        }
+
+        // clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
+        //     e.preventDefault();
+
+        //     const pointerupEvent = e;
+        //     const lastPointerdownEvent = this._pointerEvents.pointerdown.slice(-1)[0];
+
+        //     if (!isTap(lastPointerdownEvent, pointerupEvent)) {
+        //         return;
+        //     }
+
+        //     const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
+        //     this.club = clubName;
+        // });
 
         return clubListItem;
     }
@@ -347,9 +439,9 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
 
     private _getClubListCarousel(): HTMLElement {
         const clubListCarousel = this._domParser.parseFromString(`
-            <skyduck-carousel id="clubListCarousel">
+            <zooduck-carousel id="clubListCarousel">
                 <div slot="slides"></div>
-            </skyduck-carousel>
+            </zooduck-carousel>
         `, 'text/html').body.firstChild as HTMLElement;
 
         const slidesSlot = clubListCarousel.querySelector('[slot=slides]');
@@ -776,4 +868,4 @@ class HTMLSkyduckWeatherElement extends HTMLElement {
     }
 }
 
-customElements.define(tagName, HTMLSkyduckWeatherElement);
+customElements.define(tagName, HTMLSkyDuckElement);

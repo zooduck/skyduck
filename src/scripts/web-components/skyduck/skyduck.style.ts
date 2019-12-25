@@ -80,7 +80,7 @@ a:hover {
     z-index: 99;
     display: grid;
     grid-template-rows: auto 55vh;
-    gap: 50px;
+    grid-gap: 50px;
     justify-content: center;
     justify-items: center;
     width: 100%;
@@ -164,7 +164,7 @@ a:hover {
 .club-info-grid {
     display: grid;
     grid-template-columns: 1fr auto;
-    grid-row-gap: 10px;
+    grid-gap: 10px;
     padding: 0 10px;
 }
 .club-info-grid__map {
@@ -189,7 +189,7 @@ a:hover {
 .controls {
     display: grid;
     grid-template-columns: repeat(2, 1fr) auto;
-    gap: 10px;
+    grid-gap: 10px;
     align-items: center;
     margin: 10px;
     color: var(--white);
@@ -217,7 +217,7 @@ a:hover {
 .forecast-slide-selectors {
     display: grid;
     grid-template-columns: repeat(8, auto);
-    gap: 5px;
+    grid-gap: 5px;
     height: 60px;
     max-width: 450px;
     margin: 0 auto;
@@ -259,7 +259,7 @@ a:hover {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: repeat(2, auto);
-    gap: 10px;
+    grid-gap: 10px;
     align-items: center;
     border-left: solid 10px var(--lightgray);
     padding: 0 0 10px 10px;
@@ -290,7 +290,7 @@ a:hover {
     grid-template-columns: 1fr auto;
     align-items: center;
     justify-items: right;
-    gap: 5px;
+    grid-gap: 5px;
 }
 .forecast-grid-header-sun-info__item {
     text-align: right;
@@ -321,7 +321,7 @@ a:hover {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: 1fr auto;
-    gap: 10px;
+    grid-gap: 10px;
 }
 #forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast,
 #forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
@@ -439,7 +439,7 @@ a:hover {
 }
 .forecast-data-grid-type {
     display: grid;
-    gap: 5px;
+    grid-gap: 5px;
     justify-items: center;
     align-items: center;
     background: rgba(255, 255, 255, .8);
@@ -520,12 +520,11 @@ zooduck-icon-circle .icon-circle {
     grid-row-gap: 10px;
     list-style-type: none;
     padding-inline-start: 0;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 10px auto;
 }
 .club-list-item {
     display: grid;
-    gap: 5px;
+    grid-gap: 5px;
 }
 .club-list-item__name {
     cursor: pointer;
@@ -540,7 +539,7 @@ zooduck-icon-circle .icon-circle {
 .club-list-item-distance {
     display: grid;
     grid-template-columns: minmax(auto, 0%) auto;
-    gap: 5px;
+    grid-gap: 5px;
 }
 .club-list-item-distance__marker {
     height: 25px;

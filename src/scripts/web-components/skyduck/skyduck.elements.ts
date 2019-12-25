@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { weatherRatings } from './utils/weather-ratings';
-import '../skyduck-carousel/skyduck-carousel.component';
+import { weatherRatings } from './utils/weather-ratings/weather-ratings';
+import '../zooduck-carousel/zooduck-carousel.component';
 /* eslint-disable */
 import {
     HourlyData,
@@ -12,14 +12,14 @@ import {
     Rating,
     WeatherImageMap
 } from './interfaces/index';
-import { HTMLSkyduckCarouselElement } from '../skyduck-carousel/skyduck-carousel.component';
+import { HTMLZooduckCarouselElement } from '../zooduck-carousel/zooduck-carousel.component';
 import { weatherImageMap } from './utils/weather-image-map';
 import * as images from '../../../assets/img/*.png';
 /* eslint-enable */
 export class SkyduckWeatherElements {
     private _dailyForecast: DailyForecast;
     private _domParser: DOMParser;
-    private _forecastCarousel: HTMLSkyduckCarouselElement;
+    private _forecastCarousel: HTMLZooduckCarouselElement;
     private _googleMapsKey: string;
     private _imageMap: WeatherImageMap;
     private _requestTime: string;
@@ -100,8 +100,8 @@ export class SkyduckWeatherElements {
         return forecast as HTMLElement;
     }
 
-    private _buildForecastCarousel(): HTMLSkyduckCarouselElement {
-        const carousel = document.createElement('skyduck-carousel');
+    private _buildForecastCarousel(): HTMLZooduckCarouselElement {
+        const carousel = document.createElement('zooduck-carousel');
         carousel.setAttribute('id', 'forecastCarousel');
 
         const forecastSlides = this._dailyForecast.weather.daily.data.filter((dailyData) => {
@@ -135,7 +135,7 @@ export class SkyduckWeatherElements {
             });
         });
 
-        return carousel as HTMLSkyduckCarouselElement;
+        return carousel as HTMLZooduckCarouselElement;
     }
 
     private _buildForecastHour(hourlyData: HourlyData, hourlyDataIndex: number): HTMLElement {

@@ -57,7 +57,7 @@ export class HTMLZooduckIconSkyduckInFlightElement extends HTMLZooduckIconBaseEl
                 display: grid;
                 grid-template-rows: repeat(26, 1fr);
                 background-color: var(--zooduck-icon-background-color);
-                gap: 2.5%;
+                grid-gap: 2.5%;
                 overflow: hidden;
                 clip-path: polygon(75% 0%, 100% 100%, 0% 100%, 0% 0%);
             }
