@@ -182,7 +182,7 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
 
         this.shadowRoot.querySelector('zooduck-input')
-            .addEventListener('keypress:enter', this._onSearchSubmit);
+            .addEventListener('keyup:enter', this._onSearchSubmit);
 
         this.shadowRoot.querySelector('#clubListCtrl')
             .addEventListener('pointerup', (e) => {
