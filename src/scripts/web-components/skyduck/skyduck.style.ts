@@ -27,6 +27,7 @@ export const style = `
     --charcoal: #333;
     --pink: hotpink;
     --lightskyblue: lightskyblue;
+    --paleskyblue: rgba(135, 206, 250, .4);
     --gray: #999;
     --lightgray: lightgray;
 }
@@ -125,12 +126,11 @@ a:hover {
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 2px;
     height: 10px;
-    background-color: var(--lightskyblue);
+    background-color: var(--paleskyblue);
 }
 .loader-bar__inner {
-    background-color: var(--white);
+    background-color: var(--lightskyblue);
     width: 0;
     height: 100%;
     transition-property: width;
