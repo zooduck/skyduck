@@ -53,6 +53,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _domParser: DOMParser;
     private _error: string;
     private _forecast: DailyForecast;
+    private _firstLoadDelayMillis: number;
     private _geocodeData: GeocodeData;
     private _googleMapsKey: string;
     private _hasLoaded = false;
@@ -76,10 +77,12 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this._defaultClub = 'skydive algarve';
         this._domParser = new DOMParser();
+        this._firstLoadDelayMillis = 10000;
         this._latLonSpin = new LatLonSpin();
         this._modifierClasses = {
-            ready: '--ready',
             error: '--error',
+            init: '--init',
+            ready: '--ready',
         };
         this._pointerEventDetails = new PointerEventDetails();
         this._pointerEvents = {
@@ -103,6 +106,11 @@ class HTMLSkyDuckElement extends HTMLElement {
         this._club = val;
         if (val !== null) {
             this.removeAttribute('location');
+
+            if (!this._hasLoaded) {
+                return;
+            }
+
             this._updateContent();
         }
         this._syncStringAttr('club', this.club);
@@ -121,6 +129,11 @@ class HTMLSkyDuckElement extends HTMLElement {
                 this._error = err;
             }).then(() => {
                 this.removeAttribute('club');
+
+                if (!this._hasLoaded) {
+                    return;
+                }
+
                 this._updateContent();
             });
         }
@@ -233,22 +246,13 @@ class HTMLSkyDuckElement extends HTMLElement {
                 this._blurSearchInput();
             });
         }
+    }
 
-        // carousel
-        //     .addEventListener('pointerdown', (e) => {
-        //         e.preventDefault();
+    private async _addStyleAndLoader() {
+        this.shadowRoot.appendChild(this._getStyle());
+        this.shadowRoot.appendChild(this._getLoader());
 
-        //         // this._pointerEvents.pointerdown.push(e);
-
-
-        //         const searchInput = this.shadowRoot.querySelector('zooduck-input') as HTMLInputElement;
-
-        //         if (!searchInput) {
-        //             return;
-        //         }
-
-        //         searchInput.blur();
-        //     });
+        await wait(0); // timeout is necessary for the width transition on #loaderBarInner to register
     }
 
     private _blurSearchInput() {
@@ -454,6 +458,21 @@ class HTMLSkyDuckElement extends HTMLElement {
         return clubListCarousel;
     }
 
+    private _getCurrentPosition(): Promise<void> {
+        return new Promise((resolve) => {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                this._position = position;
+                resolve();
+            }, async (err) => {
+                const errorMessage = err.code === 1
+                    ? geolocationBlockedByUserMessage
+                    : err.message;
+                alert(errorMessage);
+                resolve();
+            });
+        });
+    }
+
     private async _getGoogleMapsKey(): Promise<string> {
         if (!this._googleMapsKey) {
             const response =  await fetch('/googlemapskey');
@@ -506,11 +525,14 @@ class HTMLSkyDuckElement extends HTMLElement {
                     <div id="loaderInfoLocalTime"></div>
                 </div>
                 <div id="loaderError" class="loader__error"></div>
+                <div class="loader-bar">
+                    <div id="loaderBarInner" class="loader-bar__inner"></div>
+                </div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
         const spinner = this._getSpinner();
-        loader.appendChild(spinner);
+        loader.insertBefore(spinner, loader.lastElementChild);
 
         loader.addEventListener('pointerup', (e: PointerEvent) => {
             e.preventDefault();
@@ -698,7 +720,8 @@ class HTMLSkyDuckElement extends HTMLElement {
             await this._getImages();
         }
 
-        const minTimeToDisplaySpinner = this._hasLoaded ? 500 : 2000;
+        const minTimeToDisplaySpinner = this._hasLoaded ? 500 : 0;
+
         await wait(minTimeToDisplaySpinner);
 
         if (this._error) {
@@ -741,6 +764,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this.classList.add(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
+        this.classList.remove(this._modifierClasses.init);
 
         this._hasLoaded = true;
 
@@ -826,30 +850,29 @@ class HTMLSkyDuckElement extends HTMLElement {
             console.error(err); // eslint-disable-line no-console
             this._error = err;
         } finally {
-            this._setContent();
+            await this._setContent();
         }
     }
 
-    protected async _init() {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            this._position = position;
+    private _setLoaderBarSpeed(millis: number): void {
+        const loaderBarInner = this.shadowRoot.querySelector('#loaderBarInner') as HTMLElement;
+        const style = `
+            transition-duration: ${millis}ms;
+            width: 100%;
+        `;
+        loaderBarInner.setAttribute('style', style);
+    }
 
-            this.shadowRoot.appendChild(this._getStyle());
-            this.shadowRoot.appendChild(this._getLoader());
+    protected async _init(): Promise<void> {
+        this.classList.add(this._modifierClasses.init);
 
-            await this._initClubs();
-        }, async (err) => {
-            const errorMessage = err.code === 1
-                ? geolocationBlockedByUserMessage
-                : err.message;
+        await this._getCurrentPosition();
 
-            alert(errorMessage);
+        await this._addStyleAndLoader();
 
-            this.shadowRoot.appendChild(this._getStyle());
-            this.shadowRoot.appendChild(this._getLoader());
+        this._setLoaderBarSpeed(this._firstLoadDelayMillis);
 
-            await this._initClubs();
-        });
+        await this._initClubs();
     }
 
     protected attributeChangedCallback(name: string, _oldVal: any, newVal: any) {
@@ -863,6 +886,10 @@ class HTMLSkyDuckElement extends HTMLElement {
         this._version = await versionResponse.text();
 
         await this._init();
+
+        await wait(this._firstLoadDelayMillis);
+
+        await this._updateContent();
 
         this.dispatchEvent(new CustomEvent('load'));
     }

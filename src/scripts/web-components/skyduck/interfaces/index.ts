@@ -109,8 +109,9 @@ export interface HourlyData {
 }
 
 export interface ModifierClasses {
-    ready: string;
     error: string;
+    init: string;
+    ready: string;
 }
 
 export interface SetContentOptions {

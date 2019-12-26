@@ -1,3 +1,3 @@
-export const wait = (delay = 0) => {
-    return new Promise(res => setTimeout(res, delay));
+export const wait = (delayInMillis = 0): Promise<void> => {
+    return new Promise(res => setTimeout(res, delayInMillis));
 };

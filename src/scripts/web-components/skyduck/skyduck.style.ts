@@ -79,7 +79,7 @@ a:hover {
     top: 0;
     z-index: 99;
     display: grid;
-    grid-template-rows: auto 55vh;
+    grid-template-rows: 1fr auto 1fr;
     grid-gap: 50px;
     justify-content: center;
     justify-items: center;
@@ -118,6 +118,26 @@ a:hover {
 }
 .loader__icon {
     grid-row: 2;
+}
+.loader-bar {
+    display: flex;
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 2px;
+    height: 10px;
+    background-color: var(--lightskyblue);
+}
+.loader-bar__inner {
+    background-color: var(--white);
+    width: 0;
+    height: 100%;
+    transition-property: width;
+    transition-timing-function: ease;
+}
+:host(:not(.--init)) .loader-bar {
+    visibility: hidden;
 }
 :host(.--error) .loader__icon {
     display: none;
