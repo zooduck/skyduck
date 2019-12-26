@@ -102,9 +102,11 @@ class HTMLSkyDuckElement extends HTMLElement {
         return this._club;
     }
 
-    public set club(val: string|null) {
+    public set club(val: string) {
         this._club = val;
-        if (val !== null) {
+        this._syncStringAttr('club', this.club);
+
+        if (val) {
             this.removeAttribute('location');
 
             if (!this._hasLoaded) {
@@ -113,23 +115,24 @@ class HTMLSkyDuckElement extends HTMLElement {
 
             this._updateContent();
         }
-        this._syncStringAttr('club', this.club);
     }
 
     public get location() {
         return this._location;
     }
 
-    public set location(val: string|null) {
+    public set location(val: string) {
         this._location = val;
-        if (val !== null) {
+        this._syncStringAttr('location', this._location);
+
+        if (val) {
+            this.removeAttribute('club');
+
             this._geocodeLookup(this._location).then(() => {
             }).catch((err) => {
                 console.error(err); // eslint-disable-line no-console
                 this._error = err;
             }).then(() => {
-                this.removeAttribute('club');
-
                 if (!this._hasLoaded) {
                     return;
                 }
@@ -137,7 +140,6 @@ class HTMLSkyDuckElement extends HTMLElement {
                 this._updateContent();
             });
         }
-        this._syncStringAttr('location', this._location);
     }
 
     private _addClubListCarousel() {
