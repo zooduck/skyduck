@@ -1,6 +1,6 @@
 {
   "name": "skyduck",
-  "version": "0.0.3-alpha",
+  "version": "0.0.4-alpha",
   "description": "skydiving weather forecast",
   "main": "index.js",
   "scripts": {
