@@ -3,7 +3,6 @@ import  './prototype/Number/to-positive';
 import { wait } from '../skyduck/utils/wait/wait';
 import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details/pointer-event-details'; // eslint-disable-line no-unused-vars
 
-
 interface Slide {
     id: number;
     index: number;
@@ -25,6 +24,8 @@ interface TouchMoveData {
 interface PointerEvents {
     pointerdown: EventDetails[];
 }
+
+type Loading = 'eager'|'lazy';
 
 const tagName = 'zooduck-carousel';
 const requiredSlotMissingError = (slotName: string) => {
@@ -49,6 +50,9 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
     private _currentOffsetX: number;
     private _currentslide: string;
     private _currentSlide: Slide;
+    private _imagesToLoad: HTMLImageElement[];
+    private _imageIntersectionObserver: IntersectionObserver;
+    private _loading: Loading;
     private _maxOffsetX: number;
     private _minPixelsMovementRequiredToRegisterMove: number;
     private _pointerEventDetails: PointerEventDetails;
@@ -66,6 +70,12 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
 
         this._currentOffsetX = 0;
         this._minPixelsMovementRequiredToRegisterMove = 10;
+        this._imageIntersectionObserver = new IntersectionObserver(this._imageIntersectionObserverCallback, {
+            root: null,
+            threshold: [.1],
+        });
+        this._imagesToLoad = [];
+        this._loading = 'lazy';
         this._maxOffsetX = 0;
         this._pointerEventDetails = new PointerEventDetails();
         this._pointerEvents = {
@@ -108,7 +118,36 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
     static get observedAttributes(): string[] {
         return [
             'currentslide',
+            'loading',
         ];
+    }
+
+    public set currentslide(slideNumber: any) {
+        this._currentslide = slideNumber;
+        this._syncAttr('currentslide', slideNumber);
+
+        const slideIndex = parseInt(slideNumber, 10) - 1;
+        const requestedSlide = this._slides[slideIndex];
+
+        if (!requestedSlide) {
+            return;
+        }
+
+        this._setCurrentSlide(requestedSlide.index);
+        this._slideIntoView(requestedSlide, false);
+    }
+
+    public get currentslide(): any {
+        return this._currentslide;
+    }
+
+    public set loading(val: Loading) {
+        this._loading = val;
+        this._syncAttr('loading', val);
+    }
+
+    public get loading(): Loading {
+        return this._loading;
     }
 
     private _getMaxNegativeOffsetX(): number {
@@ -146,6 +185,32 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
         return slideSelectorsHeight;
     }
 
+    private _imageIntersectionObserverCallback: IntersectionObserverCallback = (entries: IntersectionObserverEntry[]) => {
+        entries.forEach((entry: IntersectionObserverEntry) => {
+            if (entry.isIntersecting) {
+                const imageToLoad = this._imagesToLoad.find((img) => {
+                    return entry.target == img;
+                });
+
+                if (!imageToLoad) {
+                    return;
+                }
+
+                const imageLoader = new Image();
+
+                imageLoader.onload = () => {
+                    imageToLoad.src = imageToLoad.dataset.src;
+                    const imagesToLoadIndex = this._imagesToLoad.findIndex((img: HTMLImageElement) => {
+                        return imageToLoad === img;
+                    });
+                    this._imagesToLoad.splice(imagesToLoadIndex, 1);
+                };
+
+                imageLoader.src = imageToLoad.dataset.src;
+            }
+        });
+    }
+
     private _isDoubleTap(lastTwoPointerdownTimeStamps: number[]): boolean {
         if (lastTwoPointerdownTimeStamps.length < 2) {
             return false;
@@ -156,6 +221,31 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
         const maxTimeBetweenPointerDown = 250;
 
         return (lastPointerdownTime - secondToLastPointerdownTime) < maxTimeBetweenPointerDown;
+    }
+
+    private _isSwipeValid(distanceX: number) {
+        const minTravel = 50;
+        const isSwipeValid = distanceX.toPositive() > minTravel;
+
+        return isSwipeValid;
+    }
+
+    private _isTouchMoveRecognised() {
+        const totalPixelsTravelled = this._touchMoveData.distanceX.toPositive() + this._touchMoveData.distanceY.toPositive();
+
+        return totalPixelsTravelled > this._minPixelsMovementRequiredToRegisterMove;
+    }
+
+    private _lazyLoad(img: HTMLImageElement) {
+        img.dataset.src = img.src;
+        img.src = '';
+
+        this._imagesToLoad.push(img);
+
+        img.style.minWidth = '10px';
+        img.style.minHeight = '10px';
+
+        this._imageIntersectionObserver.observe(img);
     }
 
     private _onCurrentSlideChange(): void {
@@ -181,13 +271,6 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
 
         this._setCurrentSlide(nextSlide.index);
         this._slideIntoView(nextSlide);
-    }
-
-    private _isSwipeValid(distanceX: number) {
-        const minTravel = 50;
-        const isSwipeValid = distanceX.toPositive() > minTravel;
-
-        return isSwipeValid;
     }
 
     private _onSwipeRight() {
@@ -234,12 +317,6 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
         this._touchMoveData.distanceY = 0;
 
         this._touchActive = true;
-    }
-
-    private _isTouchMoveRecognised() {
-        const totalPixelsTravelled = this._touchMoveData.distanceX.toPositive() + this._touchMoveData.distanceY.toPositive();
-
-        return totalPixelsTravelled > this._minPixelsMovementRequiredToRegisterMove;
     }
 
     private _onTouchMove(eventDetails: EventDetails|any) {
@@ -489,25 +566,6 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
         this._setCarouselHeightToSlideHeight();
     }
 
-    public get currentslide(): any {
-        return this._currentslide;
-    }
-
-    public set currentslide(slideNumber: any) {
-        this._currentslide = slideNumber;
-        this._syncAttr('currentslide', slideNumber);
-
-        const slideIndex = parseInt(slideNumber, 10) - 1;
-        const requestedSlide = this._slides[slideIndex];
-
-        if (!requestedSlide) {
-            return;
-        }
-
-        this._setCurrentSlide(requestedSlide.index);
-        this._slideIntoView(requestedSlide, false);
-    }
-
     protected async connectedCallback() {
         // Required "slides" slot
         await wait(0); // without this timeout, puppeteer tests will fail (with requiredSlotMissingError)
@@ -517,11 +575,11 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
         }
 
         this._slides = Array.from(requiredSlottedContent.children)
-            .map((item: HTMLElement, i: number) => {
+            .map((slide: HTMLElement, i: number): Slide => {
                 return {
                     id: i + 1,
                     index: i,
-                    el: item,
+                    el: slide,
                 };
             });
 
@@ -564,6 +622,19 @@ export class HTMLZooduckCarouselElement extends HTMLElement {
             this._setContainerStyle();
 
             this._slideIntoView(this._currentSlide, false);
+
+            const images = Array.from(this._container.querySelectorAll('img'));
+
+
+            if (this._loading === 'eager') {
+                this.dispatchEvent(new CustomEvent('load'));
+
+                return;
+            }
+
+            images.forEach((img: HTMLImageElement) => {
+                this._lazyLoad(img);
+            });
 
             this.dispatchEvent(new CustomEvent('load'));
         });
