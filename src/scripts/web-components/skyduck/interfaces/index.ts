@@ -19,6 +19,11 @@ export interface ColorModifiersData {
     visibility: number;
 }
 
+export interface Coords {
+    latitude: number;
+    longitude: number;
+}
+
 export interface DailyData {
     time: number;
     sunriseTime: number;

@@ -20,6 +20,7 @@ import { isTap } from '../../utils/is-tap/is-tap';
 import { wait } from './utils/wait/wait';
 import { HTMLZooduckCarouselElement } from '../zooduck-carousel/zooduck-carousel.component'; // eslint-disable-line no-unused-vars
 import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details/pointer-event-details'; // eslint-disable-line no-unused-vars
+import { LoaderTemplate } from './templates/loader.template';
 
 interface PointerEvents {
     pointerdown: EventDetails[];
@@ -382,20 +383,6 @@ class HTMLSkyDuckElement extends HTMLElement {
             });
         }
 
-        // clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
-        //     e.preventDefault();
-
-        //     const pointerupEvent = e;
-        //     const lastPointerdownEvent = this._pointerEvents.pointerdown.slice(-1)[0];
-
-        //     if (!isTap(lastPointerdownEvent, pointerupEvent)) {
-        //         return;
-        //     }
-
-        //     const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
-        //     this.club = clubName;
-        // });
-
         return clubListItem;
     }
 
@@ -517,24 +504,8 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private _getLoader(): HTMLElement {
-        const loader = this._domParser.parseFromString(`
-            <div class="loader" id="skyduckLoader">
-                <div class="loader-info">
-                    <div id="loaderInfoLat"></div>
-                    <div id="loaderInfoLon"></div>
-                    <div id="loaderInfoPlace" class="loader-info__place"></div>
-                    <div id="loaderInfoIANA"></div>
-                    <div id="loaderInfoLocalTime"></div>
-                </div>
-                <div id="loaderError" class="loader__error"></div>
-                <div class="loader-bar">
-                    <div id="loaderBarInner" class="loader-bar__inner"></div>
-                </div>
-            </div>
-        `, 'text/html').body.firstChild as HTMLElement;
-
-        const spinner = this._getSpinner();
-        loader.insertBefore(spinner, loader.lastElementChild);
+        const loaderTemplate = new LoaderTemplate();
+        const loader = loaderTemplate.html;
 
         loader.addEventListener('pointerup', (e: PointerEvent) => {
             e.preventDefault();
@@ -548,26 +519,9 @@ class HTMLSkyDuckElement extends HTMLElement {
             }
         });
 
-        this._loaderMessageElements = {
-            loaderInfoLat: loader.querySelector('#loaderInfoLat'),
-            loaderInfoLon: loader.querySelector('#loaderInfoLon'),
-            loaderInfoPlace: loader.querySelector('#loaderInfoPlace'),
-            loaderInfoIANA: loader.querySelector('#loaderInfoIANA'),
-            loaderInfoLocalTime: loader.querySelector('#loaderInfoLocalTime'),
-        };
+        this._loaderMessageElements = loaderTemplate.infoElements;
 
-        return loader as HTMLElement;
-    }
-
-    private _getSpinner(): HTMLElement {
-        const spinner = this._domParser.parseFromString(`
-            <zooduck-icon-skyduck-in-flight
-                class="loader__icon"
-                size="100"
-                color="var(--lightskyblue)"></zooduck-icon-skyduck-in-flight>
-        `, 'text/html').body.firstChild;
-
-        return spinner as HTMLElement;
+        return loader;
     }
 
     private _getStyle(): HTMLStyleElement {
