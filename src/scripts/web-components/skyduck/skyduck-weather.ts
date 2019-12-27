@@ -1,11 +1,21 @@
-import { graphqlConfig } from '../../config/graphql.config';
-import { darkSkyQuery } from './graphql-queries/dark-sky-query';
 import { DateTime } from 'luxon';
-import { DailyForecast, GeocodeData, HourlyData, SkydiveClub, DailyData } from './interfaces/index'; // eslint-disable-line no-unused-vars
-import { skydiveClubQuery } from './graphql-queries/skydive-club-query';
+/* eslint-disable no-unused-vars */
+import {
+    DailyForecast,
+    GeocodeData,
+    HourlyData,
+    SkydiveClub,
+    DailyData,
+    Weather,
+    SkydiveClubWeather,
+} from './interfaces/index';
+/* eslint-enable no-unused-vars */
+import { darkSkyLookup } from './fetch/dark-sky-lookup.fetch';
+import { querySkydiveClub } from './fetch/skydive-club.fetch';
+import { dbWeatherLookup } from './fetch/db-weather-lookup.fetch';
+import { dbWeatherUpdate } from './fetch/db-weather-update.fetch';
 
 export class SkyduckWeather {
-    private _dailyData: any;
     private _skydiveClub: SkydiveClub;
 
     private _floatToInt(float: number): number {
@@ -75,7 +85,7 @@ export class SkyduckWeather {
     }
 
     public async getDailyForecastByClub(name: string): Promise<DailyForecast> {
-        const skydiveClub: SkydiveClub = await this._querySkydiveClub(name);
+        const skydiveClub: SkydiveClub = await querySkydiveClub(name);
 
         if (!skydiveClub) {
             throw Error(`Could not find club "${name}" in the skyduck database. Try searching by location instead.`);
@@ -83,21 +93,29 @@ export class SkyduckWeather {
 
         this._skydiveClub = skydiveClub;
 
-        const dbWeatherResult = await this._queryDatabase(skydiveClub.id);
+        let dbWeather: SkydiveClubWeather;
+        let dbWeatherUpToDate: boolean;
+        let dbWeatherExists: boolean;
         const oneHourAgo = DateTime.local().minus({ hours: 1 }).toMillis();
 
-        if (dbWeatherResult.error || dbWeatherResult.requestTime < oneHourAgo) {
+        try {
+            dbWeather = await dbWeatherLookup(skydiveClub.id);
+            dbWeatherUpToDate = dbWeather.requestTime > oneHourAgo;
+            dbWeatherExists = true;
+        } catch (err) {
+            dbWeatherUpToDate = false;
+            dbWeatherExists = false;
+        }
+
+        if (!dbWeatherUpToDate) {
             const darkSkyData = await this._queryDarkSky(skydiveClub.latitude, skydiveClub.longitude, name);
-            const method = dbWeatherResult.error ? 'POST' : 'PUT';
-            const dbWeatherUpdate = await this._updateWeatherDatabase(darkSkyData, method);
-            const dbWeatherUpdateResult = await dbWeatherUpdate.json();
+            const method = !dbWeatherExists ? 'POST' : 'PUT';
+            const weather = await dbWeatherUpdate(darkSkyData, method);
 
             return {
                 query: darkSkyData.query,
                 club: darkSkyData.club,
-                weather: {
-                    ...dbWeatherUpdateResult,
-                }
+                weather,
             };
         }
 
@@ -105,7 +123,7 @@ export class SkyduckWeather {
             query: name,
             club: this._skydiveClub,
             weather: {
-                ...dbWeatherResult,
+                ...dbWeather,
             }
         };
 
@@ -158,71 +176,31 @@ export class SkyduckWeather {
         return tzTime.toLocaleString(DateTime.TIME_24_SIMPLE);
     }
 
+    private _formatDarkSkyData(weather: Weather, query: string) {
+        const { latitude, longitude, timezone, daily, hourly } = weather;
+
+        return {
+            query,
+            club: this._skydiveClub,
+            weather: {
+                latitude,
+                longitude,
+                timezone,
+                daily: {
+                    summary: daily.summary,
+                    icon: daily.icon,
+                    data: this._formatDailyData(daily.data, hourly.data, timezone),
+                },
+                requestTime: new Date().getTime(),
+            }
+        };
+    }
+
     private async _queryDarkSky(lat: number, lon: number, query: string): Promise<DailyForecast> {
         try {
-            const graphqlResult = await fetch(graphqlConfig.uri, {
-                ...graphqlConfig.options,
-                body: JSON.stringify({
-                    query: darkSkyQuery,
-                    variables: {
-                        lat,
-                        lon,
-                    },
-                }),
-            });
+            const weather = await darkSkyLookup(lat, lon);
 
-            const json = await graphqlResult.json();
-
-            const {
-                daily: rawDailyData,
-                hourly: rawHourlyData,
-                timezone
-            } = json.data.weather;
-
-            this._dailyData = this._formatDailyData(rawDailyData.data, rawHourlyData.data, timezone);
-
-            return {
-                query,
-                club: this._skydiveClub,
-                weather: {
-                    latitude: json.data.weather.latitude,
-                    longitude: json.data.weather.longitude,
-                    timezone: json.data.weather.timezone,
-                    daily: {
-                        summary: json.data.weather.daily.summary,
-                        icon: json.data.weather.daily.icon,
-                        data: this._dailyData,
-                    },
-                    requestTime: new Date().getTime(),
-                }
-            };
-        } catch (err) {
-            throw new Error(err);
-        }
-    }
-
-    private async _queryDatabase(clubId: string): Promise<DailyForecast|any> {
-        const dbWeatherQuery = await fetch(`/weather?id=${clubId}`);
-        const dbWeatherResult = await dbWeatherQuery.json();
-
-        return dbWeatherResult;
-    }
-
-    private async _querySkydiveClub(name: string): Promise<SkydiveClub> {
-        try {
-            const graphqlResult = await fetch(graphqlConfig.uri, {
-                ...graphqlConfig.options,
-                body: JSON.stringify({
-                    query: skydiveClubQuery,
-                    variables: {
-                        name,
-                    },
-                }),
-            });
-
-            const json = await graphqlResult.json();
-
-            return json.data.club;
+            return this._formatDarkSkyData(weather, query);
         } catch (err) {
             throw new Error(err);
         }
@@ -233,25 +211,5 @@ export class SkyduckWeather {
         const decimalHour = dt.hour + decimalMinute;
 
         return Math.round(decimalHour);
-    }
-
-    private async _updateWeatherDatabase(darkSkyData: DailyForecast, method: 'POST'|'PUT'): Promise<any> {
-        const result = await fetch('/weather', {
-            method,
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                ...darkSkyData.club,
-                ...darkSkyData.weather,
-                requestTime: new Date().getTime(),
-            }),
-        });
-
-        if (!result.ok) {
-            throw new Error(`${result.status} (${result.statusText})`);
-        }
-
-        return result;
     }
 }

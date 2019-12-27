@@ -34,6 +34,12 @@ export interface Coords {
     longitude: number;
 }
 
+export interface Daily {
+    summary: string;
+    icon: string;
+    data: DailyData[];
+}
+
 export interface DailyData {
     time: number;
     sunriseTime: number;
@@ -58,17 +64,7 @@ export interface DailyData {
 export interface DailyForecast {
     query: string;
     club: SkydiveClub;
-    weather: {
-        daily: {
-            summary: string;
-            icon: string;
-            data: any[];
-        }
-        latitude: number;
-        longitude: number;
-        timezone: string;
-        requestTime?: number;
-    }
+    weather: Weather|SkydiveClubWeather;
     countryRegion?: any;
 }
 
@@ -103,6 +99,12 @@ export interface GeocodeData {
     address: any;
     latitude: number;
     longitude: number;
+}
+
+export interface Hourly {
+    summary: string;
+    icon: string;
+    data: HourlyData[];
 }
 
 export interface HourlyData {
@@ -141,7 +143,24 @@ export interface SkydiveClub {
     latitude: number;
     longitude: number;
     site: string;
-    distance?: number;
+}
+
+export interface SkydiveClubWeather {
+    id: string;
+    name: string;
+    place: string;
+    site: string;
+    weather: Weather;
+    requestTime: number;
+}
+
+export interface Weather {
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    daily: Daily;
+    hourly?: Hourly;
+    requestTime?: number;
 }
 
 export interface WeatherElements {
