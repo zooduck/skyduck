@@ -512,6 +512,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _setLoaderBarSpeed(millis: number): void {
         const loaderBarInner = this.shadowRoot.querySelector('#loaderBarInner') as HTMLElement;
         const style = `
+            animation-fill-mode: forwards;
             animation-duration: ${millis}ms;
         `;
         loaderBarInner.setAttribute('style', style);
