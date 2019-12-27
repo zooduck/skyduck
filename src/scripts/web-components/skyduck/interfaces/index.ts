@@ -2,6 +2,16 @@ export type ColorModifier = '--red'|'--amber'|'--green';
 export type SearchType = 'club'|'location';
 export type Rating = 'red'|'amber'|'green';
 
+export interface ClubListSorted {
+    country: string;
+    furthestDZDistance: number;
+    list: SkydiveClub[];
+}
+
+export type ClubListsSortedByCountry = {
+    [key: string]: ClubListSorted;
+}
+
 export interface ColorModifiers {
     cloudCover: ColorModifier;
     windSpeed: ColorModifier;

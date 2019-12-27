@@ -9,28 +9,23 @@ import {
     DailyForecast,
     GeocodeData,
     SkydiveClub,
+    ClubListsSortedByCountry,
 } from './interfaces/index';
 import { LatLonSpin } from './utils/lat-lon-spin';
 import { weatherImageMap } from './utils/weather-image-map';
 import { DateTime } from 'luxon';
-import { graphqlConfig } from '../../config/graphql.config';
-import { skydiveClubsQuery } from './graphql-queries/skydive-clubs-query';
-import { DistanceBetweenPoints } from './utils/distance-between-points';
 import { isTap } from '../../utils/is-tap/is-tap';
 import { wait } from './utils/wait/wait';
 import { HTMLZooduckCarouselElement } from '../zooduck-carousel/zooduck-carousel.component'; // eslint-disable-line no-unused-vars
 import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details/pointer-event-details'; // eslint-disable-line no-unused-vars
 import { LoaderTemplate } from './templates/loader.template';
+import { geocodeLookup } from './fetch/geocode-lookup.fetch';
+import { ClubListCarouselTemplate } from './templates/club-list-carousel.template';
+import { reverseGeocodeLookup } from './fetch/reverse-geocode-lookup.fetch';
+import { skydiveClubsLookup } from './fetch/skydive-clubs.fetch';
 
 interface PointerEvents {
     pointerdown: EventDetails[];
-}
-
-type ClubListSortedByCountry = {
-    [key: string]: {
-        furthestDZDistance: number;
-        list: SkydiveClub[];
-    }
 }
 
 type LoaderMessageElements = {
@@ -48,10 +43,8 @@ Geolocation permission has been blocked
 /* eslint-enable */
 class HTMLSkyDuckElement extends HTMLElement {
     private _club: string;
-    private _clubs: ClubListSortedByCountry;
-    private _nearestClub: SkydiveClub;
+    private _clubs: ClubListsSortedByCountry;
     private _defaultClub: string;
-    private _domParser: DOMParser;
     private _error: string;
     private _forecast: DailyForecast;
     private _firstLoadDelayMillis: number;
@@ -62,6 +55,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _isSearchInProgress = false;
     private _loaderMessageElements: LoaderMessageElements;
     private _modifierClasses: ModifierClasses;
+    private _nearestClub: SkydiveClub;
     private _onSearchSubmit: EventListener;
     private _pointerEventDetails: PointerEventDetails;
     private _pointerEvents: PointerEvents;
@@ -77,7 +71,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         this.attachShadow({ mode: 'open' });
 
         this._defaultClub = 'skydive algarve';
-        this._domParser = new DOMParser();
         this._firstLoadDelayMillis = 10000;
         this._latLonSpin = new LatLonSpin();
         this._modifierClasses = {
@@ -129,7 +122,8 @@ class HTMLSkyDuckElement extends HTMLElement {
         if (val) {
             this.removeAttribute('club');
 
-            this._geocodeLookup(this._location).then(() => {
+            geocodeLookup(this._location).then((response) => {
+                this._geocodeData = response;
             }).catch((err) => {
                 console.error(err); // eslint-disable-line no-console
                 this._error = err;
@@ -148,114 +142,14 @@ class HTMLSkyDuckElement extends HTMLElement {
             return;
         }
 
-        const clubListCarousel = this._getClubListCarousel();
-        this._addEventsToCarousel(clubListCarousel);
+        const clubListCarousel = new ClubListCarouselTemplate(this._clubs, this._nearestClub, this._position).html;
+        this._registerEventsOnCarousel(clubListCarousel);
         this.shadowRoot.appendChild(clubListCarousel);
-    }
-
-    private _addEventListeners(): void {
-        this._onSearchSubmit = (e: CustomEvent) => {
-            this._clearContent();
-
-            const { value } = e.detail;
-
-            if (!value || this._isSearchInProgress) {
-                return;
-            }
-
-            this._isSearchInProgress = true;
-
-            this.location = value;
-        };
-
-        if ('PointerEvent' in window) {
-            this.addEventListener('pointerdown', (e: PointerEvent) => {
-                const eventDetails = this._pointerEventDetails.fromPointer(e);
-                this._pointerEvents.pointerdown.push(eventDetails);
-            });
-        } else {
-            this.addEventListener('mousedown', (e: MouseEvent) => {
-                const eventDetails = this._pointerEventDetails.fromMouse(e);
-                this._pointerEvents.pointerdown.push(eventDetails);
-            });
-            this.addEventListener('touchstart', (e: TouchEvent) => {
-                const eventDetails = this._pointerEventDetails.fromTouch(e);
-                this._pointerEvents.pointerdown.push(eventDetails);
-            });
-        }
-
-        this.shadowRoot.querySelector('zooduck-input')
-            .addEventListener('keyup:enter', this._onSearchSubmit);
-
-        this.shadowRoot.querySelector('#clubListCtrl')
-            .addEventListener('pointerup', (e) => {
-                e.preventDefault();
-
-                this._showClubList();
-            });
-
-        this.shadowRoot.querySelector('#getForecastForCurrentLocation')
-            .addEventListener('pointerup', async (e) => {
-                e.preventDefault();
-
-                if (!this._position) {
-                    return;
-                }
-
-                try {
-                    await this._reverseGeocodeLookup(this._position.coords);
-                    this.removeAttribute('club');
-                    this._updateContent();
-                } catch (err) {
-                    throw Error(err);
-                }
-            });
-
-
-        const forecastDisplayModeToggle = this.shadowRoot.querySelector('#forecastDisplayModeToggle');
-        forecastDisplayModeToggle.addEventListener('pointerup', (e: PointerEvent) => {
-            e.preventDefault();
-
-            const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLZooduckCarouselElement;
-
-            forecastCarousel.classList.toggle('--forecast-display-mode-24h');
-
-            forecastCarousel.updateCarouselHeight();
-        });
-
-        const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLElement;
-        this._addEventsToCarousel(forecastCarousel);
-    }
-
-    private _addEventsToCarousel(carousel: HTMLElement): void {
-        if ('PointerEvent' in window) {
-            carousel.addEventListener('pointerdown', (e: PointerEvent) => {
-                const eventDetails = this._pointerEventDetails.fromPointer(e);
-                this._pointerEvents.pointerdown.push(eventDetails);
-
-                this._blurSearchInput();
-            });
-        } else {
-            carousel.addEventListener('mousedown', (e: MouseEvent) => {
-                const eventDetails = this._pointerEventDetails.fromMouse(e);
-                this._pointerEvents.pointerdown.push(eventDetails);
-
-                this._blurSearchInput();
-            });
-            carousel.addEventListener('touchstart', (e: TouchEvent) => {
-                const eventDetails = this._pointerEventDetails.fromTouch(e);
-                this._pointerEvents.pointerdown.push(eventDetails);
-
-                this._blurSearchInput();
-            });
-        }
     }
 
     private async _addStyleAndLoader() {
         this.shadowRoot.appendChild(this._getStyle());
         this.shadowRoot.appendChild(this._getLoader());
-
-        await wait(0); // timeout is necessary for the width transition on #loaderBarInner to register
     }
 
     private _blurSearchInput() {
@@ -267,7 +161,6 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         searchInput.blur();
     }
-
 
     private _clearContent(): void {
         Array.from(this.shadowRoot.children).forEach((child: HTMLElement) => {
@@ -282,169 +175,6 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this.classList.remove(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
-    }
-
-    private async _geocodeLookup(place: string): Promise<void> {
-        try {
-            const response = await fetch(`/geocode?place=${place}`);
-
-            if (!response.ok) {
-                throw(`(${response.status}) ${response.statusText}`);
-            }
-
-            const json = await response.json();
-            const resource = json.resourceSets[0].resources[0];
-
-            if (!resource) {
-                this._geocodeData = null;
-                throw(`Unable to resolve coordinates for location of "${place}."`);
-            }
-
-            const coords = resource.geocodePoints[0].coordinates;
-            const { name, address } = resource;
-
-            this._geocodeData = {
-                locationQuery: place,
-                address,
-                name,
-                latitude: coords[0],
-                longitude: coords[1],
-            };
-        } catch (err) {
-            throw Error(err);
-        }
-    }
-
-    private _setClubToSelectedClubFromList(clubListItem: HTMLElement) {
-        const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
-        this.club = clubName;
-    }
-
-    private _getClubListItem(country: string,  club: SkydiveClub): HTMLElement {
-        const { furthestDZDistance } = this._clubs[country];
-        const distanceFromCurrentLocation = club.distance;
-        const clubListItemDistanceStyle = `
-            ${!this._position ? 'display: none;' : ''}
-            grid-template-columns: minmax(auto, ${Math.round((club.distance / furthestDZDistance) * 100)}%) auto;
-        `;
-        const distanceColorModifier = distanceFromCurrentLocation >= 200
-            ? '--red'
-            : distanceFromCurrentLocation >= 100
-                ? '--amber'
-                : '--green';
-        const clubListItem = this._domParser.parseFromString(`
-            <li class="club-list-item">
-                <div class="club-list-item-distance" style="${clubListItemDistanceStyle}">
-                    <span class="club-list-item-distance__marker ${distanceColorModifier}"></span>
-                    <div class="club-list-item-distance__miles">
-                        <span>${distanceFromCurrentLocation}</span>
-                        <small>miles</small>
-                    </div>
-                </div>
-                <h3 class="club-list-item__name">${club.name}</h3>
-                <span class="club-list-item__place">${club.place}</span>
-                <a class="club-list-item__site-link" href="${club.site}" target="_blank">${club.site.replace(/https?:\/\//, '')}</a>
-            </li>`, 'text/html').body.firstChild as HTMLElement;
-
-        const clubListItemName = clubListItem.querySelector('.club-list-item__name');
-
-        if ('PointerEvent' in window) {
-            clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
-                const pointerupEventDetails = this._pointerEventDetails.fromPointer(e);
-                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
-
-                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
-                    return;
-                }
-
-                this._setClubToSelectedClubFromList(clubListItem);
-            });
-        } else {
-            clubListItemName.addEventListener('mouseup', (e: MouseEvent) => {
-                const pointerupEventDetails = this._pointerEventDetails.fromMouse(e);
-                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
-
-                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
-                    return;
-                }
-
-                this._setClubToSelectedClubFromList(clubListItem);
-            });
-
-            clubListItemName.addEventListener('touchend', (e: TouchEvent) => {
-                const pointerupEventDetails = this._pointerEventDetails.fromTouch(e);
-                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
-
-                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
-                    return;
-                }
-
-                this._setClubToSelectedClubFromList(clubListItem);
-            });
-        }
-
-        return clubListItem;
-    }
-
-    private _getClubListCountries(): string[] {
-        const clubListCountries = Object.keys(this._clubs);
-
-        if (!this._nearestClub) {
-            return clubListCountries;
-        }
-
-        const nearestCountryIndex = clubListCountries.findIndex((country: string) => {
-            return country === this._nearestClub.country;
-        });
-
-        const nearestCountryKey = clubListCountries.splice(nearestCountryIndex, 1)[0];
-
-        clubListCountries.unshift(nearestCountryKey);
-
-        return clubListCountries;
-    }
-
-    /* eslint-disable indent */
-    private _getClubListContainers(): HTMLElement[] {
-        const clubListCountries = this._getClubListCountries();
-        const clubListContainers = clubListCountries.map((country) => {
-            const numberOfClubs = this._clubs[country].list.length;
-            const clubListCountry = `<h2 class="club-list-container__country">${country} (${numberOfClubs})</h2>`;
-            const clubList = this._domParser.parseFromString(`
-                <div class="club-list-container" id="clubList${country}">
-                    ${clubListCountry}
-                    <ul class="club-list-container__club-list"></ul>
-                </div>
-            `, 'text/html').body.firstChild as HTMLElement;
-
-            this._clubs[country].list.map((club: SkydiveClub) => {
-                return this._getClubListItem(country, club);
-            }).forEach((clubListItem: HTMLElement) => {
-                const ul = clubList.querySelector('.club-list-container__club-list');
-                ul.appendChild(clubListItem);
-            });
-
-            return clubList;
-        });
-
-        return clubListContainers;
-    }
-
-    private _getClubListCarousel(): HTMLElement {
-        const clubListCarousel = this._domParser.parseFromString(`
-            <zooduck-carousel id="clubListCarousel">
-                <div slot="slides"></div>
-            </zooduck-carousel>
-        `, 'text/html').body.firstChild as HTMLElement;
-
-        const slidesSlot = clubListCarousel.querySelector('[slot=slides]');
-        const slides = this._getClubListContainers();
-
-        slides.forEach((slide: HTMLElement) => {
-            slidesSlot.appendChild(slide);
-        });
-
-        return clubListCarousel;
     }
 
     private _getCurrentPosition(): Promise<void> {
@@ -534,38 +264,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     /* eslint-enable indent */
     private async _initClubs(): Promise<void> {
         try {
-            const graphqlResponse = await fetch(graphqlConfig.uri, {
-                ...graphqlConfig.options,
-                body: JSON.stringify({
-                    query: skydiveClubsQuery,
-                }),
-            });
-
-            if (!graphqlResponse.ok) {
-                throw Error(`(${graphqlResponse.status}) ${graphqlResponse.statusText}`);
-            }
-
-            const json = await graphqlResponse.json();
-            const clubs = json.data.clubs.map((club: SkydiveClub) => {
-                const distanceInMiles = this._position
-                    ? new DistanceBetweenPoints({
-                        from: {
-                            latDeg: this._position.coords.latitude,
-                            lonDeg: this._position.coords.longitude,
-                        },
-                        to: {
-                            latDeg: club.latitude,
-                            lonDeg: club.longitude,
-                        }
-                    }).miles
-                    : 0;
-
-                return {
-                    ...club,
-                    distance: distanceInMiles,
-                };
-            });
-
+            const clubs = await skydiveClubsLookup(this._position);
             if (this._position) {
                 this._sortClubsByDistance(clubs);
 
@@ -583,13 +282,249 @@ class HTMLSkyDuckElement extends HTMLElement {
             }
 
             this._clubs = this._sortClubsByCountry(clubs);
+
         } catch (err) {
             this._error = err;
             this._setLoaderError();
         }
     }
 
-    private async _loaderInfoDisplay(): Promise<void> {
+    private _loadImage(src: string) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.src = src;
+        });
+    }
+
+    private _registerEvents(): void {
+        this._onSearchSubmit = (e: CustomEvent) => {
+            this._clearContent();
+
+            const { value } = e.detail;
+
+            if (!value || this._isSearchInProgress) {
+                return;
+            }
+
+            this._isSearchInProgress = true;
+
+            this.location = value;
+        };
+
+        if ('PointerEvent' in window) {
+            this.addEventListener('pointerdown', (e: PointerEvent) => {
+                const eventDetails = this._pointerEventDetails.fromPointer(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+            });
+        } else {
+            this.addEventListener('mousedown', (e: MouseEvent) => {
+                const eventDetails = this._pointerEventDetails.fromMouse(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+            });
+            this.addEventListener('touchstart', (e: TouchEvent) => {
+                const eventDetails = this._pointerEventDetails.fromTouch(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+            });
+        }
+
+        this.shadowRoot.querySelector('zooduck-input')
+            .addEventListener('keyup:enter', this._onSearchSubmit);
+
+        this.shadowRoot.querySelector('#clubListCtrl')
+            .addEventListener('pointerup', (e) => {
+                e.preventDefault();
+
+                this._showClubList();
+            });
+
+        this.shadowRoot.querySelector('#getForecastForCurrentLocation')
+            .addEventListener('pointerup', async (e) => {
+                e.preventDefault();
+
+                if (!this._position) {
+                    return;
+                }
+
+                try {
+                    const reverseGeocodeLookupResponse = await reverseGeocodeLookup(this._position.coords);
+                    this._geocodeData = reverseGeocodeLookupResponse;
+                    this.removeAttribute('club');
+                    this._updateContent();
+                } catch (err) {
+                    throw Error(err);
+                }
+            });
+
+
+        const forecastDisplayModeToggle = this.shadowRoot.querySelector('#forecastDisplayModeToggle');
+        forecastDisplayModeToggle.addEventListener('pointerup', (e: PointerEvent) => {
+            e.preventDefault();
+
+            const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLZooduckCarouselElement;
+
+            forecastCarousel.classList.toggle('--forecast-display-mode-24h');
+
+            forecastCarousel.updateCarouselHeight();
+        });
+
+        const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLElement;
+        this._registerEventsOnCarousel(forecastCarousel);
+    }
+
+    private _registerEventsOnCarousel(carousel: HTMLElement): void {
+        if ('PointerEvent' in window) {
+            carousel.addEventListener('pointerdown', (e: PointerEvent) => {
+                const eventDetails = this._pointerEventDetails.fromPointer(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+
+                this._blurSearchInput();
+            });
+        } else {
+            carousel.addEventListener('mousedown', (e: MouseEvent) => {
+                const eventDetails = this._pointerEventDetails.fromMouse(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+
+                this._blurSearchInput();
+            });
+            carousel.addEventListener('touchstart', (e: TouchEvent) => {
+                const eventDetails = this._pointerEventDetails.fromTouch(e);
+                this._pointerEvents.pointerdown.push(eventDetails);
+
+                this._blurSearchInput();
+            });
+        }
+
+        const clubListItems = Array.from(carousel.querySelectorAll('.club-list-item'));
+        clubListItems.forEach((clubListItem: HTMLElement) => {
+            this._registerEventsOnClubListItem(clubListItem);
+        });
+    }
+
+    private _registerEventsOnClubListItem(clubListItem: HTMLElement) {
+        const clubListItemName = clubListItem.querySelector('.club-list-item__name');
+
+        if ('PointerEvent' in window) {
+            clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromPointer(e);
+                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
+
+                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
+                    return;
+                }
+
+                this._setClubToSelectedClubFromList(clubListItem);
+            });
+        } else {
+            clubListItemName.addEventListener('mouseup', (e: MouseEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromMouse(e);
+                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
+
+                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
+                    return;
+                }
+
+                this._setClubToSelectedClubFromList(clubListItem);
+            });
+
+            clubListItemName.addEventListener('touchend', (e: TouchEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromTouch(e);
+                const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
+
+                if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
+                    return;
+                }
+
+                this._setClubToSelectedClubFromList(clubListItem);
+            });
+        }
+    }
+
+    private _resetLoaderMessages() {
+        Array.from(Object.keys(this._loaderMessageElements)).forEach((key: string) => {
+            this._loaderMessageElements[key].innerHTML = '';
+        });
+    }
+
+    private _setClubToSelectedClubFromList(clubListItem: HTMLElement) {
+        const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
+        this.club = clubName;
+    }
+
+    private async _setContent(options: SetContentOptions = { useLoader: true }): Promise<void> {
+        this._isSearchInProgress = false;
+
+        if (!this._imagesReady) {
+            await this._getImages();
+        }
+
+        const minTimeToDisplaySpinner = this._hasLoaded ? 500 : 0;
+
+        await wait(minTimeToDisplaySpinner);
+
+        if (this._error) {
+            this._setLoaderError();
+
+            return;
+        }
+
+        if (options.useLoader && this._hasLoaded) {
+            await this._setLoaderInfoDisplay();
+        }
+
+        const googleMapsKey = await this._getGoogleMapsKey();
+
+        const weatherElements: WeatherElements = new SkyduckWeatherElements(
+            this._forecast,
+            googleMapsKey,
+            this._version,
+        );
+
+        const {
+            header,
+            locationInfo,
+            search,
+            forecast,
+            forecastDisplayModeToggle,
+            footer,
+        } = weatherElements;
+
+        this.shadowRoot.appendChild(header);
+        this.shadowRoot.appendChild(search);
+        this.shadowRoot.appendChild(locationInfo);
+        this.shadowRoot.appendChild(forecastDisplayModeToggle);
+        this.shadowRoot.appendChild(forecast);
+        this.shadowRoot.appendChild(footer);
+
+        this._addClubListCarousel();
+
+        this._registerEvents();
+
+        this.classList.add(this._modifierClasses.ready);
+        this.classList.remove(this._modifierClasses.error);
+        this.classList.remove(this._modifierClasses.init);
+
+        this._hasLoaded = true;
+
+        this.scrollIntoView();
+    }
+
+    private _setLoaderBarSpeed(millis: number): void {
+        const loaderBarInner = this.shadowRoot.querySelector('#loaderBarInner') as HTMLElement;
+        const style = `
+            animation-duration: ${millis}ms;
+        `;
+        loaderBarInner.setAttribute('style', style);
+    }
+
+    private _setLoaderError() {
+        this.classList.add(this._modifierClasses.error);
+
+        const loaderError =  this.shadowRoot.querySelector('#loaderError');
+        loaderError.innerHTML = this._error;
+    }
+
+    private async _setLoaderInfoDisplay(): Promise<void> {
         const { club, weather } = this._forecast;
         const delayBetweenInfoMessages = 500;
 
@@ -598,7 +533,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             loaderInfoLon,
             loaderInfoPlace,
             loaderInfoIANA,
-            loaderInfoLocalTime
+            loaderInfoLocalTime,
         } = this._loaderMessageElements;
 
         this._latLonSpin.apply(loaderInfoLat, 'Lat:&nbsp;');
@@ -623,116 +558,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         await wait(delayBetweenInfoMessages);
     }
 
-    private _loadImage(src: string) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = resolve;
-            img.src = src;
-        });
-    }
-
-    private _resetLoaderMessages() {
-        Array.from(Object.keys(this._loaderMessageElements)).forEach((key: string) => {
-            this._loaderMessageElements[key].innerHTML = '';
-        });
-    }
-
-    private async _reverseGeocodeLookup(point: Coordinates): Promise<void> {
-        try {
-            const { latitude, longitude } = point;
-            const response = await fetch(`/reverse_geocode?point=${latitude},${longitude}`);
-
-            if (!response.ok) {
-                throw(`(${response.status}) ${response.statusText}`);
-            }
-
-            const json = await response.json();
-            const resource = json.resourceSets[0].resources[0];
-
-            if (!resource) {
-                this._geocodeData = null;
-                throw(`Unable to resolve location for coordinates of "${latitude},${longitude}."`);
-            }
-
-            const coords = resource.geocodePoints[0].coordinates;
-            const { name, address } = resource;
-
-            this._geocodeData = {
-                locationQuery: `Current Location (${latitude},${longitude})`,
-                address,
-                name,
-                latitude: coords[0],
-                longitude: coords[1],
-            };
-        } catch (err) {
-            throw Error(err);
-        }
-    }
-
-    private async _setContent(options: SetContentOptions = { useLoader: true }): Promise<void> {
-        this._isSearchInProgress = false;
-
-        if (!this._imagesReady) {
-            await this._getImages();
-        }
-
-        const minTimeToDisplaySpinner = this._hasLoaded ? 500 : 0;
-
-        await wait(minTimeToDisplaySpinner);
-
-        if (this._error) {
-            this._setLoaderError();
-
-            return;
-        }
-
-        if (options.useLoader && this._hasLoaded) {
-            await this._loaderInfoDisplay();
-        }
-
-        const googleMapsKey = await this._getGoogleMapsKey();
-
-        const weatherElements: WeatherElements = new SkyduckWeatherElements(
-            this._forecast,
-            googleMapsKey,
-            this._version
-        );
-
-        const {
-            header,
-            locationInfo,
-            search,
-            forecast,
-            forecastDisplayModeToggle,
-            footer
-        } = weatherElements;
-
-        this.shadowRoot.appendChild(header);
-        this.shadowRoot.appendChild(search);
-        this.shadowRoot.appendChild(locationInfo);
-        this.shadowRoot.appendChild(forecastDisplayModeToggle);
-        this.shadowRoot.appendChild(forecast);
-        this.shadowRoot.appendChild(footer);
-
-        this._addClubListCarousel();
-
-        this._addEventListeners();
-
-        this.classList.add(this._modifierClasses.ready);
-        this.classList.remove(this._modifierClasses.error);
-        this.classList.remove(this._modifierClasses.init);
-
-        this._hasLoaded = true;
-
-        this.scrollIntoView();
-    }
-
-    private _setLoaderError() {
-        this.classList.add(this._modifierClasses.error);
-
-        const loaderError =  this.shadowRoot.querySelector('#loaderError');
-        loaderError.innerHTML = this._error;
-    }
 
     private _showClubList() {
         const clubList = this.shadowRoot.querySelector('#clubListCarousel');
@@ -756,6 +581,7 @@ class HTMLSkyDuckElement extends HTMLElement {
         clubs.forEach((club: SkydiveClub) => {
             if (!clubsByCountry[club.country]) {
                 clubsByCountry[club.country] = {
+                    country: club.country,
                     furthestDZDistance: .1,
                     list: [],
                 };
@@ -808,15 +634,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         } finally {
             await this._setContent();
         }
-    }
-
-    private _setLoaderBarSpeed(millis: number): void {
-        const loaderBarInner = this.shadowRoot.querySelector('#loaderBarInner') as HTMLElement;
-        const style = `
-            transition-duration: ${millis}ms;
-            width: 100%;
-        `;
-        loaderBarInner.setAttribute('style', style);
     }
 
     protected async _init(): Promise<void> {

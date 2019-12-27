@@ -120,6 +120,32 @@ a:hover {
 .loader__icon {
     grid-row: 2;
 }
+@keyframes loadingBar {
+    0% {
+        width: 0;
+    }
+    50% {
+        width: 10%;
+    }
+    60% {
+        width: 50%;
+    }
+    69% {
+        width: 55%;
+    }
+    70% {
+        width: 65%;
+    }
+    79% {
+        width: 70%;
+    }
+    80% {
+        width: 80%;
+    }
+    100% {
+        width: 100%;
+    }
+}
 .loader-bar {
     display: flex;
     grid-row: 3;
@@ -133,8 +159,7 @@ a:hover {
     background-color: var(--lightskyblue);
     width: 0;
     height: 100%;
-    transition-property: width;
-    transition-timing-function: ease;
+    animation: loadingBar linear;
 }
 :host(:not(.--init)) .loader-bar {
     visibility: hidden;
