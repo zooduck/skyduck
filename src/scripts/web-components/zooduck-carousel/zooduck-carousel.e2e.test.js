@@ -8,7 +8,7 @@ const getAttribute = async (page, node, attr) => {
 
 describe('<zooduck-carousel>', () => {
     beforeAll(async () => {
-        await page.goto('http://localhost:3333/index.test.html');
+        await page.goto(`${PATH}/index.test.html`);
     });
 
     it('should have a shadowRoot', async () => {

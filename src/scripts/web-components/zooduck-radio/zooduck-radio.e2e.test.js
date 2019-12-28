@@ -8,7 +8,7 @@ const getAttribute = async (page, node, attr) => {
 
 describe('<zooduck-radio>', () => {
     beforeAll(async () => {
-        await page.goto('http://localhost:3333/index.test.html');
+        await page.goto(`${PATH}/index.test.html`);
     });
 
     it('should sync properties to attributes', async () => {
