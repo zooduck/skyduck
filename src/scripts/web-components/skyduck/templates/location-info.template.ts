@@ -1,22 +1,16 @@
 import { GoogleMapTemplate } from './google-map.template';
 import { PlaceTemplate } from './place.template';
 import { LocalTimeAndUnitsInfoTemplate } from './local-time-and-units-info.template';
-import { SkydiveClub, Coords } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { LocationDetails } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
 export class LocationInfoTemplate {
-    private _club: SkydiveClub;
-    private _coords: Coords;
-    private _countryRegion: string;
     private _googleMapsKey: string;
+    private _locationDetails: LocationDetails;
     private _locationInfo: HTMLElement;
-    private _timezone: string;
 
-    constructor(club: SkydiveClub, countryRegion: string, timezone: string, coords: Coords, googleMapsKey: string) {
-        this._club = club;
-        this._coords = coords;
-        this._countryRegion = countryRegion;
+    constructor(locationDetails: LocationDetails, googleMapsKey) {
         this._googleMapsKey = googleMapsKey;
-        this._timezone = timezone;
+        this._locationDetails = locationDetails;
 
         this._buildLocationInfo();
     }
@@ -25,11 +19,11 @@ export class LocationInfoTemplate {
         this._locationInfo = document.createElement('div') as HTMLElement;
         this._locationInfo.className = 'club-info-grid';
 
-        const { place: q } = this._club;
+        const { address, coords, timezone } = this._locationDetails;
 
-        this._locationInfo.appendChild(new GoogleMapTemplate(this._googleMapsKey, q, this._coords).html);
-        this._locationInfo.appendChild(new PlaceTemplate(this._countryRegion, this._club).html);
-        this._locationInfo.appendChild(new LocalTimeAndUnitsInfoTemplate(this._timezone).html);
+        this._locationInfo.appendChild(new GoogleMapTemplate(this._googleMapsKey, address, coords).html);
+        this._locationInfo.appendChild(new PlaceTemplate(this._locationDetails).html);
+        this._locationInfo.appendChild(new LocalTimeAndUnitsInfoTemplate(timezone).html);
     }
 
     public get html(): HTMLElement {

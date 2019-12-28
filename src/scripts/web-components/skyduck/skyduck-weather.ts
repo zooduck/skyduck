@@ -6,8 +6,8 @@ import {
     HourlyData,
     SkydiveClub,
     DailyData,
-    Weather,
-    SkydiveClubWeather,
+    DarkSkyWeather,
+    FormattedWeather,
 } from './interfaces/index';
 /* eslint-enable no-unused-vars */
 import { darkSkyLookup } from './fetch/dark-sky-lookup.fetch';
@@ -93,13 +93,14 @@ export class SkyduckWeather {
 
         this._skydiveClub = skydiveClub;
 
-        let dbWeather: SkydiveClubWeather;
+        let dbWeather: FormattedWeather;
         let dbWeatherUpToDate: boolean;
         let dbWeatherExists: boolean;
         const oneHourAgo = DateTime.local().minus({ hours: 1 }).toMillis();
+        const { latitude,longitude } = this._skydiveClub;
 
         try {
-            dbWeather = await dbWeatherLookup(skydiveClub.id);
+            dbWeather = await dbWeatherLookup(latitude, longitude);
             dbWeatherUpToDate = dbWeather.requestTime > oneHourAgo;
             dbWeatherExists = true;
         } catch (err) {
@@ -110,50 +111,32 @@ export class SkyduckWeather {
         if (!dbWeatherUpToDate) {
             const darkSkyData = await this._queryDarkSky(skydiveClub.latitude, skydiveClub.longitude, name);
             const method = !dbWeatherExists ? 'POST' : 'PUT';
-            const weather = await dbWeatherUpdate(darkSkyData, method);
+            const weather = await dbWeatherUpdate(darkSkyData.weather, method);
 
             return {
                 query: darkSkyData.query,
-                club: darkSkyData.club,
                 weather,
             };
         }
 
         return {
             query: name,
-            club: this._skydiveClub,
-            weather: {
-                ...dbWeather,
-            }
+            weather: dbWeather,
         };
 
     }
 
     public async getDailyForecastByQuery(geocodeData: GeocodeData): Promise<DailyForecast> {
-        const { name, latitude, longitude, locationQuery } = geocodeData;
-        const { countryRegion } = geocodeData.address;
-
-        const place = name.includes(countryRegion)
-            ? name
-            : `${name}, ${countryRegion}`;
-
-        this._skydiveClub = {
-            id: '',
-            name: '',
-            place,
-            country: '',
-            latitude,
-            longitude,
-            site: '',
-        };
+        const { latitude, longitude, locationQuery } = geocodeData;
+        const { countryRegion, formattedAddress } = geocodeData.address;
 
         const darkSkyData = await this._queryDarkSky(latitude, longitude, locationQuery);
 
         return {
             query: darkSkyData.query,
-            club: darkSkyData.club,
             weather: darkSkyData.weather,
-            countryRegion: geocodeData.address.countryRegion,
+            countryRegion,
+            formattedAddress,
         };
     }
 
@@ -176,12 +159,11 @@ export class SkyduckWeather {
         return tzTime.toLocaleString(DateTime.TIME_24_SIMPLE);
     }
 
-    private _formatDarkSkyData(weather: Weather, query: string) {
+    private _formatDarkSkyData(weather: DarkSkyWeather, query: string): DailyForecast {
         const { latitude, longitude, timezone, daily, hourly } = weather;
 
         return {
             query,
-            club: this._skydiveClub,
             weather: {
                 latitude,
                 longitude,

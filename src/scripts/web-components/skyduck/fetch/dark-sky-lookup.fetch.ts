@@ -1,7 +1,8 @@
 import { graphqlConfig } from '../../../config/graphql.config';
 import { darkSkyQuery } from '../graphql-queries/dark-sky-query';
+import { DarkSkyWeather } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
-export const darkSkyLookup = async (lat: number, lon: number) => {
+export const darkSkyLookup = async (lat: number, lon: number): Promise<DarkSkyWeather> => {
     try {
         const response = await fetch(graphqlConfig.uri, {
             ...graphqlConfig.options,

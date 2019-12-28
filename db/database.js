@@ -28,7 +28,7 @@ const mongo = () => {
 
                     await createCollections(db);
 
-                    await db.collection('Weather').createIndex({ id: 1 }, { unique: true });
+                    await db.collection('Weather').createIndex({ latitude: 1, longitude: 1 }, { unique: true });
                     await db.collection('SkydiveClub').createIndex({ id: 1 }, {unique: true });
 
                     resolve(db);

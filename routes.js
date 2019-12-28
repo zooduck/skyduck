@@ -71,7 +71,8 @@ const weather = {
     path: '/weather',
     callback: async (request, response) => {
         const query = {
-            id: request.query.id,
+            latitude: parseFloat(request.query.latitude),
+            longitude: parseFloat(request.query.longitude),
         };
         const options = {
             projection: {

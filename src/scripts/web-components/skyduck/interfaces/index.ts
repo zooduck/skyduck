@@ -41,34 +41,6 @@ export interface Daily {
 }
 
 export interface DailyData {
-    time: number;
-    sunriseTime: number;
-    sunsetTime: number;
-    summary: string;
-    icon: string;
-    precipProbability: number;
-    precipType: string;
-    temperatureMin: number;
-    temperatureMax: number;
-    apparentTemperatureMin: number;
-    apparentTemperatureMax: number;
-    humidity: number;
-    windSpeed: number;
-    windGust: number;
-    windBearing: number;
-    cloudCover: number;
-    visibility: number;
-    hourly: HourlyData[];
-}
-
-export interface DailyForecast {
-    query: string;
-    club: SkydiveClub;
-    weather: Weather|SkydiveClubWeather;
-    countryRegion?: any;
-}
-
-export interface ForecastData {
     apparentTemperature: number;
     cloudCover: number;
     dateString: string;
@@ -91,6 +63,29 @@ export interface ForecastData {
     sunriseTimeString: string;
     sunsetTime: number;
     sunsetTimeString: string;
+}
+
+export interface DailyForecast {
+    query: string;
+    weather: FormattedWeather;
+    countryRegion?: string;
+    formattedAddress?: string;
+}
+
+export interface DarkSkyWeather {
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    daily: Daily;
+    hourly: Hourly;
+}
+
+export interface FormattedWeather {
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    daily: Daily;
+    requestTime: number;
 }
 
 export interface GeocodeData {
@@ -125,6 +120,28 @@ export interface HourlyData {
     summary: string;
 }
 
+export interface ImageMap {
+    'clear-day': string,
+    'clear-night': string;
+    cloudy: string;
+    default: string;
+    fog: string;
+    'partly-cloudy-day': string;
+    rain: string;
+    'skyduck-logo': string;
+    sleet: string;
+    snow: string;
+    wind: string;
+}
+
+export interface LocationDetails {
+    name: string;
+    address: string;
+    timezone: string;
+    coords: Coords;
+    site?: string;
+}
+
 export interface ModifierClasses {
     error: string;
     init: string;
@@ -136,6 +153,7 @@ export interface SetContentOptions {
 }
 
 export interface SkydiveClub {
+    distance?: number;
     id: string;
     name: string;
     place: string;
@@ -145,24 +163,6 @@ export interface SkydiveClub {
     site: string;
 }
 
-export interface SkydiveClubWeather {
-    id: string;
-    name: string;
-    place: string;
-    site: string;
-    weather: Weather;
-    requestTime: number;
-}
-
-export interface Weather {
-    latitude: number;
-    longitude: number;
-    timezone: string;
-    daily: Daily;
-    hourly?: Hourly;
-    requestTime?: number;
-}
-
 export interface WeatherElements {
     footer: HTMLElement;
     forecast: HTMLElement;
@@ -170,17 +170,4 @@ export interface WeatherElements {
     locationInfo: HTMLElement;
     header: HTMLElement;
     search: HTMLElement;
-}
-
-export interface WeatherImageMap {
-    'clear-day': string,
-    'clear-night': string;
-    cloudy: string;
-    default: string;
-    fog: string;
-    'partly-cloudy-day': string;
-    rain: string;
-    sleet: string;
-    snow: string;
-    wind: string;
 }

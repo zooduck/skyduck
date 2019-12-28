@@ -1,8 +1,8 @@
-import { SkydiveClubWeather } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { FormattedWeather } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
-export const dbWeatherLookup = async (clubId: string): Promise<SkydiveClubWeather> => {
+export const dbWeatherLookup = async (latitude: number, longitude: number): Promise<FormattedWeather> => {
     try {
-        const response = await fetch(`/weather?id=${clubId}`);
+        const response = await fetch(`/weather?latitude=${latitude}&longitude=${longitude}`);
 
         if (!response.ok) {
             throw(`(${response.status}) ${response.statusText}`);
@@ -10,7 +10,7 @@ export const dbWeatherLookup = async (clubId: string): Promise<SkydiveClubWeathe
 
         const json = await response.json();
 
-        return json as SkydiveClubWeather;
+        return json as FormattedWeather;
     } catch (err) {
         throw Error(err);
     }

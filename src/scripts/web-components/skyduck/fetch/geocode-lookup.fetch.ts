@@ -10,7 +10,6 @@ export const geocodeLookup = async (place: string): Promise<any> => {
         const resource = json.resourceSets[0].resources[0];
 
         if (!resource) {
-            this._geocodeData = null;
             throw(`Unable to resolve coordinates for location of "${place}."`);
         }
 

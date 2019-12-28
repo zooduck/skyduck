@@ -1,6 +1,6 @@
 interface ElementAndInterval {
     el: HTMLElement;
-    interval: number;
+    interval: any;
 }
 
 export class LatLonSpin {

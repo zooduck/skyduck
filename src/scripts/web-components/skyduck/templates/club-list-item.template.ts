@@ -10,15 +10,15 @@ export class ClubListItemTemplate {
         this._clubs = clubs;
         this._position = position;
 
-        this._buildClubListItem(club);
+        this._buildClubListItem();
     }
 
-    private _buildClubListItem(club: SkydiveClub): void {
+    private _buildClubListItem(): void {
         const { furthestDZDistance } = this._clubs;
-        const distanceFromCurrentLocation = club.distance;
+        const distanceFromCurrentLocation = this._club.distance;
         const clubListItemDistanceStyle = `
             ${!this._position ? 'display: none;' : ''}
-            grid-template-columns: minmax(auto, ${Math.round((club.distance / furthestDZDistance) * 100)}%) auto;
+            grid-template-columns: minmax(auto, ${Math.round((this._club.distance / furthestDZDistance) * 100)}%) auto;
         `;
         const distanceColorModifier = distanceFromCurrentLocation >= 200
             ? '--red'
@@ -34,49 +34,10 @@ export class ClubListItemTemplate {
                         <small>miles</small>
                     </div>
                 </div>
-                <h3 class="club-list-item__name">${club.name}</h3>
-                <span class="club-list-item__place">${club.place}</span>
-                <a class="club-list-item__site-link" href="${club.site}" target="_blank">${club.site.replace(/https?:\/\//, '')}</a>
+                <h3 class="club-list-item__name">${this._club.name}</h3>
+                <span class="club-list-item__place">${this._club.place}</span>
+                <a class="club-list-item__site-link" href="${this._club.site}" target="_blank">${this._club.site.replace(/https?:\/\//, '')}</a>
             </li>`, 'text/html').body.firstChild as HTMLElement;
-
-        // const clubListItemName = clubListItem.querySelector('.club-list-item__name');
-
-        // if ('PointerEvent' in window) {
-        //     clubListItemName.addEventListener('pointerup', (e: PointerEvent) => {
-        //         const pointerupEventDetails = this._pointerEventDetails.fromPointer(e);
-        //         const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
-
-        //         if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
-        //             return;
-        //         }
-
-        //         this._setClubToSelectedClubFromList(clubListItem);
-        //     });
-        // } else {
-        //     clubListItemName.addEventListener('mouseup', (e: MouseEvent) => {
-        //         const pointerupEventDetails = this._pointerEventDetails.fromMouse(e);
-        //         const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
-
-        //         if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
-        //             return;
-        //         }
-
-        //         this._setClubToSelectedClubFromList(clubListItem);
-        //     });
-
-        //     clubListItemName.addEventListener('touchend', (e: TouchEvent) => {
-        //         const pointerupEventDetails = this._pointerEventDetails.fromTouch(e);
-        //         const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
-
-        //         if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
-        //             return;
-        //         }
-
-        //         this._setClubToSelectedClubFromList(clubListItem);
-        //     });
-        // }
-
-        // return clubListItem;
     }
 
 

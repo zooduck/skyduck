@@ -1,19 +1,34 @@
-import { SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { LocationDetails } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
 export class PlaceTemplate {
-    private _club: SkydiveClub;
-    private _countryRegion: string;
+    private _locationDetails: LocationDetails;
     private _place: HTMLElement;
 
-    constructor(countryRegion: string, club: SkydiveClub) {
-        this._countryRegion = countryRegion;
-        this._club = club;
+    constructor(locationDetails: LocationDetails) {
+        this._locationDetails = locationDetails;
 
         this._buildPlace();
     }
 
-    private _formatPlace(place: string): string {
-        const parts = place.split(',');
+    private _buildPlace(): void {
+        const { name, address, site } = this._locationDetails;
+        const title = `
+            <h3>${name}</h3>
+        `;
+        const siteLink = site
+            ? `<a class="club-info-grid-location-info__site-link" href="${site}" target="_blank">${site.replace(/https?:\/+/, '')}</a>`
+            : '';
+        this._place = new DOMParser().parseFromString(`
+            <div class="club-info-grid-location-info">
+                ${title}
+                ${this._formatAddress(address)}
+                ${siteLink}
+            </div>
+        `, 'text/html').body.firstChild as HTMLElement;
+    }
+
+    private _formatAddress(address: string): string {
+        const parts = address.split(',');
         const uniqueParts = [];
         parts.forEach((part) => {
             const _part = part.trim();
@@ -26,28 +41,6 @@ export class PlaceTemplate {
         });
 
         return html.join('');
-    }
-
-    private _buildPlace(): void {
-        const name = this._countryRegion
-            ? this._club.place.split(',')[0]
-            : this._club.name;
-        const place = this._countryRegion
-            ? this._club.place.substr(name.length).concat(',').concat(this._countryRegion)
-            : this._club.place;
-        const title = `
-            <h3>${name}</h3>
-        `;
-        const siteLink = this._club.site
-            ? `<a class="club-info-grid-location-info__site-link" href="${this._club.site}" target="_blank">${this._club.site.replace(/https?:\/+/, '')}</a>`
-            : '';
-        this._place = new DOMParser().parseFromString(`
-            <div class="club-info-grid-location-info">
-                ${title}
-                ${this._formatPlace(place)}
-                ${siteLink}
-            </div>
-        `, 'text/html').body.firstChild as HTMLElement;
     }
 
     public get html(): HTMLElement {

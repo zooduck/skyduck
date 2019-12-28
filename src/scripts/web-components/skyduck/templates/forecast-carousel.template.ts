@@ -1,15 +1,15 @@
 import { HTMLZooduckCarouselElement } from '../../zooduck-carousel/zooduck-carousel.component'; // eslint-disable-line no-unused-vars
 import { ForecastTemplate } from './forecast.template';
-import { ForecastData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { DailyData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { averageRatingModifierForDay } from '../utils/average-rating-modifier-for-day';
 
 export class ForecastCarouselTemplate {
-    private _dailyData: ForecastData[];
+    private _dailyData: DailyData[];
     private _defaultForecastHours: number[];
     private _timezone: string;
     private _forecastCarousel: HTMLZooduckCarouselElement;
 
-    constructor(dailyData: ForecastData[], defaultForecastHours: number[], timezone: string) {
+    constructor(dailyData: DailyData[], defaultForecastHours: number[], timezone: string) {
         this._dailyData = dailyData;
         this._defaultForecastHours = defaultForecastHours;
         this._timezone = timezone;
@@ -21,9 +21,9 @@ export class ForecastCarouselTemplate {
         const carousel = document.createElement('zooduck-carousel') as HTMLZooduckCarouselElement;
         carousel.setAttribute('id', 'forecastCarousel');
 
-        const forecastSlides = this._dailyData.filter((dailyData: ForecastData) => {
+        const forecastSlides = this._dailyData.filter((dailyData: DailyData) => {
             return dailyData.hourly.length;
-        }).map((dailyData: ForecastData) => {
+        }).map((dailyData: DailyData) => {
             return new ForecastTemplate(dailyData, this._defaultForecastHours, this._timezone).html;
         });
 

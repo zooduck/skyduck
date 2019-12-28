@@ -3,7 +3,7 @@ import { skydiveClubsQuery } from '../graphql-queries/skydive-clubs-query';
 import { DistanceBetweenPoints } from '../utils/distance-between-points';
 import { SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
-export const skydiveClubsLookup = async (position: Position): Promise<any> => {
+export const skydiveClubsLookup = async (position: Position): Promise<SkydiveClub[]> => {
     try {
         const graphqlResponse = await fetch(graphqlConfig.uri, {
             ...graphqlConfig.options,

@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { DailyForecast } from './interfaces/index';
+import { DailyForecast, LocationDetails } from './interfaces/index';
 import { HTMLZooduckCarouselElement } from '../zooduck-carousel/zooduck-carousel.component';
 import { FooterTemplate } from './templates/footer.template';
 import { ForecastCarouselTemplate } from './templates/forecast-carousel.template';
@@ -8,32 +8,29 @@ import { HeaderTemplate } from './templates/header.template';
 import { LocationInfoTemplate } from './templates/location-info.template';
 import { SearchTemplate } from './templates/search.template';
 /* eslint-enable */
+
 export class SkyduckWeatherElements {
     private _dailyForecast: DailyForecast;
     private _forecastCarousel: HTMLZooduckCarouselElement;
     private _googleMapsKey: string;
+    private _locationDetails: LocationDetails;
     private _defaultForecastHours: number[];
     private _version: string;
 
     constructor(
+        locationDetails: LocationDetails,
         dailyForecast: DailyForecast,
         googleMapsKey: string,
         version: string) {
         this._dailyForecast = dailyForecast;
         this._defaultForecastHours = [9, 12, 15];
         this._googleMapsKey = googleMapsKey;
+        this._locationDetails = locationDetails;
         this._version = `v${version.split('-')[0]}`;
     }
 
     public get locationInfo(): HTMLElement {
-        const {latitude, longitude, timezone }= this._dailyForecast.weather;
-        const coords = {
-            latitude,
-            longitude,
-        };
-        const { countryRegion, club } = this._dailyForecast;
-
-        return new LocationInfoTemplate(club, countryRegion, timezone, coords, this._googleMapsKey).html;
+        return new LocationInfoTemplate(this._locationDetails, this._googleMapsKey).html;
     }
 
     public get footer(): HTMLElement {

@@ -1,20 +1,20 @@
-import { ForecastData, HourlyData, ColorModifiersData, ColorModifiers, ColorModifier, WeatherImageMap } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { HourlyData, ColorModifiersData, ColorModifiers, ColorModifier, DailyData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { weatherRatings } from '../utils/weather-ratings/weather-ratings';
 import { averageRatingModifierForDay } from '../utils/average-rating-modifier-for-day';
-import { weatherImageMap } from '../utils/weather-image-map';
+import { imageMap } from '../utils/image-map';
 
 export class ForecastTemplate {
     private _defaultForecastHours: number[];
     private _forecast: HTMLElement;
     private _timezone: string;
 
-    constructor(dayForecast: ForecastData, defaultForecastHours: number[], timezone: string) {
+    constructor(dayForecast: DailyData, defaultForecastHours: number[], timezone: string) {
         this._defaultForecastHours = defaultForecastHours;
         this._timezone = timezone;
         this._buildForecast(dayForecast);
     }
 
-    private _buildForecast(dayForecast: ForecastData): void {
+    private _buildForecast(dayForecast: DailyData): void {
         const {
             day,
             dateString,
@@ -73,7 +73,7 @@ export class ForecastTemplate {
             windGust,
         } = hourlyData;
 
-        const weatherImagePath = weatherImageMap[icon] || weatherImageMap.default;
+        const weatherImagePath = imageMap[icon] || imageMap.default;
         const colorModifiers = this._getColorModifiers(hourlyData);
 
         const averageRatingModifier = averageRatingModifierForDay([hourlyData]);

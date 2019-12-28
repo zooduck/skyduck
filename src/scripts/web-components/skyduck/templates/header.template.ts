@@ -1,4 +1,4 @@
-import * as images from '../../../../assets/img/*.png';
+import { imageMap } from '../utils/image-map';
 
 export class HeaderTemplate {
     private _header: HTMLElement;
@@ -13,7 +13,7 @@ export class HeaderTemplate {
         this._header = new DOMParser().parseFromString(`
             <div class="header">
                 <div class="header-title-container">
-                    <img class="header__skyduck-logo" src="${images['skyduck-logo']}" alt="skyduck-logo" />
+                    <img class="header__skyduck-logo" src="${imageMap['skyduck-logo']}" alt="skyduck-logo" />
                     <small>${this._version}</small>
                 </div>
                 ${this._buildLocationIcon().outerHTML}

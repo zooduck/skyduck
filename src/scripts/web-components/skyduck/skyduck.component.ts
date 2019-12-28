@@ -10,9 +10,11 @@ import {
     GeocodeData,
     SkydiveClub,
     ClubListsSortedByCountry,
+    LocationDetails,
+    Coords,
 } from './interfaces/index';
 import { LatLonSpin } from './utils/lat-lon-spin';
-import { weatherImageMap } from './utils/weather-image-map';
+import { imageMap } from './utils/image-map';
 import { DateTime } from 'luxon';
 import { isTap } from '../../utils/is-tap/is-tap';
 import { wait } from './utils/wait/wait';
@@ -43,7 +45,8 @@ Geolocation permission has been blocked
 /* eslint-enable */
 class HTMLSkyDuckElement extends HTMLElement {
     private _club: string;
-    private _clubs: ClubListsSortedByCountry;
+    private _clubs: SkydiveClub[];
+    private _clubsSortedByCountry: ClubListsSortedByCountry;
     private _defaultClub: string;
     private _error: string;
     private _forecast: DailyForecast;
@@ -53,7 +56,9 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _hasLoaded = false;
     private _imagesReady = false;
     private _isSearchInProgress = false;
+    private _latLonSpin: LatLonSpin;
     private _loaderMessageElements: LoaderMessageElements;
+    private _locationDetails: LocationDetails;
     private _modifierClasses: ModifierClasses;
     private _nearestClub: SkydiveClub;
     private _onSearchSubmit: EventListener;
@@ -61,7 +66,6 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _pointerEvents: PointerEvents;
     private _position: Position;
     private _location: string;
-    private _latLonSpin: LatLonSpin;
     private _version: string;
     private _weather: SkyduckWeather;
 
@@ -126,6 +130,8 @@ class HTMLSkyDuckElement extends HTMLElement {
                 this._geocodeData = response;
             }).catch((err) => {
                 console.error(err); // eslint-disable-line no-console
+
+                this._geocodeData = null;
                 this._error = err;
             }).then(() => {
                 if (!this._hasLoaded) {
@@ -137,12 +143,18 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
     }
 
+    private _getClubData(): SkydiveClub {
+        return this._clubs.find((club: SkydiveClub) => {
+            return new RegExp(this._club).test(club.name);
+        });
+    }
+
     private _addClubListCarousel() {
         if (this.shadowRoot.querySelector('#clubListCarousel')) {
             return;
         }
 
-        const clubListCarousel = new ClubListCarouselTemplate(this._clubs, this._nearestClub, this._position).html;
+        const clubListCarousel = new ClubListCarouselTemplate(this._clubsSortedByCountry, this._nearestClub, this._position).html;
         this._registerEventsOnCarousel(clubListCarousel);
         this.shadowRoot.appendChild(clubListCarousel);
     }
@@ -205,10 +217,10 @@ class HTMLSkyDuckElement extends HTMLElement {
         const imagesLoaded = [];
 
         return new Promise((resolve) => {
-            const imageLinks = Object.keys(weatherImageMap).map((key) => {
+            const imageLinks = Object.keys(imageMap).map((key) => {
                 return {
                     key,
-                    url: weatherImageMap[key],
+                    url: imageMap[key],
                 };
             });
             imageLinks.forEach(async (link) => {
@@ -281,8 +293,8 @@ class HTMLSkyDuckElement extends HTMLElement {
                 }
             }
 
-            this._clubs = this._sortClubsByCountry(clubs);
-
+            this._clubs = clubs;
+            this._clubsSortedByCountry = this._sortClubsByCountry(clubs);
         } catch (err) {
             this._error = err;
             this._setLoaderError();
@@ -475,6 +487,7 @@ class HTMLSkyDuckElement extends HTMLElement {
         const googleMapsKey = await this._getGoogleMapsKey();
 
         const weatherElements: WeatherElements = new SkyduckWeatherElements(
+            this._locationDetails,
             this._forecast,
             googleMapsKey,
             this._version,
@@ -526,8 +539,14 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private async _setLoaderInfoDisplay(): Promise<void> {
-        const { club, weather } = this._forecast;
+        const { weather, formattedAddress, countryRegion } = this._forecast;
+        const { latitude, longitude, timezone } = weather;
         const delayBetweenInfoMessages = 500;
+
+        const clubData = this._getClubData();
+        const place = clubData
+            ? clubData.place
+            : `${formattedAddress},${countryRegion}`;
 
         const {
             loaderInfoLat,
@@ -539,26 +558,25 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this._latLonSpin.apply(loaderInfoLat, 'Lat:&nbsp;');
         await wait(delayBetweenInfoMessages);
-        this._latLonSpin.setContent(loaderInfoLat, `Lat: ${weather.latitude.toString().substr(0, 9)}`);
+        this._latLonSpin.setContent(loaderInfoLat, `Lat: ${latitude.toString().substr(0, 9)}`);
 
         this._latLonSpin.apply(loaderInfoLon, 'Lon:&nbsp;');
         await wait(delayBetweenInfoMessages);
-        this._latLonSpin.setContent(loaderInfoLon, `Lon: ${weather.longitude.toString().substr(0, 9)}`);
+        this._latLonSpin.setContent(loaderInfoLon, `Lon: ${longitude.toString().substr(0, 9)}`);
 
-        loaderInfoPlace.innerHTML = `${club.place}`;
+        loaderInfoPlace.innerHTML = `${place}`;
         await wait(delayBetweenInfoMessages);
 
-        loaderInfoIANA.innerHTML = `${weather.timezone}`;
+        loaderInfoIANA.innerHTML = `${timezone}`;
         await wait(delayBetweenInfoMessages);
 
         const locationTime = DateTime.local()
-            .setZone(this._forecast.weather.timezone)
+            .setZone(timezone)
             .toLocaleString(DateTime.TIME_24_SIMPLE);
 
         loaderInfoLocalTime.innerHTML = `Local Time: ${locationTime}`;
         await wait(delayBetweenInfoMessages);
     }
-
 
     private _showClubList() {
         const clubList = this.shadowRoot.querySelector('#clubListCarousel');
@@ -613,6 +631,16 @@ class HTMLSkyDuckElement extends HTMLElement {
         this.setAttribute(name, val);
     }
 
+    private _setLocationDetails(name: string, address: string, site: string, timezone: string, coords: Coords): void {
+        this._locationDetails = {
+            name,
+            address,
+            site,
+            timezone,
+            coords,
+        };
+    }
+
     private async _updateContent(): Promise<void> {
         this._clearContent();
 
@@ -625,8 +653,27 @@ class HTMLSkyDuckElement extends HTMLElement {
         try {
             if (this._club) {
                 this._forecast = await this._weather.getDailyForecastByClub(this.club);
+
+                const { timezone } = this._forecast.weather;
+                const { name, place: address, site, latitude, longitude } = this._getClubData();
+                const coords = {
+                    latitude,
+                    longitude,
+                };
+
+                this._setLocationDetails(name, address, site, timezone, coords);
             } else if (this._geocodeData) {
                 this._forecast = await this._weather.getDailyForecastByQuery(this._geocodeData);
+
+                const site = '';
+                const { latitude, longitude, timezone } = this._forecast.weather;
+                const { countryRegion: address, formattedAddress: name } = this._forecast;
+                const coords = {
+                    latitude,
+                    longitude,
+                };
+
+                this._setLocationDetails(name, address, site, timezone, coords);
             }
             this._error = '';
         } catch (err) {
