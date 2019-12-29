@@ -171,3 +171,7 @@ export interface WeatherElements {
     header: HTMLElement;
     search: HTMLElement;
 }
+
+export interface HTMLZooduckCarouselElement extends HTMLElement {
+    updateCarouselHeight: any;
+}

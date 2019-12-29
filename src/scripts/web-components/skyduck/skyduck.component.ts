@@ -1,6 +1,6 @@
 import { style } from './skyduck.style';
 import { SkyduckWeatherElements } from './skyduck.elements';
-import { SkyduckWeather } from './skyduck-weather';
+import { SkyduckWeather } from './skyduck.weather';
 /* eslint-disable */
 import {
     ModifierClasses,
@@ -12,13 +12,13 @@ import {
     ClubListsSortedByCountry,
     LocationDetails,
     Coords,
+    HTMLZooduckCarouselElement,
 } from './interfaces/index';
 import { LatLonSpin } from './utils/lat-lon-spin';
 import { imageMap } from './utils/image-map';
 import { DateTime } from 'luxon';
 import { isTap } from '../../utils/is-tap/is-tap';
-import { wait } from './utils/wait/wait';
-import { HTMLZooduckCarouselElement } from '../zooduck-carousel/zooduck-carousel.component'; // eslint-disable-line no-unused-vars
+import { wait } from '../../utils/wait/wait';
 import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details/pointer-event-details'; // eslint-disable-line no-unused-vars
 import { LoaderTemplate } from './templates/loader.template';
 import { geocodeLookup } from './fetch/geocode-lookup.fetch';
@@ -187,6 +187,12 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this.classList.remove(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
+    }
+
+    private _customElementLoaded(customElement: HTMLElement): Promise<void> {
+        return new Promise((resolve: any) => {
+            customElement.addEventListener('load', resolve);
+        });
     }
 
     private _getCurrentPosition(): Promise<void> {
@@ -507,6 +513,9 @@ class HTMLSkyDuckElement extends HTMLElement {
         this.shadowRoot.appendChild(locationInfo);
         this.shadowRoot.appendChild(forecastDisplayModeToggle);
         this.shadowRoot.appendChild(forecast);
+
+        await this._customElementLoaded(forecast as HTMLZooduckCarouselElement);
+
         this.shadowRoot.appendChild(footer);
 
         this._addClubListCarousel();

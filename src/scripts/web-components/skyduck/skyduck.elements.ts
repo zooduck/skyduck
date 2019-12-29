@@ -1,6 +1,5 @@
 /* eslint-disable */
-import { DailyForecast, LocationDetails } from './interfaces/index';
-import { HTMLZooduckCarouselElement } from '../zooduck-carousel/zooduck-carousel.component';
+import { DailyForecast, LocationDetails, HTMLZooduckCarouselElement } from './interfaces/index';
 import { FooterTemplate } from './templates/footer.template';
 import { ForecastCarouselTemplate } from './templates/forecast-carousel.template';
 import { ForecastDisplayModeToggleTemplate } from './templates/forecast-display-mode-toggle.template';
