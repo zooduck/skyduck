@@ -37,7 +37,7 @@ export class LoaderTemplate {
         this._spinner = new DOMParser().parseFromString(`
             <zooduck-icon-skyduck-in-flight
                 class="loader__icon"
-                size="100"
+                size="200"
                 color="var(--lightskyblue)"></zooduck-icon-skyduck-in-flight>
         `, 'text/html').body.firstChild as HTMLElement;
     }
