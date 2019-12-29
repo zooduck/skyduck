@@ -253,4 +253,13 @@ export const skydiveClubs: SkydiveClub[] = [
         longitude: -3.500076,
         site: 'http://skydivemadrid.es',
     },
+    {
+        id: 'skydive_bovec',
+        name: 'Skydive Bovec',
+        place: 'Rupa 17, 5230 Bovec, Slovenia',
+        country: 'Slovenia',
+        latitude: 46.333670,
+        longitude: 13.554195,
+        site: 'https://www.skydivebovec.com',
+    },
 ];

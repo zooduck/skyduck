@@ -9,5 +9,5 @@ import './web-components/skyduck/skyduck.component';
 
 
 // import { skydiveClubs } from '../../db/data/skydive-clubs';
-// import { addClub } from './web-components/skyduck-weather/utils/add-club';
+// import { addClub } from './web-components/skyduck/utils/add-club';
 // skydiveClubs.forEach((club) => addClub(club));
