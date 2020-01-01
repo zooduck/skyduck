@@ -1,7 +1,7 @@
-import { HTMLZooduckCarouselElement } from '../../zooduck-carousel/zooduck-carousel.component'; // eslint-disable-line no-unused-vars
 import { ForecastTemplate } from './forecast.template';
-import { DailyData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { DailyData, HTMLZooduckCarouselElement } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { averageRatingModifierForDay } from '../utils/average-rating-modifier-for-day';
+import { Hours } from '../utils/hours';
 
 export class ForecastCarouselTemplate {
     private _dailyData: DailyData[];
@@ -59,7 +59,8 @@ export class ForecastCarouselTemplate {
         const days = this._dailyData;
 
         const averageRatingTabs: HTMLElement[] = days.map((day) => {
-            const averageRatingModifier = averageRatingModifierForDay(day.hourly);
+            const daylightHours = new Hours(day, this._timezone).daylightHours;
+            const averageRatingModifier = averageRatingModifierForDay(daylightHours);
 
             const forecastSlideSelector = new DOMParser().parseFromString(`
                 <div class="forecast-slide-selectors__item ${averageRatingModifier}"></div>

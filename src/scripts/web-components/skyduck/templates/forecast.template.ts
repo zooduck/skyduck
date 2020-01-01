@@ -2,6 +2,7 @@ import { HourlyData, ColorModifiersData, ColorModifiers, ColorModifier, DailyDat
 import { weatherRatings } from '../utils/weather-ratings/weather-ratings';
 import { averageRatingModifierForDay } from '../utils/average-rating-modifier-for-day';
 import { imageMap } from '../utils/image-map';
+import { Hours } from '../utils/hours';
 
 export class ForecastTemplate {
     private _defaultForecastHours: number[];
@@ -33,7 +34,8 @@ export class ForecastTemplate {
             return this._buildForecastHour(hour, hourlyDataIndex);
         });
 
-        const averageRatingModifier = averageRatingModifierForDay(hourly);
+        const daylightHours = new Hours(dayForecast, this._timezone).daylightHours;
+        const averageRatingModifier = averageRatingModifierForDay(daylightHours);
         const sunsetColorModifier = `--${weatherRatings.sunset(sunsetTime, this._timezone)}`;
 
         this._forecast = new DOMParser().parseFromString(`
