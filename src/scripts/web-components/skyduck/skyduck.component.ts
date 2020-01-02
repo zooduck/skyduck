@@ -793,7 +793,10 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         if (!this._club && !this._location) {
             await this._initClubs();
-            this.club = this._nearestClub.name;
+
+            this.club = this._nearestClub
+                ? this._nearestClub.name
+                : this._defaultClub;
         }
     }
 
