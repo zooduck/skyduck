@@ -311,6 +311,21 @@ a:hover {
 :host(:not(.--ready)) .forecast-grid {
     display: none;
 }
+.forecast-grid__title {
+    padding: 10px;
+}
+.forecast-grid__title.--red {
+    background-color: var(--red);
+    color: var(--white);
+}
+.forecast-grid__title.--amber {
+    background-color: var(--amber);
+    color: var(--black);
+}
+.forecast-grid__title.--green {
+    background-color: var(--green);
+    color: var(--white);
+}
 .forecast-grid-header {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -330,6 +345,9 @@ a:hover {
     border-color: var(--green);
 }
 .forecast-grid-header-date {
+    display: grid;
+}
+.forecast-grid-header-date__date {
     display: flex;
     align-items: center;
     justify-content: left;

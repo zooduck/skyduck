@@ -1,4 +1,4 @@
-import { HourlyData, ColorModifiersData, ColorModifiers, ColorModifier, DailyData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { HourlyData, ColorModifiersData, ColorModifiers, ColorModifier, DailyData, LocationDetails } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { weatherRatings } from '../utils/weather-ratings/weather-ratings';
 import { averageRatingModifierForDay } from '../utils/average-rating-modifier-for-day';
 import { imageMap } from '../utils/image-map';
@@ -7,10 +7,12 @@ import { Hours } from '../utils/hours';
 export class ForecastTemplate {
     private _defaultForecastHours: number[];
     private _forecast: HTMLElement;
+    private _locationDetails: LocationDetails;
     private _timezone: string;
 
-    constructor(dayForecast: DailyData, defaultForecastHours: number[], timezone: string) {
+    constructor(dayForecast: DailyData, defaultForecastHours: number[], timezone: string, locationDetails: LocationDetails) {
         this._defaultForecastHours = defaultForecastHours;
+        this._locationDetails = locationDetails;
         this._timezone = timezone;
         this._buildForecast(dayForecast);
     }
@@ -37,13 +39,17 @@ export class ForecastTemplate {
         const daylightHours = new Hours(dayForecast, this._timezone).daylightHours;
         const averageRatingModifier = averageRatingModifierForDay(daylightHours);
         const sunsetColorModifier = `--${weatherRatings.sunset(sunsetTime, this._timezone)}`;
+        const { name: title } = this._locationDetails;
 
         this._forecast = new DOMParser().parseFromString(`
             <div class="forecast-grid">
                 <div class="forecast-grid-header ${averageRatingModifier}">
                     <div class="forecast-grid-header-date">
-                        <h2>${day}</h2>
-                        <h1 class="forecast-grid-header-date__date-string">${dateString}</h1>
+                        <div class="forecast-grid-header-date__location">${title}</div>
+                        <div class="forecast-grid-header-date__date">
+                            <h2>${day}</h2>
+                            <h1 class="forecast-grid-header-date__date-string">${dateString}</h1>
+                        </div>
                     </div>
                     <span class="forecast-grid-header__summary">${summary || defaultSummary}</span>
                     <div class="forecast-grid-header-sun-info">

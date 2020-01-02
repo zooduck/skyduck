@@ -54,7 +54,7 @@ export class SkyduckWeatherElements {
 
     public get forecast(): HTMLElement {
         const { daily, timezone } = this._dailyForecast.weather;
-        this._forecastCarousel = new ForecastCarouselTemplate(daily.data, this._defaultForecastHours, timezone).html;
+        this._forecastCarousel = new ForecastCarouselTemplate(daily.data, this._defaultForecastHours, timezone, this._locationDetails).html;
 
         return this._forecastCarousel;
     }
