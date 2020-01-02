@@ -164,6 +164,7 @@ export interface SkydiveClub {
 }
 
 export interface WeatherElements {
+    clubList: HTMLElement;
     footer: HTMLElement;
     forecast: HTMLElement;
     forecastDisplayModeToggle: HTMLElement;

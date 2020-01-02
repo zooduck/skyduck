@@ -4,7 +4,6 @@ import { SkyduckWeather } from './skyduck.weather';
 /* eslint-disable */
 import {
     ModifierClasses,
-    SetContentOptions,
     WeatherElements,
     DailyForecast,
     GeocodeData,
@@ -14,6 +13,7 @@ import {
     Coords,
     HTMLZooduckCarouselElement,
 } from './interfaces/index';
+/* eslint-enable */
 import { LatLonSpin } from './utils/lat-lon-spin';
 import { imageMap } from './utils/image-map';
 import { DateTime } from 'luxon';
@@ -22,9 +22,10 @@ import { wait } from '../../utils/wait/wait';
 import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details/pointer-event-details'; // eslint-disable-line no-unused-vars
 import { LoaderTemplate } from './templates/loader.template';
 import { geocodeLookup } from './fetch/geocode-lookup.fetch';
-import { ClubListCarouselTemplate } from './templates/club-list-carousel.template';
 import { reverseGeocodeLookup } from './fetch/reverse-geocode-lookup.fetch';
 import { skydiveClubsLookup } from './fetch/skydive-clubs.fetch';
+import { escapeSpecialChars } from './utils/escape-special-chars';
+import { sortClubsByCountry } from './utils/sort-clubs-by-country';
 
 interface PointerEvents {
     pointerdown: EventDetails[];
@@ -55,7 +56,6 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _googleMapsKey: string;
     private _hasLoaded = false;
     private _imagesReady = false;
-    private _isSearchInProgress = false;
     private _latLonSpin: LatLonSpin;
     private _loaderMessageElements: LoaderMessageElements;
     private _locationDetails: LocationDetails;
@@ -75,7 +75,7 @@ class HTMLSkyDuckElement extends HTMLElement {
         this.attachShadow({ mode: 'open' });
 
         this._defaultClub = 'skydive algarve';
-        this._firstLoadDelayMillis = 10000;
+        this._firstLoadDelayMillis = 5000;
         this._latLonSpin = new LatLonSpin();
         this._modifierClasses = {
             error: '--error',
@@ -106,12 +106,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         if (val) {
             this.removeAttribute('location');
-
-            if (!this._hasLoaded) {
-                return;
-            }
-
-            this._updateContent();
+            this._onClubChange();
         }
     }
 
@@ -125,38 +120,8 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         if (val) {
             this.removeAttribute('club');
-
-            geocodeLookup(this._location).then((response) => {
-                this._geocodeData = response;
-            }).catch((err) => {
-                console.error(err); // eslint-disable-line no-console
-
-                this._geocodeData = null;
-                this._error = err;
-            }).then(() => {
-                if (!this._hasLoaded) {
-                    return;
-                }
-
-                this._updateContent();
-            });
+            this._onLocationChange();
         }
-    }
-
-    private _getClubData(): SkydiveClub {
-        return this._clubs.find((club: SkydiveClub) => {
-            return new RegExp(this._club).test(club.name);
-        });
-    }
-
-    private _addClubListCarousel() {
-        if (this.shadowRoot.querySelector('#clubListCarousel')) {
-            return;
-        }
-
-        const clubListCarousel = new ClubListCarouselTemplate(this._clubsSortedByCountry, this._nearestClub, this._position).html;
-        this._registerEventsOnCarousel(clubListCarousel);
-        this.shadowRoot.appendChild(clubListCarousel);
     }
 
     private async _addStyleAndLoader() {
@@ -172,6 +137,26 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
 
         searchInput.blur();
+    }
+
+    private _clearLoaderInfoDisplay() {
+        const {
+            loaderInfoLat,
+            loaderInfoLon,
+            loaderInfoPlace,
+            loaderInfoIANA,
+            loaderInfoLocalTime,
+        } = this._loaderMessageElements;
+
+        [
+            loaderInfoLat,
+            loaderInfoLon,
+            loaderInfoPlace,
+            loaderInfoIANA,
+            loaderInfoLocalTime
+        ].forEach((loaderInfoEl: HTMLElement) => {
+            loaderInfoEl.innerHTML = '';
+        });
     }
 
     private _clearContent(): void {
@@ -195,6 +180,18 @@ class HTMLSkyDuckElement extends HTMLElement {
         });
     }
 
+    private _getClubData(): SkydiveClub {
+        if (!this._club) {
+            return;
+        }
+
+        const clubEscaped = escapeSpecialChars(this._club);
+
+        return this._clubs.find((club: SkydiveClub) => {
+            return new RegExp(clubEscaped, 'i').test(club.name);
+        });
+    }
+
     private _getCurrentPosition(): Promise<void> {
         return new Promise((resolve) => {
             navigator.geolocation.getCurrentPosition(async (position) => {
@@ -208,6 +205,48 @@ class HTMLSkyDuckElement extends HTMLElement {
                 resolve();
             });
         });
+    }
+
+    private async _getForecast() {
+        try {
+            if (this._club) {
+                this._forecast = await this._weather.getDailyForecastByClub(this.club);
+
+                const { timezone } = this._forecast.weather;
+                const { name, place: address, site, latitude, longitude } = this._getClubData();
+                const coords = {
+                    latitude,
+                    longitude,
+                };
+
+                this._setLocationDetails(name, address, site, timezone, coords);
+            } else if (this._geocodeData) {
+                this._forecast = await this._weather.getDailyForecastByQuery(this._geocodeData);
+
+                const site = '';
+                const { latitude, longitude, timezone, } = this._forecast.weather;
+                const { countryRegion, formattedAddress, } = this._forecast;
+                const coords = {
+                    latitude,
+                    longitude,
+                };
+
+                const formattedAddressPieces = formattedAddress.split(',').map((piece: string) => {
+                    return piece.trim();
+                });
+                if (!formattedAddressPieces.includes(countryRegion)) {
+                    formattedAddressPieces.push(countryRegion);
+                }
+                const name = formattedAddressPieces[0];
+                const address = formattedAddressPieces.slice(1).join(',');
+
+                this._setLocationDetails(name, address, site, timezone, coords);
+            }
+            this._error = '';
+        } catch (err) {
+            console.error(err); // eslint-disable-line no-console
+            this._error = err;
+        }
     }
 
     private async _getGoogleMapsKey(): Promise<string> {
@@ -255,15 +294,11 @@ class HTMLSkyDuckElement extends HTMLElement {
         const loaderTemplate = new LoaderTemplate();
         const loader = loaderTemplate.html;
 
-        loader.addEventListener('pointerup', (e: PointerEvent) => {
+        loader.addEventListener('click', (e: Event) => {
             e.preventDefault();
 
-            if (this._forecast && this._error) {
-                this._error = '';
-                this.classList.remove(this._modifierClasses.error);
-                this._setContent({
-                    useLoader: false,
-                });
+            if (this._error) {
+                this._setReady();
             }
         });
 
@@ -279,10 +314,67 @@ class HTMLSkyDuckElement extends HTMLElement {
         return styleEl;
     }
 
-    /* eslint-enable indent */
+    private async _onClubChange() {
+        this._setLoading();
+
+        if (!this._clubs) {
+            await this._initClubs();
+        }
+
+        if (!this._getClubData()) {
+            this._error = `Could not find club "${this._club}" in the Skyduck database. Try searching by location instead.`;
+            this._revertContent();
+
+            return;
+        }
+
+        await this._getForecast();
+        this._setContent();
+    }
+
+    private async _onFirstLoad() {
+        this._googleMapsKey =  await this._getGoogleMapsKey();
+
+        await this._addStyleAndLoader();
+
+        this._setLoaderBarSpeed(this._firstLoadDelayMillis);
+
+        await this._initClubs();
+
+        await wait (this._firstLoadDelayMillis);
+    }
+
+    private _onLocationChange() {
+        this._setLoading();
+
+        geocodeLookup(this._location).then(async (response) => {
+            this._geocodeData = response;
+
+            try {
+                await this._getForecast();
+                this._setContent();
+            } catch (err) {
+                this._error = err;
+                this._revertContent();
+            }
+        }).catch((err) => {
+            this._geocodeData = null;
+            this._error = err;
+
+            this._revertContent();
+        });
+    }
+
     private async _initClubs(): Promise<void> {
+        if (this._clubs) {
+            return;
+        }
+
         try {
+            await this._getCurrentPosition();
+
             const clubs = await skydiveClubsLookup(this._position);
+
             if (this._position) {
                 this._sortClubsByDistance(clubs);
 
@@ -300,7 +392,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             }
 
             this._clubs = clubs;
-            this._clubsSortedByCountry = this._sortClubsByCountry(clubs);
+            this._clubsSortedByCountry = sortClubsByCountry(clubs);
         } catch (err) {
             this._error = err;
             this._setLoaderError();
@@ -317,15 +409,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     private _registerEvents(): void {
         this._onSearchSubmit = (e: CustomEvent) => {
-            this._clearContent();
-
             const { value } = e.detail;
-
-            if (!value || this._isSearchInProgress) {
-                return;
-            }
-
-            this._isSearchInProgress = true;
 
             this.location = value;
         };
@@ -335,50 +419,60 @@ class HTMLSkyDuckElement extends HTMLElement {
                 const eventDetails = this._pointerEventDetails.fromPointer(e);
                 this._pointerEvents.pointerdown.push(eventDetails);
             });
-        } else {
+        } else if ('TouchEvent' in window) {
             this.addEventListener('mousedown', (e: MouseEvent) => {
                 const eventDetails = this._pointerEventDetails.fromMouse(e);
                 this._pointerEvents.pointerdown.push(eventDetails);
             });
+        } else {
             this.addEventListener('touchstart', (e: TouchEvent) => {
                 const eventDetails = this._pointerEventDetails.fromTouch(e);
                 this._pointerEvents.pointerdown.push(eventDetails);
             });
         }
 
-        this.shadowRoot.querySelector('zooduck-input')
+        const searchInput = this.shadowRoot.querySelector('zooduck-input');
+        searchInput && searchInput
             .addEventListener('keyup:enter', this._onSearchSubmit);
 
-        this.shadowRoot.querySelector('#clubListCtrl')
-            .addEventListener('pointerup', (e) => {
-                e.preventDefault();
-
+        const clubListCtrl = this.shadowRoot.querySelector('#clubListCtrl');
+        clubListCtrl && clubListCtrl
+            .addEventListener('click', () => {
                 this._showClubList();
             });
 
-        this.shadowRoot.querySelector('#getForecastForCurrentLocation')
-            .addEventListener('pointerup', async (e) => {
-                e.preventDefault();
-
+        const geolocationForecastCtrl = this.shadowRoot.querySelector('#getForecastForCurrentLocation');
+        geolocationForecastCtrl && geolocationForecastCtrl
+            .addEventListener('click', async () => {
                 if (!this._position) {
                     return;
                 }
 
+                this._setLoading();
+
                 try {
                     const reverseGeocodeLookupResponse = await reverseGeocodeLookup(this._position.coords);
                     this._geocodeData = reverseGeocodeLookupResponse;
-                    this.removeAttribute('club');
-                    this._updateContent();
+                    const { name: location } = this._geocodeData;
+
+                    if (!location) {
+                        // If reverse geocode lookup is successful but returns an empty value for "name"
+                        this._error = 'Reverse geocode lookup failed. Unknown error.';
+                        this._setLoaderError();
+
+                        return;
+                    }
+
+                    this.location = location;
                 } catch (err) {
-                    throw Error(err);
+                    this._error = err;
+                    this._setLoaderError();
                 }
             });
 
 
         const forecastDisplayModeToggle = this.shadowRoot.querySelector('#forecastDisplayModeToggle');
-        forecastDisplayModeToggle.addEventListener('pointerup', (e: PointerEvent) => {
-            e.preventDefault();
-
+        forecastDisplayModeToggle && forecastDisplayModeToggle.addEventListener('zooduck-icon-toggle:change', () => {
             const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLZooduckCarouselElement;
 
             forecastCarousel.classList.toggle('--forecast-display-mode-24h');
@@ -387,7 +481,10 @@ class HTMLSkyDuckElement extends HTMLElement {
         });
 
         const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLElement;
-        this._registerEventsOnCarousel(forecastCarousel);
+        forecastCarousel && this._registerEventsOnCarousel(forecastCarousel);
+
+        const clubListCarousel = this.shadowRoot.querySelector('#clubListCarousel') as HTMLElement;
+        clubListCarousel && this._registerEventsOnCarousel(clubListCarousel);
     }
 
     private _registerEventsOnCarousel(carousel: HTMLElement): void {
@@ -398,15 +495,16 @@ class HTMLSkyDuckElement extends HTMLElement {
 
                 this._blurSearchInput();
             });
-        } else {
-            carousel.addEventListener('mousedown', (e: MouseEvent) => {
-                const eventDetails = this._pointerEventDetails.fromMouse(e);
+        } else if ('TouchEvent' in window) {
+            carousel.addEventListener('touchstart', (e: TouchEvent) => {
+                const eventDetails = this._pointerEventDetails.fromTouch(e);
                 this._pointerEvents.pointerdown.push(eventDetails);
 
                 this._blurSearchInput();
             });
-            carousel.addEventListener('touchstart', (e: TouchEvent) => {
-                const eventDetails = this._pointerEventDetails.fromTouch(e);
+        } else {
+            carousel.addEventListener('mousedown', (e: MouseEvent) => {
+                const eventDetails = this._pointerEventDetails.fromMouse(e);
                 this._pointerEvents.pointerdown.push(eventDetails);
 
                 this._blurSearchInput();
@@ -433,9 +531,9 @@ class HTMLSkyDuckElement extends HTMLElement {
 
                 this._setClubToSelectedClubFromList(clubListItem);
             });
-        } else {
-            clubListItemName.addEventListener('mouseup', (e: MouseEvent) => {
-                const pointerupEventDetails = this._pointerEventDetails.fromMouse(e);
+        } else if ('TouchEvent' in window) {
+            clubListItemName.addEventListener('touchend', (e: TouchEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromTouch(e);
                 const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
 
                 if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
@@ -444,9 +542,9 @@ class HTMLSkyDuckElement extends HTMLElement {
 
                 this._setClubToSelectedClubFromList(clubListItem);
             });
-
-            clubListItemName.addEventListener('touchend', (e: TouchEvent) => {
-                const pointerupEventDetails = this._pointerEventDetails.fromTouch(e);
+        } else {
+            clubListItemName.addEventListener('mouseup', (e: MouseEvent) => {
+                const pointerupEventDetails = this._pointerEventDetails.fromMouse(e);
                 const lastPointerdownEventDetails = this._pointerEvents.pointerdown.slice(-1)[0];
 
                 if (!isTap(lastPointerdownEventDetails, pointerupEventDetails)) {
@@ -464,21 +562,14 @@ class HTMLSkyDuckElement extends HTMLElement {
         });
     }
 
-    private _setClubToSelectedClubFromList(clubListItem: HTMLElement) {
-        const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
-        this.club = clubName;
-    }
+    private _revertContent() {
+        console.error(this._error); // eslint-disable-line no-console
 
-    private async _setContent(options: SetContentOptions = { useLoader: true }): Promise<void> {
-        this._isSearchInProgress = false;
+        if (!this._hasLoaded) {
+            this._setBasicContent();
 
-        if (!this._imagesReady) {
-            await this._getImages();
+            return;
         }
-
-        const minTimeToDisplaySpinner = this._hasLoaded ? 500 : 0;
-
-        await wait(minTimeToDisplaySpinner);
 
         if (this._error) {
             this._setLoaderError();
@@ -486,20 +577,88 @@ class HTMLSkyDuckElement extends HTMLElement {
             return;
         }
 
-        if (options.useLoader && this._hasLoaded) {
-            await this._setLoaderInfoDisplay();
+        this._setReady();
+    }
+
+    private async _setBasicContent() {
+        if (this._hasLoaded) {
+            return;
         }
 
-        const googleMapsKey = await this._getGoogleMapsKey();
+        await this._onFirstLoad();
+
+        if (this._error) {
+            this._setLoaderError();
+        }
 
         const weatherElements: WeatherElements = new SkyduckWeatherElements(
             this._locationDetails,
             this._forecast,
-            googleMapsKey,
+            this._googleMapsKey,
             this._version,
+            this._clubsSortedByCountry,
+            this._nearestClub,
+            this._position,
         );
 
         const {
+            header,
+            search,
+            clubList,
+        } = weatherElements;
+
+        this.shadowRoot.appendChild(header);
+        this.shadowRoot.appendChild(search);
+        this.shadowRoot.appendChild(clubList);
+
+        this._registerEvents();
+
+        if (!this._hasLoaded) {
+            this.dispatchEvent(new CustomEvent('load'));
+        }
+
+        this._hasLoaded = true;
+
+        if (this._error) {
+            return;
+        }
+
+        this._setReady();
+
+    }
+
+    private _setClubToSelectedClubFromList(clubListItem: HTMLElement) {
+        const clubName = clubListItem.querySelector('.club-list-item__name').innerHTML;
+        this.club = clubName;
+    }
+
+    private async _setContent() {
+
+        if (!this._hasLoaded) {
+            await this._onFirstLoad();
+        }
+
+        if (!this._imagesReady) {
+            await this._getImages();
+        }
+
+        if (this._hasLoaded) {
+            this._clearContent();
+            await this._setLoaderInfoDisplay();
+        }
+
+        const weatherElements: WeatherElements = new SkyduckWeatherElements(
+            this._locationDetails,
+            this._forecast,
+            this._googleMapsKey,
+            this._version,
+            this._clubsSortedByCountry,
+            this._nearestClub,
+            this._position,
+        );
+
+        const {
+            clubList,
             header,
             locationInfo,
             search,
@@ -507,6 +666,8 @@ class HTMLSkyDuckElement extends HTMLElement {
             forecastDisplayModeToggle,
             footer,
         } = weatherElements;
+
+        this._setReady();
 
         this.shadowRoot.appendChild(header);
         this.shadowRoot.appendChild(search);
@@ -517,14 +678,13 @@ class HTMLSkyDuckElement extends HTMLElement {
         await this._customElementLoaded(forecast as HTMLZooduckCarouselElement);
 
         this.shadowRoot.appendChild(footer);
-
-        this._addClubListCarousel();
+        this.shadowRoot.appendChild(clubList);
 
         this._registerEvents();
 
-        this.classList.add(this._modifierClasses.ready);
-        this.classList.remove(this._modifierClasses.error);
-        this.classList.remove(this._modifierClasses.init);
+        if (!this._hasLoaded) {
+            this.dispatchEvent(new CustomEvent('load'));
+        }
 
         this._hasLoaded = true;
 
@@ -587,6 +747,20 @@ class HTMLSkyDuckElement extends HTMLElement {
         await wait(delayBetweenInfoMessages);
     }
 
+    private _setLoading() {
+        this.classList.remove(this._modifierClasses.ready);
+    }
+
+    private _setReady() {
+        this.classList.add(this._modifierClasses.ready);
+        this.classList.remove(this._modifierClasses.error);
+        this.classList.remove(this._modifierClasses.init);
+
+        this._clearLoaderInfoDisplay();
+
+        this.scrollIntoView();
+    }
+
     private _showClubList() {
         const clubList = this.shadowRoot.querySelector('#clubListCarousel');
         clubList.scrollIntoView({ behavior: 'smooth' });
@@ -602,34 +776,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         clubs.sort((a: SkydiveClub, b: SkydiveClub) => {
             return a.distance - b.distance;
         });
-    }
-
-    private _sortClubsByCountry(clubs: SkydiveClub[]): any {
-        const clubsByCountry = {};
-        clubs.forEach((club: SkydiveClub) => {
-            if (!clubsByCountry[club.country]) {
-                clubsByCountry[club.country] = {
-                    country: club.country,
-                    furthestDZDistance: .1,
-                    list: [],
-                };
-            }
-            const { list, furthestDZDistance } = clubsByCountry[club.country];
-
-            list.push(club);
-
-            if (club.distance > furthestDZDistance) {
-                clubsByCountry[club.country].furthestDZDistance = club.distance;
-            }
-        });
-
-        const sortedKeys = Object.keys(clubsByCountry).sort();
-        const clubsByCountrySorted = {};
-        sortedKeys.forEach((key: string) => {
-            clubsByCountrySorted[key] = clubsByCountry[key];
-        });
-
-        return clubsByCountrySorted;
     }
 
     private _syncStringAttr(name: string, val: string) {
@@ -650,59 +796,8 @@ class HTMLSkyDuckElement extends HTMLElement {
         };
     }
 
-    private async _updateContent(): Promise<void> {
-        this._clearContent();
-
-        if (!this.club && !this._geocodeData) {
-            this._setContent();
-
-            return;
-        }
-
-        try {
-            if (this._club) {
-                this._forecast = await this._weather.getDailyForecastByClub(this.club);
-
-                const { timezone } = this._forecast.weather;
-                const { name, place: address, site, latitude, longitude } = this._getClubData();
-                const coords = {
-                    latitude,
-                    longitude,
-                };
-
-                this._setLocationDetails(name, address, site, timezone, coords);
-            } else if (this._geocodeData) {
-                this._forecast = await this._weather.getDailyForecastByQuery(this._geocodeData);
-
-                const site = '';
-                const { latitude, longitude, timezone } = this._forecast.weather;
-                const { countryRegion: address, formattedAddress: name } = this._forecast;
-                const coords = {
-                    latitude,
-                    longitude,
-                };
-
-                this._setLocationDetails(name, address, site, timezone, coords);
-            }
-            this._error = '';
-        } catch (err) {
-            console.error(err); // eslint-disable-line no-console
-            this._error = err;
-        } finally {
-            await this._setContent();
-        }
-    }
-
     protected async _init(): Promise<void> {
         this.classList.add(this._modifierClasses.init);
-
-        await this._getCurrentPosition();
-
-        await this._addStyleAndLoader();
-
-        this._setLoaderBarSpeed(this._firstLoadDelayMillis);
-
-        await this._initClubs();
     }
 
     protected attributeChangedCallback(name: string, _oldVal: any, newVal: any) {
@@ -715,13 +810,11 @@ class HTMLSkyDuckElement extends HTMLElement {
         const versionResponse = await fetch('/version');
         this._version = await versionResponse.text();
 
+        if (!this._club && !this._location) {
+            this.club = this._defaultClub;
+        }
+
         await this._init();
-
-        await wait(this._firstLoadDelayMillis);
-
-        await this._updateContent();
-
-        this.dispatchEvent(new CustomEvent('load'));
     }
 }
 

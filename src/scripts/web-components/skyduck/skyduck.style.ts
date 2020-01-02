@@ -6,6 +6,7 @@ export const style = `
     position: relative;
     display: block;
     width: 100%;
+    height: 100vh;
     max-width: 768px;
     min-height: 100vh;
     margin: 0 auto;
@@ -17,6 +18,7 @@ export const style = `
     color: var(--black);
 
     --font-size-base: 16px;
+    --slide-selectors-height: 60px;
 
     --red: rgb(255, 99, 71, .8);
     --amber: rgba(255, 165, 0, .8);
@@ -30,6 +32,9 @@ export const style = `
     --paleskyblue: rgba(135, 206, 250, .4);
     --gray: #999;
     --lightgray: lightgray;
+}
+:host(.--ready) {
+    height: auto;
 }
 @media (max-width: 320px) {
     :host {
@@ -86,8 +91,8 @@ a:hover {
     justify-items: center;
     width: 100%;
     height: 100vh;
-    background-color: var(--white);
-    color: var(--lightskyblue);
+    background-color: var(--lightskyblue);
+    color: var(--white);
     padding: 10px;
     font-size: 1.2em;
 }
@@ -96,6 +101,7 @@ a:hover {
 }
 .loader__error {
     display: none;
+    grid-row: 2;
     align-self: start;
     text-align: center;
     border: solid 3px var(--red);
@@ -111,6 +117,9 @@ a:hover {
     align-self: end;
     width: 200px;
     text-align: center;
+}
+:host(.--error) .loader-info {
+    display: none;
 }
 .loader-info__place {
     white-space: nowrap;
@@ -153,10 +162,10 @@ a:hover {
     align-items: center;
     width: 100%;
     height: 10px;
-    background-color: var(--paleskyblue);
+    background-color: rgba(255, 255, 255, .5);
 }
 .loader-bar__inner {
-    background-color: var(--lightskyblue);
+    background-color: var(--white);
     width: 0;
     height: 100%;
     animation: loadingBar linear;
@@ -164,7 +173,8 @@ a:hover {
 :host(:not(.--init)) .loader-bar {
     visibility: hidden;
 }
-:host(.--error) .loader__icon {
+:host(.--error) .loader__icon,
+:host(.--error) .loader-bar {
     display: none;
 }
 
@@ -263,7 +273,7 @@ a:hover {
     display: grid;
     grid-template-columns: repeat(8, auto);
     grid-gap: 5px;
-    height: 60px;
+    height: var(--slide-selectors-height);
     max-width: 450px;
     margin: 0 auto;
     padding: 20px 10px 0 10px;
@@ -292,6 +302,7 @@ a:hover {
     grid-template-rows: repeat(2, 0fr) repeat(3, auto);
     grid-template-columns: 100%;
     grid-row-gap: 10px;
+    min-height: calc(100vh - var(--slide-selectors-height));
     padding: 10px;
 }
 #forecastCarousel.--forecast-display-mode-24h .forecast-grid {
@@ -471,7 +482,7 @@ a:hover {
     grid-column: 2;
     grid-row: 1 / span 2;
     display: grid;
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(3, minmax(55px, auto));
     grid-template-rows: repeat(2, auto);
     grid-column-gap: 5px;
     align-self: end;
@@ -531,7 +542,7 @@ zooduck-icon-circle .icon-circle {
 }
 @media (min-width: 640px) {
     .forecast-data-grid {
-        grid-template-columns: repeat(5, auto);
+        grid-template-columns: repeat(5, minmax(55px, auto));
     }
     .forecast-data-grid-type.--landscape-only {
         display: grid;
@@ -554,6 +565,7 @@ zooduck-icon-circle .icon-circle {
     padding: 10px;
     user-select: text;
     cursor: default;
+    min-height: 100vh;
 }
 .club-list-container__country {
     background-color: #eee;

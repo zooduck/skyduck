@@ -38,7 +38,8 @@ export class LoaderTemplate {
             <zooduck-icon-skyduck-in-flight
                 class="loader__icon"
                 size="200"
-                color="var(--lightskyblue)"></zooduck-icon-skyduck-in-flight>
+                color="var(--white)"
+                backgroundcolor="var(--lightskyblue)"></zooduck-icon-skyduck-in-flight>
         `, 'text/html').body.firstChild as HTMLElement;
     }
 
