@@ -58,6 +58,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _imagesReady = false;
     private _latLonSpin: LatLonSpin;
     private _loaderMessageElements: LoaderMessageElements;
+    private _location: string;
     private _locationDetails: LocationDetails;
     private _modifierClasses: ModifierClasses;
     private _nearestClub: SkydiveClub;
@@ -65,7 +66,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _pointerEventDetails: PointerEventDetails;
     private _pointerEvents: PointerEvents;
     private _position: Position;
-    private _location: string;
+    private _showMap: boolean;
     private _version: string;
     private _weather: SkyduckWeather;
 
@@ -86,6 +87,7 @@ class HTMLSkyDuckElement extends HTMLElement {
         this._pointerEvents = {
             pointerdown: [],
         };
+        this._showMap = true;
         this._weather = new SkyduckWeather();
     }
 
@@ -472,6 +474,12 @@ class HTMLSkyDuckElement extends HTMLElement {
             forecastCarousel.updateCarouselHeight();
         });
 
+        const mapDisplayToggle = this.shadowRoot.querySelector('#mapDisplayToggle');
+        mapDisplayToggle && mapDisplayToggle.addEventListener('zooduck-icon-toggle:change', () => {
+            this.classList.toggle('--hide-map');
+            this._showMap = !this._showMap;
+        });
+
         const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLElement;
         forecastCarousel && this._registerEventsOnCarousel(forecastCarousel);
 
@@ -591,6 +599,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._clubsSortedByCountry,
             this._nearestClub,
             this._position,
+            this._showMap,
         );
 
         const {
@@ -647,6 +656,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._clubsSortedByCountry,
             this._nearestClub,
             this._position,
+            this._showMap,
         );
 
         const {

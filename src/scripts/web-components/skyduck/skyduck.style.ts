@@ -222,6 +222,9 @@ a:hover {
     grid-gap: 10px;
     padding: 0 10px;
 }
+:host(.--hide-map) .club-info-grid {
+    display: none;
+}
 .club-info-grid__map {
     grid-column: 1 / span 2;
     width: 100%;
@@ -264,6 +267,11 @@ a:hover {
 }
 .controls__view-club-list:hover {
     text-decoration: underline;
+}
+.controls__toggles {
+    display: grid;
+    justify-content: right;
+    grid-gap: 10px;
 }
 .controls__forecast-display-mode-toggle {
     justify-self: right;
