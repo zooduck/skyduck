@@ -589,9 +589,9 @@ zooduck-icon-circle .icon-circle {
 
 .club-list-container {
     padding: 10px;
-    user-select: text;
     cursor: default;
     min-height: 100vh;
+    user-select: none;
 }
 .club-list-container__country {
     background-color: #eee;
@@ -612,9 +612,13 @@ zooduck-icon-circle .icon-circle {
 .club-list-item__name {
     cursor: pointer;
     justify-self: left;
+    user-select: text;
 }
 .club-list-item__name:hover {
     text-decoration: underline;
+}
+.club-list-item__place {
+    user-select: text;
 }
 .club-list-item__site-link {
     justify-self: left;
