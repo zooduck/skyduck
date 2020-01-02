@@ -379,16 +379,8 @@ class HTMLSkyDuckElement extends HTMLElement {
                 this._sortClubsByDistance(clubs);
 
                 this._nearestClub = clubs[0];
-
-                if (!this._club && !this._location) {
-                    this.club = this._nearestClub.name;
-                }
             } else {
                 this._sortClubsByName(clubs);
-
-                if (!this._club && !this._location) {
-                    this.club = this._defaultClub;
-                }
             }
 
             this._clubs = clubs;
@@ -798,6 +790,11 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     protected async _init(): Promise<void> {
         this.classList.add(this._modifierClasses.init);
+
+        if (!this._club && !this._location) {
+            await this._initClubs();
+            this.club = this._nearestClub.name;
+        }
     }
 
     protected attributeChangedCallback(name: string, _oldVal: any, newVal: any) {
@@ -809,10 +806,6 @@ class HTMLSkyDuckElement extends HTMLElement {
     protected async connectedCallback() {
         const versionResponse = await fetch('/version');
         this._version = await versionResponse.text();
-
-        if (!this._club && !this._location) {
-            this.club = this._defaultClub;
-        }
 
         await this._init();
     }
