@@ -104,10 +104,10 @@ a:hover {
     grid-row: 2;
     align-self: start;
     text-align: center;
-    border: solid 3px var(--red);
+    border: solid 3px var(--white);
     padding: 10px;
     max-width: 450px;
-    color: var(--red);
+    color: var(--white);
 }
 :host(.--error) .loader__error {
     display: block;
