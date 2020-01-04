@@ -28,6 +28,10 @@ import { escapeSpecialChars } from './utils/escape-special-chars';
 import { sortClubsByCountry } from './utils/sort-clubs-by-country';
 import { getCurrentPosition } from './utils/get-current-position';
 
+interface AnimateMapOptions {
+    hideMap: boolean;
+}
+
 interface PointerEvents {
     pointerdown: EventDetails[];
 }
@@ -62,6 +66,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _pointerEvents: PointerEvents;
     private _position: Position;
     private _showMap: boolean;
+    private _transitionSpeedInMillis: number;
     private _userDeniedGeolocation = false;
     private _version: string;
     private _weather: SkyduckWeather;
@@ -84,6 +89,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             pointerdown: [],
         };
         this._showMap = true;
+        this._transitionSpeedInMillis = 250;
         this._weather = new SkyduckWeather();
     }
 
@@ -122,7 +128,28 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
     }
 
-    private async _addStyleAndLoader() {
+    private async _animateMap(options: AnimateMapOptions) {
+        const { hideMap } = options;
+        const clubInfoGrid = this.shadowRoot.querySelector('.club-info-grid') as HTMLElement;
+
+        if (!clubInfoGrid) {
+            return;
+        }
+
+        if (hideMap) {
+            clubInfoGrid.style.height = `${clubInfoGrid.offsetHeight}px`;
+            clubInfoGrid.style.transform = 'translateX(-100%)';
+            await wait(this._transitionSpeedInMillis);
+            clubInfoGrid.style.height = '0';
+
+            return;
+        }
+
+        clubInfoGrid.style.height = 'auto';
+        clubInfoGrid.style.transform = 'translateX(0)';
+    }
+
+    private _addStyleAndLoader() {
         this.shadowRoot.appendChild(this._getStyle());
         this.shadowRoot.appendChild(this._getLoader());
     }
@@ -292,7 +319,9 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     private _getStyle(): HTMLStyleElement {
         const styleEl = document.createElement('style');
-        styleEl.textContent = style;
+        styleEl.textContent = style({
+            transitionSpeedInMillis: this._transitionSpeedInMillis,
+        });
 
         return styleEl;
     }
@@ -318,7 +347,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private async _onFirstLoad() {
         this._googleMapsKey =  await this._getGoogleMapsKey();
 
-        await this._addStyleAndLoader();
+        this._addStyleAndLoader();
 
         this._setLoaderBarSpeed(this._firstLoadDelayMillis);
 
@@ -462,8 +491,8 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         const mapDisplayToggle = this.shadowRoot.querySelector('#mapDisplayToggle');
         mapDisplayToggle && mapDisplayToggle.addEventListener('zooduck-icon-toggle:change', () => {
-            this.classList.toggle('--hide-map');
             this._showMap = !this._showMap;
+            this._animateMap({ hideMap: !this._showMap });
         });
 
         const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLElement;

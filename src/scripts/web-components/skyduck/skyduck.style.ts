@@ -1,4 +1,11 @@
-export const style = `
+interface StyleOptions {
+    transitionSpeedInMillis: number;
+}
+
+export const style = (styleOptions: StyleOptions) => {
+    const { transitionSpeedInMillis } = styleOptions;
+
+    return `
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Luckiest+Guy&display=swap');
 
@@ -183,7 +190,7 @@ a:hover {
     color: rgba(0, 0, 0, .52);
     font-size: 14px;
     padding: 10px;
-    transition: all .25s;
+    transition: all ${transitionSpeedInMillis}ms;
     box-shadow: 2px 2px 10px #ccc;
 }
 @media (min-width: 768px) {
@@ -236,9 +243,7 @@ a:hover {
     grid-template-columns: 1fr auto;
     grid-gap: 10px;
     padding: 0 10px;
-}
-:host(.--hide-map) .club-info-grid {
-    display: none;
+    transition: all ${transitionSpeedInMillis}ms;
 }
 .club-info-grid__map {
     grid-column: 1 / span 2;
@@ -443,7 +448,7 @@ a:hover {
 }
 #forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast,
 #forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
-    animation: slideOnHourlyForecast .25s both;
+    animation: slideOnHourlyForecast ${transitionSpeedInMillis}ms both;
 }
 #forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
     height: auto;
@@ -576,7 +581,7 @@ zooduck-icon-circle .icon-circle {
     color: var(--white);
 }
 .forecast-data-grid__data.--amber {
-   background-color: var(--amber);
+    background-color: var(--amber);
 }
 .forecast-data-grid__data.--green {
     background-color: var(--green);
@@ -656,4 +661,5 @@ zooduck-icon-circle .icon-circle {
     white-space: nowrap;
     font-size: 22px;
 }
-`;
+    `;
+};
