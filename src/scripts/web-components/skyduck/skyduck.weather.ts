@@ -84,8 +84,16 @@ export class SkyduckWeather {
         };
     }
 
-    public async getDailyForecastByClub(name: string): Promise<DailyForecast> {
-        const skydiveClub: SkydiveClub = await querySkydiveClub(name);
+    public async getDailyForecastByClub(name: string, clubList: SkydiveClub[]): Promise<DailyForecast> {
+        let skydiveClub: SkydiveClub;
+
+        if (clubList) {
+            skydiveClub = clubList.find((club: SkydiveClub) => {
+                return new RegExp(name, 'i').test(club.name);
+            });
+        } else {
+            skydiveClub = await querySkydiveClub(name);
+        }
 
         if (!skydiveClub) {
             throw Error(`Could not find club "${name}" in the skyduck database. Try searching by location instead.`);

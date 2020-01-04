@@ -287,6 +287,7 @@ a:hover {
     display: grid;
     justify-content: right;
     grid-gap: 10px;
+    grid-column: 2;
 }
 .controls__forecast-display-mode-toggle {
     justify-self: right;

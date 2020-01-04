@@ -165,10 +165,10 @@ export interface SkydiveClub {
 
 export interface WeatherElements {
     clubList: HTMLElement;
+    controls: HTMLElement;
     geolocationError: HTMLElement;
     footer: HTMLElement;
     forecast: HTMLElement;
-    forecastDisplayModeToggle: HTMLElement;
     locationInfo: HTMLElement;
     header: HTMLElement;
     search: HTMLElement;

@@ -193,7 +193,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private async _getForecast() {
         try {
             if (this._club) {
-                this._forecast = await this._weather.getDailyForecastByClub(this.club);
+                this._forecast = await this._weather.getDailyForecastByClub(this._club, this._clubs);
 
                 const { timezone } = this._forecast.weather;
                 const { name, place: address, site, latitude, longitude } = this._getClubData();
@@ -227,8 +227,8 @@ class HTMLSkyDuckElement extends HTMLElement {
             }
             this._error = '';
         } catch (err) {
-            console.error(err); // eslint-disable-line no-console
             this._error = err;
+            this._revertContent();
         }
     }
 
@@ -647,12 +647,12 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         const {
             clubList,
+            controls,
             geolocationError,
             header,
             locationInfo,
             search,
             forecast,
-            forecastDisplayModeToggle,
             footer,
         } = weatherElements;
 
@@ -665,7 +665,7 @@ class HTMLSkyDuckElement extends HTMLElement {
         this.shadowRoot.appendChild(header);
         this.shadowRoot.appendChild(search);
         this.shadowRoot.appendChild(locationInfo);
-        this.shadowRoot.appendChild(forecastDisplayModeToggle);
+        this.shadowRoot.appendChild(controls);
         this.shadowRoot.appendChild(forecast);
 
         await this._customElementLoaded(forecast as HTMLZooduckCarouselElement);

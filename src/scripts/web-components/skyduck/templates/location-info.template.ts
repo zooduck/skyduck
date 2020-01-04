@@ -2,6 +2,7 @@ import { GoogleMapTemplate } from './google-map.template';
 import { PlaceTemplate } from './place.template';
 import { LocalTimeAndUnitsInfoTemplate } from './local-time-and-units-info.template';
 import { LocationDetails } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { NotFoundTemplate } from './not-found.template';
 
 export class LocationInfoTemplate {
     private _googleMapsKey: string;
@@ -16,6 +17,12 @@ export class LocationInfoTemplate {
     }
 
     private _buildLocationInfo(): void {
+        if (!this._locationDetails) {
+            this._locationInfo = new NotFoundTemplate('LOCATION_DETAILS_NOT_FOUND').html;
+
+            return;
+        }
+
         this._locationInfo = document.createElement('div') as HTMLElement;
         this._locationInfo.className = 'club-info-grid';
 

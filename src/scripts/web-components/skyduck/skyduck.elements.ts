@@ -8,12 +8,14 @@ import { LocationInfoTemplate } from './templates/location-info.template';
 import { SearchTemplate } from './templates/search.template';
 import { ClubListCarouselTemplate } from './templates/club-list-carousel.template';
 import { GeolocationErrorTemplate } from './templates/geolocation-error.template';
+import { NotFoundTemplate } from './templates/not-found.template';
 /* eslint-enable */
 
 export class SkyduckWeatherElements {
     private _dailyForecast: DailyForecast;
     private _forecastCarousel: HTMLZooduckCarouselElement;
     private _googleMapsKey: string;
+    private _hasClubs: boolean;
     private _locationDetails: LocationDetails;
     private _defaultForecastHours: number[];
     private _version: string;
@@ -36,6 +38,7 @@ export class SkyduckWeatherElements {
         this._dailyForecast = dailyForecast;
         this._defaultForecastHours = [9, 12, 15];
         this._googleMapsKey = googleMapsKey;
+        this._hasClubs = Object.keys(clubsSortedByCountry).length > 0;
         this._locationDetails = locationDetails;
         this._version = version ? `v${version.split('-')[0]}` : '';
         this._clubsSortedByCountry = clubsSortedByCountry;
@@ -46,6 +49,10 @@ export class SkyduckWeatherElements {
     }
 
     public get clubList(): HTMLElement {
+        if (!this._hasClubs) {
+            return new NotFoundTemplate('CLUBS_NOT_FOUND').html;
+        }
+
         return new ClubListCarouselTemplate(this._clubsSortedByCountry, this._nearestClub, this._position).html;
     }
 
@@ -58,20 +65,28 @@ export class SkyduckWeatherElements {
     }
 
     public get footer(): HTMLElement {
+        if (!this._dailyForecast) {
+            return new NotFoundTemplate('FORECAST_NOT_FOUND').html;
+        }
+
         const { requestTime } = this._dailyForecast.weather;
 
         return new FooterTemplate(requestTime).html;
     }
 
     public get forecast(): HTMLElement {
+        if (!this._dailyForecast) {
+            return new NotFoundTemplate('FORECAST_NOT_FOUND').html;
+        }
+
         const { daily, timezone } = this._dailyForecast.weather;
         this._forecastCarousel = new ForecastCarouselTemplate(daily.data, this._defaultForecastHours, timezone, this._locationDetails).html;
 
         return this._forecastCarousel;
     }
 
-    public get forecastDisplayModeToggle(): HTMLElement {
-        return new ControlsTemplate(this._showMap).html;
+    public get controls(): HTMLElement {
+        return new ControlsTemplate(this._showMap, this._hasClubs).html;
     }
 
     public get header(): HTMLElement {
