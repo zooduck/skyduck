@@ -4,11 +4,9 @@ export class GoogleMapTemplate {
     private _coords: Coords;
     private _googleMap: HTMLIFrameElement;
     private _googleMapsKey: string;
-    private _q: string;
 
-    constructor(googleMapsKey: string, q: string, coords: Coords) {
+    constructor(googleMapsKey: string, coords: Coords) {
         this._googleMapsKey = googleMapsKey;
-        this._q = q;
         this._coords = coords;
         this._buildGoogleMap();
     }
@@ -16,7 +14,7 @@ export class GoogleMapTemplate {
     private _buildGoogleMap(): void {
         const params = {
             key: this._googleMapsKey,
-            q: this._q,
+            q: `${this._coords.latitude},${this._coords.longitude}`,
             zoom: '8',
             center: `${this._coords.latitude},${this._coords.longitude}`,
             maptype: 'roadmap',

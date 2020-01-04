@@ -19,9 +19,9 @@ export class LocationInfoTemplate {
         this._locationInfo = document.createElement('div') as HTMLElement;
         this._locationInfo.className = 'club-info-grid';
 
-        const { address, coords, timezone } = this._locationDetails;
+        const { coords, timezone } = this._locationDetails;
 
-        this._locationInfo.appendChild(new GoogleMapTemplate(this._googleMapsKey, address, coords).html);
+        this._locationInfo.appendChild(new GoogleMapTemplate(this._googleMapsKey, coords).html);
         this._locationInfo.appendChild(new PlaceTemplate(this._locationDetails).html);
         this._locationInfo.appendChild(new LocalTimeAndUnitsInfoTemplate(timezone).html);
     }
