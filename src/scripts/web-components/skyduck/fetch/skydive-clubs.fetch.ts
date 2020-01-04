@@ -17,7 +17,7 @@ export const skydiveClubsLookup = async (position: Position): Promise<SkydiveClu
         }
 
         const json = await graphqlResponse.json();
-        const clubs = json.data.clubs.map((club: SkydiveClub) => {
+        const clubs: SkydiveClub[] = json.data.clubs.map((club: SkydiveClub) => {
             const distanceInMiles = position
                 ? new DistanceBetweenPoints({
                     from: {

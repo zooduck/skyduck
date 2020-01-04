@@ -26,6 +26,7 @@ import { reverseGeocodeLookup } from './fetch/reverse-geocode-lookup.fetch';
 import { skydiveClubsLookup } from './fetch/skydive-clubs.fetch';
 import { escapeSpecialChars } from './utils/escape-special-chars';
 import { sortClubsByCountry } from './utils/sort-clubs-by-country';
+import { getCurrentPosition } from './utils/get-current-position';
 
 interface PointerEvents {
     pointerdown: EventDetails[];
@@ -36,12 +37,6 @@ type LoaderMessageElements = {
 }
 
 const tagName = 'sky-duck';
-const geolocationBlockedByUserMessage = `
-Geolocation permission has been blocked
- as the user has dismissed the permission prompt.
- This can be reset in Page Info which can be accessed
- by clicking the lock icon next to the URL.
-`.trim().replace(/\n/g, '');
 
 /* eslint-enable */
 class HTMLSkyDuckElement extends HTMLElement {
@@ -67,6 +62,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _pointerEvents: PointerEvents;
     private _position: Position;
     private _showMap: boolean;
+    private _userDeniedGeolocation = false;
     private _version: string;
     private _weather: SkyduckWeather;
 
@@ -191,21 +187,6 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         return this._clubs.find((club: SkydiveClub) => {
             return new RegExp(clubEscaped, 'i').test(club.name);
-        });
-    }
-
-    private _getCurrentPosition(): Promise<void> {
-        return new Promise((resolve) => {
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                this._position = position;
-                resolve();
-            }, async (err) => {
-                const errorMessage = err.code === 1
-                    ? geolocationBlockedByUserMessage
-                    : err.message;
-                alert(errorMessage);
-                resolve();
-            });
         });
     }
 
@@ -343,7 +324,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         await this._initClubs();
 
-        await wait (this._firstLoadDelayMillis);
+        await wait(this._firstLoadDelayMillis);
     }
 
     private _onLocationChange() {
@@ -373,8 +354,13 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
 
         try {
-            await this._getCurrentPosition();
+            this._position = await getCurrentPosition();
+        } catch (err) {
+            console.error(err); // eslint-disable-line no-console
+            this._userDeniedGeolocation = true;
+        }
 
+        try {
             const clubs = await skydiveClubsLookup(this._position);
 
             if (this._position) {
@@ -600,6 +586,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._nearestClub,
             this._position,
             this._showMap,
+            this._userDeniedGeolocation,
         );
 
         const {
@@ -625,7 +612,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
 
         this._setReady();
-
     }
 
     private _setClubToSelectedClubFromList(clubListItem: HTMLElement) {
@@ -634,7 +620,6 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private async _setContent() {
-
         if (!this._hasLoaded) {
             await this._onFirstLoad();
         }
@@ -657,10 +642,12 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._nearestClub,
             this._position,
             this._showMap,
+            this._userDeniedGeolocation,
         );
 
         const {
             clubList,
+            geolocationError,
             header,
             locationInfo,
             search,
@@ -670,6 +657,10 @@ class HTMLSkyDuckElement extends HTMLElement {
         } = weatherElements;
 
         this._setReady();
+
+        if (this._userDeniedGeolocation) {
+            this.shadowRoot.appendChild(geolocationError);
+        }
 
         this.shadowRoot.appendChild(header);
         this.shadowRoot.appendChild(search);

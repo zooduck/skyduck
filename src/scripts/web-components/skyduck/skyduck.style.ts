@@ -178,6 +178,21 @@ a:hover {
     display: none;
 }
 
+.geolocation-error {
+    background-color: lightgoldenrodyellow;
+    color: rgba(0, 0, 0, .52);
+    font-size: 14px;
+    padding: 10px;
+    transition: all .25s;
+    box-shadow: 2px 2px 10px #ccc;
+}
+@media (min-width: 768px) {
+    .geolocation-error {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}
+
 .header {
     position: relative;
     display: grid;

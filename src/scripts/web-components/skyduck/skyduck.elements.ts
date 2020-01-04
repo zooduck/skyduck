@@ -7,6 +7,7 @@ import { HeaderTemplate } from './templates/header.template';
 import { LocationInfoTemplate } from './templates/location-info.template';
 import { SearchTemplate } from './templates/search.template';
 import { ClubListCarouselTemplate } from './templates/club-list-carousel.template';
+import { GeolocationErrorTemplate } from './templates/geolocation-error.template';
 /* eslint-enable */
 
 export class SkyduckWeatherElements {
@@ -20,6 +21,7 @@ export class SkyduckWeatherElements {
     private _nearestClub: SkydiveClub;
     private _position: Position;
     private _showMap: boolean;
+    private _userDeniedGeolocation: boolean;
 
     constructor(
         locationDetails: LocationDetails,
@@ -29,7 +31,8 @@ export class SkyduckWeatherElements {
         clubsSortedByCountry: ClubListsSortedByCountry,
         nearestClub: SkydiveClub,
         position: Position,
-        showMap: boolean) {
+        showMap: boolean,
+        userDeniedGeolocation: boolean) {
         this._dailyForecast = dailyForecast;
         this._defaultForecastHours = [9, 12, 15];
         this._googleMapsKey = googleMapsKey;
@@ -39,10 +42,15 @@ export class SkyduckWeatherElements {
         this._nearestClub = nearestClub;
         this._position = position;
         this._showMap = showMap;
+        this._userDeniedGeolocation = userDeniedGeolocation;
     }
 
     public get clubList(): HTMLElement {
         return new ClubListCarouselTemplate(this._clubsSortedByCountry, this._nearestClub, this._position).html;
+    }
+
+    public get geolocationError(): HTMLElement {
+        return new GeolocationErrorTemplate().html;
     }
 
     public get locationInfo(): HTMLElement {
@@ -67,7 +75,7 @@ export class SkyduckWeatherElements {
     }
 
     public get header(): HTMLElement {
-        return new HeaderTemplate(this._version).html;
+        return new HeaderTemplate(this._version, this._userDeniedGeolocation).html;
     }
 
     public get search(): HTMLElement {
