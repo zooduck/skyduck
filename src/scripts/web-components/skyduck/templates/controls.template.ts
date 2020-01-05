@@ -5,12 +5,15 @@ export class ControlsTemplate {
     private _controls: HTMLElement;
     private _forecastDisplayMode: ForecastDisplayMode;
     private _hasClubList: boolean;
+    private _hasForecast: boolean;
     private _mapDisplayMode: MapDisplayMode;
 
-    constructor(mapDisplayMode: MapDisplayMode, forecastDisplayMode: ForecastDisplayMode, hasClubList: boolean) {
+    constructor(mapDisplayMode: MapDisplayMode, forecastDisplayMode: ForecastDisplayMode, hasClubList: boolean, hasForecast: boolean) {
         this._forecastDisplayMode = forecastDisplayMode;
         this._hasClubList = hasClubList;
+        this._hasForecast = hasForecast;
         this._mapDisplayMode = mapDisplayMode;
+
         this._buildControls();
     }
 
@@ -25,6 +28,12 @@ export class ControlsTemplate {
     }
 
     private _buildControls(): void {
+        if (!this._hasForecast) {
+            this._controls = new NotFoundTemplate('FORECAST_NOT_FOUND').html;
+
+            return;
+        }
+
         const mapDisplayToggleState = this._mapDisplayMode;
         const forecastDisplayModeToggleState = this._forecastDisplayMode === '24h'
             ? 'on'

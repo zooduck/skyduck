@@ -16,7 +16,8 @@ export class SkyduckWeatherElements {
     private _forecastCarousel: HTMLZooduckCarouselElement;
     private _forecastDisplayMode: ForecastDisplayMode;
     private _googleMapsKey: string;
-    private _hasClubs: boolean;
+    private _hasClubList: boolean;
+    private _hasForecast: boolean;
     private _locationDetails: LocationDetails;
     private _mapDisplayMode: MapDisplayMode;
     private _defaultForecastHours: number[];
@@ -41,7 +42,8 @@ export class SkyduckWeatherElements {
         this._defaultForecastHours = [9, 12, 15];
         this._forecastDisplayMode = forecastDisplayMode;
         this._googleMapsKey = googleMapsKey;
-        this._hasClubs = Object.keys(clubsSortedByCountry).length > 0;
+        this._hasClubList = Object.keys(clubsSortedByCountry).length > 0;
+        this._hasForecast = this._dailyForecast !== undefined;
         this._locationDetails = locationDetails;
         this._mapDisplayMode = mapDisplayMode;
         this._version = version ? `v${version.split('-')[0]}` : '';
@@ -52,7 +54,7 @@ export class SkyduckWeatherElements {
     }
 
     public get clubList(): HTMLElement {
-        if (!this._hasClubs) {
+        if (!this._hasClubList) {
             return new NotFoundTemplate('CLUBS_NOT_FOUND').html;
         }
 
@@ -89,7 +91,7 @@ export class SkyduckWeatherElements {
     }
 
     public get controls(): HTMLElement {
-        return new ControlsTemplate(this._mapDisplayMode, this._forecastDisplayMode, this._hasClubs).html;
+        return new ControlsTemplate(this._mapDisplayMode, this._forecastDisplayMode, this._hasClubList, this._hasForecast).html;
     }
 
     public get header(): HTMLElement {

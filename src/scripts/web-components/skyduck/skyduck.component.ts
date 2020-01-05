@@ -226,43 +226,39 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private async _getForecast() {
-        try {
-            if (this._club) {
-                this._forecast = await this._weather.getDailyForecastByClub(this._club, this._clubs);
-                const { timezone } = this._forecast.weather;
-                const { name, place: address, site, latitude, longitude } = this._getClubData();
-                const coords = {
-                    latitude,
-                    longitude,
-                };
+        if (this._club) {
+            this._forecast = await this._weather.getDailyForecastByClub(this._club, this._clubs);
+            const { timezone } = this._forecast.weather;
+            const { name, place: address, site, latitude, longitude } = this._getClubData();
+            const coords = {
+                latitude,
+                longitude,
+            };
 
-                this._setLocationDetails(name, address, site, timezone, coords);
-            } else if (this._geocodeData) {
-                this._forecast = await this._weather.getDailyForecastByQuery(this._geocodeData);
+            this._setLocationDetails(name, address, site, timezone, coords);
+        } else if (this._geocodeData) {
+            this._forecast = await this._weather.getDailyForecastByQuery(this._geocodeData);
 
-                const site = '';
-                const { latitude, longitude, timezone, } = this._forecast.weather;
-                const { countryRegion, formattedAddress, } = this._forecast;
-                const coords = {
-                    latitude,
-                    longitude,
-                };
+            const site = '';
+            const { latitude, longitude, timezone, } = this._forecast.weather;
+            const { countryRegion, formattedAddress, } = this._forecast;
+            const coords = {
+                latitude,
+                longitude,
+            };
 
-                const formattedAddressPieces = formattedAddress.split(',').map((piece: string) => {
-                    return piece.trim();
-                });
-                if (!formattedAddressPieces.includes(countryRegion)) {
-                    formattedAddressPieces.push(countryRegion);
-                }
-                const name = formattedAddressPieces[0];
-                const address = formattedAddressPieces.slice(1).join(',');
+            const formattedAddressPieces = formattedAddress.split(',').map((piece: string) => {
+                return piece.trim();
+            });
 
-                this._setLocationDetails(name, address, site, timezone, coords);
+            if (!formattedAddressPieces.includes(countryRegion)) {
+                formattedAddressPieces.push(countryRegion);
             }
-            this._error = '';
-        } catch (err) {
-            this._error = err;
-            this._revertContent();
+
+            const name = formattedAddressPieces[0];
+            const address = formattedAddressPieces.slice(1).join(',');
+
+            this._setLocationDetails(name, address, site, timezone, coords);
         }
     }
 
@@ -342,8 +338,13 @@ class HTMLSkyDuckElement extends HTMLElement {
             return;
         }
 
-        await this._getForecast();
-        this._setContent();
+        try {
+            await this._getForecast();
+            this._setContent();
+        } catch (err) {
+            this._error = err;
+            this._revertContent();
+        }
     }
 
     private async _onFirstLoad() {
@@ -670,7 +671,13 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         if (this._hasLoaded) {
             this._clearContent();
-            await this._setLoaderInfoDisplay();
+
+            try {
+                await this._setLoaderInfoDisplay();
+            } catch (err) {
+                console.error(err); // eslint-disable-line no-console
+            }
+
         }
 
         const weatherElements: WeatherElements = new SkyduckWeatherElements(

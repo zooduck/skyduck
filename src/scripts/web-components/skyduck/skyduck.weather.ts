@@ -88,16 +88,16 @@ export class SkyduckWeather {
 
         try {
             dbWeather = await dbWeatherLookup(latitude, longitude);
-
         } catch (err) {
             // do nothing
         }
 
         if (!dbWeather || !dbWeather.isFresh) {
             const darkSkyData = await this._queryDarkSky(latitude, longitude, locationQuery);
-            const method = !dbWeather ? 'POST' : 'PUT';
+            const { weather } = darkSkyData;
 
-            dbWeather = await dbWeatherUpdate(darkSkyData.weather, method);
+            const method = !dbWeather ? 'POST' : 'PUT';
+            dbWeather = await dbWeatherUpdate(weather, method);
         }
 
         return dbWeather;
@@ -181,13 +181,13 @@ export class SkyduckWeather {
     }
 
     private async _queryDarkSky(lat: number, lon: number, query: string): Promise<DailyForecast> {
-        try {
-            const weather = await darkSkyLookup(lat, lon);
+        const weather = await darkSkyLookup(lat, lon);
 
-            return this._formatDarkSkyData(weather, query);
-        } catch (err) {
-            throw new Error(err);
+        if (!weather) {
+            throw Error('Weather Service Unavailable');
         }
+
+        return this._formatDarkSkyData(weather, query);
     }
 
     private _roundHour(dt: DateTime): number {

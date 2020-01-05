@@ -24,7 +24,7 @@ export const darkSkyLookup = async (lat: number, lon: number): Promise<DarkSkyWe
 
         return weather;
     } catch (err) {
-        throw new Error(err);
+        throw Error(err);
     }
 
 };
