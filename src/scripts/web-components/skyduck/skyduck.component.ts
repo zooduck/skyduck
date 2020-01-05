@@ -270,7 +270,6 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     private async _getImages(): Promise<void> {
         const imagesLoaded = [];
-
         return new Promise((resolve) => {
             const imageLinks = Object.keys(imageMap).map((key) => {
                 return {
@@ -278,24 +277,18 @@ class HTMLSkyDuckElement extends HTMLElement {
                     url: imageMap[key],
                 };
             });
-            imageLinks.forEach(async (link) => {
-                try {
-                    const request = new Request(link.url);
-                    const response = await fetch(request);
-
-                    if (response.ok) {
-                        await this._loadImage(link.url);
-                    }
-                } catch (err) {
-                    console.error(err); // eslint-disable-line no-console
-                } finally {
-                    imagesLoaded.push(link);
-                }
+            const onLoadCallback = (e: Event) => {
+                imagesLoaded.push((e.target as HTMLImageElement).src);
 
                 if (imagesLoaded.length === imageLinks.length) {
                     this._imagesReady = true;
                     resolve();
                 }
+            };
+            imageLinks.forEach(async (link) => {
+                const img = new Image();
+                img.addEventListener('load', onLoadCallback);
+                img.src = link.url;
             });
         });
     }
