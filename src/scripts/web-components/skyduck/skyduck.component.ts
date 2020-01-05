@@ -12,6 +12,8 @@ import {
     LocationDetails,
     Coords,
     HTMLZooduckCarouselElement,
+    ForecastDisplayMode,
+    MapDisplayMode,
 } from './interfaces/index';
 /* eslint-enable */
 import { LatLonSpin } from './utils/lat-lon-spin';
@@ -31,6 +33,7 @@ import { Log } from './fetch/log.fetch';
 
 interface AnimateMapOptions {
     hideMap: boolean;
+    animationDuration?: number;
 }
 
 interface PointerEvents {
@@ -51,6 +54,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _defaultClub: string;
     private _error: string;
     private _forecast: DailyForecast;
+    private _forecastDisplayMode: ForecastDisplayMode;
     private _firstLoadDelayMillis: number;
     private _geocodeData: GeocodeData;
     private _googleMapsKey: string;
@@ -60,13 +64,13 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _loaderMessageElements: LoaderMessageElements;
     private _location: string;
     private _locationDetails: LocationDetails;
+    private _mapDisplayMode: MapDisplayMode;
     private _modifierClasses: ModifierClasses;
     private _nearestClub: SkydiveClub;
     private _onSearchSubmit: EventListener;
     private _pointerEventDetails: PointerEventDetails;
     private _pointerEvents: PointerEvents;
     private _position: Position;
-    private _showMap: boolean;
     private _transitionSpeedInMillis: number;
     private _userDeniedGeolocation = false;
     private _version: string;
@@ -79,17 +83,20 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this._defaultClub = 'skydive algarve';
         this._firstLoadDelayMillis = 5000;
+        this._forecastDisplayMode = '3h';
         this._latLonSpin = new LatLonSpin();
+        this._mapDisplayMode = 'on';
         this._modifierClasses = {
             error: '--error',
+            forecastDisplayMode24h: '--forecast-display-mode-24h',
             init: '--init',
+            loading: '--loading',
             ready: '--ready',
         };
         this._pointerEventDetails = new PointerEventDetails();
         this._pointerEvents = {
             pointerdown: [],
         };
-        this._showMap = true;
         this._transitionSpeedInMillis = 250;
         this._weather = new SkyduckWeather();
     }
@@ -130,11 +137,17 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private async _animateMap(options: AnimateMapOptions) {
-        const { hideMap } = options;
+        const { hideMap, animationDuration } = options;
         const clubInfoGrid = this.shadowRoot.querySelector('.club-info-grid') as HTMLElement;
 
         if (!clubInfoGrid) {
             return;
+        }
+
+        if (typeof(animationDuration) === 'number') {
+            clubInfoGrid.style.transition = `${animationDuration}ms`;
+        } else {
+            clubInfoGrid.style.transition = `${this._transitionSpeedInMillis}ms`;
         }
 
         if (hideMap) {
@@ -198,12 +211,6 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this.classList.remove(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
-    }
-
-    private _customElementLoaded(customElement: HTMLElement): Promise<void> {
-        return new Promise((resolve: any) => {
-            customElement.addEventListener('load', resolve);
-        });
     }
 
     private _getClubData(): SkydiveClub {
@@ -277,18 +284,19 @@ class HTMLSkyDuckElement extends HTMLElement {
                     url: imageMap[key],
                 };
             });
-            const onLoadCallback = (e: Event) => {
-                imagesLoaded.push((e.target as HTMLImageElement).src);
+            imageLinks.forEach(async (link) => {
+                try {
+                    await this._loadImage(link.url);
+                } catch (err) {
+                    console.error(err); // eslint-disable-line no-console
+                } finally {
+                    imagesLoaded.push(link.url);
+                }
 
                 if (imagesLoaded.length === imageLinks.length) {
                     this._imagesReady = true;
                     resolve();
                 }
-            };
-            imageLinks.forEach(async (link) => {
-                const img = new Image();
-                img.addEventListener('load', onLoadCallback);
-                img.src = link.url;
             });
         });
     }
@@ -302,6 +310,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
             if (this._error) {
                 this._setReady();
+                this._setLoaded(true);
             }
         });
 
@@ -487,16 +496,13 @@ class HTMLSkyDuckElement extends HTMLElement {
         const forecastDisplayModeToggle = this.shadowRoot.querySelector('#forecastDisplayModeToggle');
         forecastDisplayModeToggle && forecastDisplayModeToggle.addEventListener('zooduck-icon-toggle:change', () => {
             const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLZooduckCarouselElement;
-
-            forecastCarousel.classList.toggle('--forecast-display-mode-24h');
-
+            this._toggleForecastDisplayMode();
             forecastCarousel.updateCarouselHeight();
         });
 
         const mapDisplayToggle = this.shadowRoot.querySelector('#mapDisplayToggle');
         mapDisplayToggle && mapDisplayToggle.addEventListener('zooduck-icon-toggle:change', () => {
-            this._showMap = !this._showMap;
-            this._animateMap({ hideMap: !this._showMap });
+            this._toggleMapDisplayMode();
         });
 
         const forecastCarousel = this.shadowRoot.querySelector('#forecastCarousel') as HTMLElement;
@@ -618,8 +624,9 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._clubsSortedByCountry,
             this._nearestClub,
             this._position,
-            this._showMap,
             this._userDeniedGeolocation,
+            this._forecastDisplayMode,
+            this._mapDisplayMode,
         );
 
         const {
@@ -674,8 +681,9 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._clubsSortedByCountry,
             this._nearestClub,
             this._position,
-            this._showMap,
             this._userDeniedGeolocation,
+            this._forecastDisplayMode,
+            this._mapDisplayMode,
         );
 
         const {
@@ -698,10 +706,21 @@ class HTMLSkyDuckElement extends HTMLElement {
         this.shadowRoot.appendChild(header);
         this.shadowRoot.appendChild(search);
         this.shadowRoot.appendChild(locationInfo);
+
+        if (this._mapDisplayMode === 'on') {
+            this._animateMap({
+                hideMap: false,
+                animationDuration: 0,
+            });
+        } else {
+            this._animateMap({
+                hideMap: true,
+                animationDuration: 0,
+            });
+        }
+
         this.shadowRoot.appendChild(controls);
         this.shadowRoot.appendChild(forecast);
-
-        await this._customElementLoaded(forecast as HTMLZooduckCarouselElement);
 
         this.shadowRoot.appendChild(footer);
         this.shadowRoot.appendChild(clubList);
@@ -713,6 +732,8 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
 
         this._hasLoaded = true;
+
+        this._setLoaded();
 
         this.scrollIntoView();
     }
@@ -773,18 +794,31 @@ class HTMLSkyDuckElement extends HTMLElement {
         await wait(delayBetweenInfoMessages);
     }
 
+    private async _setLoaded(noDelay?: boolean) {
+        const contentLoadTimeInMillis = noDelay
+            ? 0
+            : 250;
+
+        await wait(contentLoadTimeInMillis);
+
+        this.classList.remove(this._modifierClasses.loading);
+        this._clearLoaderInfoDisplay();
+    }
+
     private _setLoading() {
         this.classList.remove(this._modifierClasses.ready);
+        this.classList.add(this._modifierClasses.loading);
     }
 
     private _setReady() {
-        this.classList.add(this._modifierClasses.ready);
         this.classList.remove(this._modifierClasses.error);
         this.classList.remove(this._modifierClasses.init);
 
-        this._clearLoaderInfoDisplay();
+        this.classList.add(this._modifierClasses.ready);
 
-        this.scrollIntoView();
+        if (this._forecastDisplayMode === '24h') {
+            this.classList.add(this._modifierClasses.forecastDisplayMode24h);
+        }
     }
 
     private _showClubList() {
@@ -822,8 +856,27 @@ class HTMLSkyDuckElement extends HTMLElement {
         };
     }
 
+    private _toggleForecastDisplayMode(): void {
+        this._forecastDisplayMode = this._forecastDisplayMode === '24h'
+            ? '3h'
+            : '24h';
+
+        this.classList.toggle(this._modifierClasses.forecastDisplayMode24h);
+    }
+
+    private _toggleMapDisplayMode(): void {
+        this._mapDisplayMode = this._mapDisplayMode === 'on'
+            ? 'off'
+            : 'on';
+
+        this._animateMap({
+            hideMap: this._mapDisplayMode === 'off',
+        });
+    }
+
     protected async _init(): Promise<void> {
         this.classList.add(this._modifierClasses.init);
+        this.classList.add(this._modifierClasses.loading);
 
         if (!this._club && !this._location) {
             await this._initClubs();

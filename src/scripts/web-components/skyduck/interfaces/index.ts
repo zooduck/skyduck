@@ -79,6 +79,8 @@ export interface DarkSkyWeather {
     hourly: Hourly;
 }
 
+export type ForecastDisplayMode = '24h'|'3h';
+
 export interface FormattedWeather {
     query: string;
     requestTime: number;
@@ -143,9 +145,13 @@ export interface LocationDetails {
     site?: string;
 }
 
+export type MapDisplayMode = 'on'|'off';
+
 export interface ModifierClasses {
     error: string;
+    forecastDisplayMode24h: string;
     init: string;
+    loading: string;
     ready: string;
 }
 

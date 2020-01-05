@@ -87,11 +87,11 @@ a:hover {
 }
 
 .loader {
+    display: none;
     position: fixed;
     left: 0;
     top: 0;
     z-index: 99;
-    display: grid;
     grid-template-rows: 1fr auto 1fr;
     grid-gap: 50px;
     justify-content: center;
@@ -103,8 +103,8 @@ a:hover {
     padding: 10px;
     font-size: 1.2em;
 }
-:host(.--ready) .loader {
-    display: none;
+:host(.--loading) .loader {
+    display: grid;
 }
 .loader__error {
     display: none;
@@ -335,11 +335,8 @@ a:hover {
     min-height: calc(100vh - var(--slide-selectors-height));
     padding: 10px;
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid {
+:host(.--forecast-display-mode-24h) .forecast-grid {
     grid-template-rows: 0fr auto;
-}
-:host(:not(.--ready)) .forecast-grid {
-    display: none;
 }
 .forecast-grid__title {
     padding: 10px;
@@ -427,9 +424,10 @@ a:hover {
     grid-template-rows: 1fr auto;
     grid-gap: 10px;
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast,
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
+:host(.--forecast-display-mode-24h) .forecast-grid-forecast,
+:host(.--forecast-display-mode-24h) .forecast-grid-forecast.--24h {
     grid-template-columns: repeat(2, 1fr);
+    animation: slideOnHourlyForecast ${transitionSpeedInMillis}ms both;
 }
 .forecast-grid-forecast.--24h {
     height: 0px;
@@ -447,11 +445,7 @@ a:hover {
         opacity: 1;
     }
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast,
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
-    animation: slideOnHourlyForecast ${transitionSpeedInMillis}ms both;
-}
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast.--24h {
+:host(.--forecast-display-mode-24h) .forecast-grid-forecast.--24h {
     height: auto;
     grid-column: auto;
     grid-row: auto;
@@ -464,18 +458,18 @@ a:hover {
     background-repeat: no-repeat;
 }
 @media (min-width: 768px) {
-    #forecastCarousel:not(.--forecast-display-mode-24h) .forecast-grid-forecast__weather-photo {
+    :host(:not(.--forecast-display-mode-24h)) .forecast-grid-forecast__weather-photo {
         background-position: 25% center;
     }
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast__weather-photo {
+:host(.--forecast-display-mode-24h) .forecast-grid-forecast__weather-photo {
     grid-column: 1;
     grid-row: 1 / span 2;
     background-position: 50% center;
 }
 
 @media (min-aspect-ratio: 1/1) {
-    #forecastCarousel:not(.--forecast-display-mode-24h) .forecast-grid-forecast__weather-photo {
+    :host(:not(.--forecast-display-mode-24h)) .forecast-grid-forecast__weather-photo {
         min-height: calc(768px / 4);
     }
 }
@@ -489,7 +483,7 @@ a:hover {
     padding: 10px;
     justify-self: left;
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast__time {
+:host(.--forecast-display-mode-24h) .forecast-grid-forecast__time {
     grid-row: 1 / span 2;
 }
 .forecast-grid-forecast__time span {
@@ -510,7 +504,7 @@ a:hover {
     display: flex;
     align-items: center;
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-grid-forecast-weather {
+:host(.--forecast-display-mode-24h) .forecast-grid-forecast-weather {
     grid-row: 1;
     grid-column: 2;
     align-self: end;
@@ -535,7 +529,7 @@ a:hover {
     grid-column-gap: 5px;
     align-self: end;
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-data-grid {
+:host(.--forecast-display-mode-24h) .forecast-data-grid {
     grid-row: 2;
     grid-template-rows: auto;
     align-self: auto;
@@ -549,7 +543,7 @@ a:hover {
     background: rgba(255, 255, 255, .8);
     padding: 10px;
 }
-#forecastCarousel.--forecast-display-mode-24h .forecast-data-grid-type {
+:host(.--forecast-display-mode-24h) .forecast-data-grid-type {
     box-shadow: 2px 2px 6px var(--lightgray);
 }
 .forecast-data-grid-type.--landscape-only {
@@ -604,9 +598,6 @@ zooduck-icon-circle .icon-circle {
     display: grid;
     grid-template-columns: 1fr auto;
     padding: 10px;
-}
-:host(:not(.--ready)) .footer {
-    display: none;
 }
 
 .club-list-container {

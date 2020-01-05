@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { DailyForecast, LocationDetails, HTMLZooduckCarouselElement, ClubListsSortedByCountry, SkydiveClub } from './interfaces/index';
+import { DailyForecast, LocationDetails, HTMLZooduckCarouselElement, ClubListsSortedByCountry, SkydiveClub, MapDisplayMode, ForecastDisplayMode } from './interfaces/index';
 import { FooterTemplate } from './templates/footer.template';
 import { ForecastCarouselTemplate } from './templates/forecast-carousel.template';
 import { ControlsTemplate } from './templates/controls.template';
@@ -14,15 +14,16 @@ import { NotFoundTemplate } from './templates/not-found.template';
 export class SkyduckWeatherElements {
     private _dailyForecast: DailyForecast;
     private _forecastCarousel: HTMLZooduckCarouselElement;
+    private _forecastDisplayMode: ForecastDisplayMode;
     private _googleMapsKey: string;
     private _hasClubs: boolean;
     private _locationDetails: LocationDetails;
+    private _mapDisplayMode: MapDisplayMode;
     private _defaultForecastHours: number[];
     private _version: string;
     private _clubsSortedByCountry: ClubListsSortedByCountry;
     private _nearestClub: SkydiveClub;
     private _position: Position;
-    private _showMap: boolean;
     private _userDeniedGeolocation: boolean;
 
     constructor(
@@ -33,18 +34,20 @@ export class SkyduckWeatherElements {
         clubsSortedByCountry: ClubListsSortedByCountry,
         nearestClub: SkydiveClub,
         position: Position,
-        showMap: boolean,
-        userDeniedGeolocation: boolean) {
+        userDeniedGeolocation: boolean,
+        forecastDisplayMode: ForecastDisplayMode,
+        mapDisplayMode: MapDisplayMode) {
         this._dailyForecast = dailyForecast;
         this._defaultForecastHours = [9, 12, 15];
+        this._forecastDisplayMode = forecastDisplayMode;
         this._googleMapsKey = googleMapsKey;
         this._hasClubs = Object.keys(clubsSortedByCountry).length > 0;
         this._locationDetails = locationDetails;
+        this._mapDisplayMode = mapDisplayMode;
         this._version = version ? `v${version.split('-')[0]}` : '';
         this._clubsSortedByCountry = clubsSortedByCountry;
         this._nearestClub = nearestClub;
         this._position = position;
-        this._showMap = showMap;
         this._userDeniedGeolocation = userDeniedGeolocation;
     }
 
@@ -86,7 +89,7 @@ export class SkyduckWeatherElements {
     }
 
     public get controls(): HTMLElement {
-        return new ControlsTemplate(this._showMap, this._hasClubs).html;
+        return new ControlsTemplate(this._mapDisplayMode, this._forecastDisplayMode, this._hasClubs).html;
     }
 
     public get header(): HTMLElement {

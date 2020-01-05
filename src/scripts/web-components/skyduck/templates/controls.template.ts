@@ -1,13 +1,16 @@
 import { NotFoundTemplate } from './not-found.template';
+import { ForecastDisplayMode, MapDisplayMode } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
 export class ControlsTemplate {
     private _controls: HTMLElement;
+    private _forecastDisplayMode: ForecastDisplayMode;
     private _hasClubList: boolean;
-    private _showMap: boolean;
+    private _mapDisplayMode: MapDisplayMode;
 
-    constructor(showMap: boolean, hasClubList: boolean) {
+    constructor(mapDisplayMode: MapDisplayMode, forecastDisplayMode: ForecastDisplayMode, hasClubList: boolean) {
+        this._forecastDisplayMode = forecastDisplayMode;
         this._hasClubList = hasClubList;
-        this._showMap = showMap;
+        this._mapDisplayMode = mapDisplayMode;
         this._buildControls();
     }
 
@@ -22,7 +25,8 @@ export class ControlsTemplate {
     }
 
     private _buildControls(): void {
-        const mapDisplayToggleState = this._showMap
+        const mapDisplayToggleState = this._mapDisplayMode;
+        const forecastDisplayModeToggleState = this._forecastDisplayMode === '24h'
             ? 'on'
             : 'off';
         this._controls = new DOMParser().parseFromString(`
@@ -32,7 +36,7 @@ export class ControlsTemplate {
                         id="mapDisplayToggle"
                         class="controls__map-display-toggle"
                         size="70"
-                        width="110"
+                        width="100"
                         togglestate="${mapDisplayToggleState}"
                         toggleoncolor="var(--lightskyblue)"
                         toggleontext="Map"
@@ -43,7 +47,8 @@ export class ControlsTemplate {
                         id="forecastDisplayModeToggle"
                         class="controls__forecast-display-mode-toggle"
                         size="70"
-                        width="110"
+                        width="100"
+                        togglestate="${forecastDisplayModeToggleState}"
                         toggleoncolor="var(--lightskyblue)"
                         toggleontext="24h"
                         toggleofftext="3h"
