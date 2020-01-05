@@ -6,7 +6,9 @@ export class Log {
     }
 
     private _logConnection(): void {
-        fetch(`/connect?location=${this._location}`);
+        fetch(`/connect?location=${this._location}`, {
+            method: 'PUT',
+        });
     }
 
     public connection(): void {

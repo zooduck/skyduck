@@ -15,7 +15,7 @@ const root = {
     }
 };
 
-const connect = {
+const connectPut = {
     path: '/connect',
     callback: async (request, response) => {
         const { ip } = request;
@@ -220,7 +220,6 @@ const skydiveClubPost = {
 const routes = {
     get: [
         root,
-        connect,
         geocode,
         googleMapsKey,
         reverseGeocode,
@@ -232,6 +231,7 @@ const routes = {
         skydiveClubPost,
     ],
     put: [
+        connectPut,
         weatherPut,
     ]
 };
