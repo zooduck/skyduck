@@ -29,14 +29,13 @@ database.connect().then((result) => {
     }));
 
     router(server, db);
-
 }).catch((err) => {
     console.error(err);
 });
 
 
 const serverConfig = {
-    port: process.env.PORT || 3333, // process.env.port (heroku port)
+    port: process.env.PORT || 3333, // process.env.PORT (heroku port)
 };
 
 server.listen(serverConfig.port, () => {
