@@ -642,11 +642,12 @@ zooduck-icon-circle .icon-circle {
 }
 .club-list-item-distance {
     display: grid;
-    grid-template-columns: minmax(auto, 0%) auto;
+    grid-template-columns: minmax(auto, 25%) auto;
     grid-gap: 5px;
 }
 .club-list-item-distance__marker {
     height: 25px;
+    background-color: var(--paleskyblue);
 }
 .club-list-item-distance__marker.--red {
     background-color: var(--red);
