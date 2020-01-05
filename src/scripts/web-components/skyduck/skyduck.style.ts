@@ -243,6 +243,7 @@ a:hover {
     grid-template-columns: 1fr auto;
     grid-gap: 10px;
     padding: 0 10px;
+    overflow: hidden;
     transition: all ${transitionSpeedInMillis}ms;
 }
 .club-info-grid__map {
