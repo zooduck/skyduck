@@ -1,7 +1,7 @@
 # Skyduck
 Weather forecasting tool for skydivers.
 
-Built as a pure html web component without any third-party frontend dependencies except <a href="https://moment.github.io/luxon/" target="_blank">Luxon</a>.
+Built as a pure <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components" target="_blank">HTML Web Component</a> without any third-party frontend dependencies except <a href="https://moment.github.io/luxon/" target="_blank">Luxon</a>.
 
 ![alt text](https://github.com/zooduck/screenshots/blob/master/skyduck/v0.2.13-alpha/skyduck-v0.2.13-alpha.png)
 
