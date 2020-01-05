@@ -1,8 +1,8 @@
 export const getCurrentPosition = (): Promise<Position> => {
     return new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(async (position) => {
+        navigator.geolocation.getCurrentPosition((position) => {
             resolve(position);
-        }, async (err) => {
+        }, (err) => {
             reject(err.message || err);
         });
     });

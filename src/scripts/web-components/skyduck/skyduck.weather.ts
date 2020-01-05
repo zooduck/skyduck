@@ -14,10 +14,9 @@ import { darkSkyLookup } from './fetch/dark-sky-lookup.fetch';
 import { querySkydiveClub } from './fetch/skydive-club.fetch';
 import { dbWeatherLookup } from './fetch/db-weather-lookup.fetch';
 import { dbWeatherUpdate } from './fetch/db-weather-update.fetch';
+import { escapeSpecialChars } from './utils/escape-special-chars';
 
 export class SkyduckWeather {
-    private _skydiveClub: SkydiveClub;
-
     private _floatToInt(float: number): number {
         return parseInt(float.toString(), 10);
     }
@@ -84,12 +83,34 @@ export class SkyduckWeather {
         };
     }
 
+    private async _getDBWeather(latitude: number, longitude: number, locationQuery: string): Promise<FormattedWeather> {
+        let dbWeather: FormattedWeather;
+
+        try {
+            dbWeather = await dbWeatherLookup(latitude, longitude);
+
+        } catch (err) {
+            // do nothing
+        }
+
+        if (!dbWeather || !dbWeather.isFresh) {
+            const darkSkyData = await this._queryDarkSky(latitude, longitude, locationQuery);
+            const method = !dbWeather ? 'POST' : 'PUT';
+
+            dbWeather = await dbWeatherUpdate(darkSkyData.weather, method);
+        }
+
+        return dbWeather;
+    }
+
     public async getDailyForecastByClub(name: string, clubList: SkydiveClub[]): Promise<DailyForecast> {
         let skydiveClub: SkydiveClub;
 
         if (clubList) {
+            const clubEscaped = escapeSpecialChars(name);
+
             skydiveClub = clubList.find((club: SkydiveClub) => {
-                return new RegExp(name, 'i').test(club.name);
+                return new RegExp(clubEscaped, 'i').test(club.name);
             });
         } else {
             skydiveClub = await querySkydiveClub(name);
@@ -99,50 +120,23 @@ export class SkyduckWeather {
             throw Error(`Could not find club "${name}" in the skyduck database. Try searching by location instead.`);
         }
 
-        this._skydiveClub = skydiveClub;
+        const { latitude,longitude } = skydiveClub;
 
-        let dbWeather: FormattedWeather;
-        let dbWeatherUpToDate: boolean;
-        let dbWeatherExists: boolean;
-        const oneHourAgo = DateTime.local().minus({ hours: 1 }).toMillis();
-        const { latitude,longitude } = this._skydiveClub;
-
-        try {
-            dbWeather = await dbWeatherLookup(latitude, longitude);
-            dbWeatherUpToDate = dbWeather.requestTime > oneHourAgo;
-            dbWeatherExists = true;
-        } catch (err) {
-            dbWeatherUpToDate = false;
-            dbWeatherExists = false;
-        }
-
-        if (!dbWeatherUpToDate) {
-            const darkSkyData = await this._queryDarkSky(skydiveClub.latitude, skydiveClub.longitude, name);
-            const method = !dbWeatherExists ? 'POST' : 'PUT';
-            const weather = await dbWeatherUpdate(darkSkyData.weather, method);
-
-            return {
-                query: darkSkyData.query,
-                weather,
-            };
-        }
+        const weather = await this._getDBWeather(latitude, longitude, name);
 
         return {
-            query: name,
-            weather: dbWeather,
+            weather,
         };
-
     }
 
     public async getDailyForecastByQuery(geocodeData: GeocodeData): Promise<DailyForecast> {
-        const { latitude, longitude, locationQuery } = geocodeData;
+        const { latitude, longitude, query } = geocodeData;
         const { countryRegion, formattedAddress } = geocodeData.address;
 
-        const darkSkyData = await this._queryDarkSky(latitude, longitude, locationQuery);
+        const weather = await this._getDBWeather(latitude, longitude, query);
 
         return {
-            query: darkSkyData.query,
-            weather: darkSkyData.weather,
+            weather,
             countryRegion,
             formattedAddress,
         };
@@ -171,8 +165,9 @@ export class SkyduckWeather {
         const { latitude, longitude, timezone, daily, hourly } = weather;
 
         return {
-            query,
             weather: {
+                query,
+                requestTime: new Date().getTime(),
                 latitude,
                 longitude,
                 timezone,
@@ -181,7 +176,6 @@ export class SkyduckWeather {
                     icon: daily.icon,
                     data: this._formatDailyData(daily.data, hourly.data, timezone),
                 },
-                requestTime: new Date().getTime(),
             }
         };
     }

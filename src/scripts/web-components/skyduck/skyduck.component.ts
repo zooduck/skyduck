@@ -19,7 +19,7 @@ import { imageMap } from './utils/image-map';
 import { DateTime } from 'luxon';
 import { isTap } from '../../utils/is-tap/is-tap';
 import { wait } from '../../utils/wait/wait';
-import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details/pointer-event-details'; // eslint-disable-line no-unused-vars
+import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details'; // eslint-disable-line no-unused-vars
 import { LoaderTemplate } from './templates/loader.template';
 import { geocodeLookup } from './fetch/geocode-lookup.fetch';
 import { reverseGeocodeLookup } from './fetch/reverse-geocode-lookup.fetch';
@@ -27,6 +27,7 @@ import { skydiveClubsLookup } from './fetch/skydive-clubs.fetch';
 import { escapeSpecialChars } from './utils/escape-special-chars';
 import { sortClubsByCountry } from './utils/sort-clubs-by-country';
 import { getCurrentPosition } from './utils/get-current-position';
+import { Log } from './fetch/log.fetch';
 
 interface AnimateMapOptions {
     hideMap: boolean;
@@ -221,7 +222,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         try {
             if (this._club) {
                 this._forecast = await this._weather.getDailyForecastByClub(this._club, this._clubs);
-
                 const { timezone } = this._forecast.weather;
                 const { name, place: address, site, latitude, longitude } = this._getClubData();
                 const coords = {
@@ -345,6 +345,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private async _onFirstLoad() {
+
         this._googleMapsKey =  await this._getGoogleMapsKey();
 
         this._addStyleAndLoader();
@@ -384,6 +385,16 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         try {
             this._position = await getCurrentPosition();
+
+            try {
+                const geocodeData: GeocodeData = await reverseGeocodeLookup(this._position.coords);
+                const { name: userLocation } = geocodeData;
+                const log = new Log(userLocation);
+
+                log.connection();
+            } catch (err) {
+                console.error(err); // eslint-disable-line no-console
+            }
         } catch (err) {
             console.error(err); // eslint-disable-line no-console
             this._userDeniedGeolocation = true;

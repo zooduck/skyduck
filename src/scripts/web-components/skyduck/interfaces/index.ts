@@ -66,7 +66,6 @@ export interface DailyData {
 }
 
 export interface DailyForecast {
-    query: string;
     weather: FormattedWeather;
     countryRegion?: string;
     formattedAddress?: string;
@@ -81,15 +80,17 @@ export interface DarkSkyWeather {
 }
 
 export interface FormattedWeather {
+    query: string;
+    requestTime: number;
     latitude: number;
     longitude: number;
     timezone: string;
     daily: Daily;
-    requestTime: number;
+    isFresh?: boolean;
 }
 
 export interface GeocodeData {
-    locationQuery: string;
+    query: string;
     name: string;
     address: any;
     latitude: number;

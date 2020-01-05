@@ -1,4 +1,6 @@
-export const reverseGeocodeLookup = async (point: Coordinates): Promise<any> => {
+import { GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+
+export const reverseGeocodeLookup = async (point: Coordinates): Promise<GeocodeData> => {
     try {
         const { latitude, longitude } = point;
         const response = await fetch(`/reverse_geocode?point=${latitude},${longitude}`);
@@ -19,7 +21,7 @@ export const reverseGeocodeLookup = async (point: Coordinates): Promise<any> => 
         const { name, address } = resource;
 
         const geocodeData = {
-            locationQuery: `Current Location (${latitude},${longitude})`,
+            query: 'navigator.geolocation.getCurrentPosition',
             address,
             name,
             latitude: coords[0],
