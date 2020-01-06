@@ -89,7 +89,7 @@ export class SkyduckWeather {
         try {
             dbWeather = await dbWeatherLookup(latitude, longitude);
         } catch (err) {
-            // do nothing
+            // continue...
         }
 
         if (!dbWeather || !dbWeather.isFresh) {
@@ -167,7 +167,7 @@ export class SkyduckWeather {
         return {
             weather: {
                 query,
-                requestTime: new Date().getTime(),
+                requestTime: DateTime.local().toMillis(),
                 latitude,
                 longitude,
                 timezone,

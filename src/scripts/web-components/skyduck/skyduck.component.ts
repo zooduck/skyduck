@@ -228,6 +228,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private async _getForecast() {
         if (this._club) {
             this._forecast = await this._weather.getDailyForecastByClub(this._club, this._clubs);
+
             const { timezone } = this._forecast.weather;
             const { name, place: address, site, latitude, longitude } = this._getClubData();
             const coords = {

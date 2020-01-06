@@ -187,9 +187,10 @@ const weatherPut = {
     path: '/weather',
     callback: async (request, response) =>  {
         const doc = request.body;
-        const { id, daily, requestTime } = doc;
+        const { requestTime, latitude, longitude, daily } = doc;
+
         try {
-            await db.collection('Weather').updateOne({ id: id }, {
+            await db.collection('Weather').updateOne({ latitude, longitude }, {
                 $set: {
                     daily,
                     requestTime,
