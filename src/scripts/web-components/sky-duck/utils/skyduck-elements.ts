@@ -1,17 +1,17 @@
 /* eslint-disable */
-import { DailyForecast, LocationDetails, HTMLZooduckCarouselElement, ClubListsSortedByCountry, SkydiveClub, MapDisplayMode, ForecastDisplayMode } from './interfaces/index';
-import { FooterTemplate } from './templates/footer.template';
-import { ForecastCarouselTemplate } from './templates/forecast-carousel.template';
-import { ControlsTemplate } from './templates/controls.template';
-import { HeaderTemplate } from './templates/header.template';
-import { LocationInfoTemplate } from './templates/location-info.template';
-import { SearchTemplate } from './templates/search.template';
-import { ClubListCarouselTemplate } from './templates/club-list-carousel.template';
-import { GeolocationErrorTemplate } from './templates/geolocation-error.template';
-import { NotFoundTemplate } from './templates/not-found.template';
+import { DailyForecast, LocationDetails, HTMLZooduckCarouselElement, ClubListsSortedByCountry, SkydiveClub, MapDisplayMode, ForecastDisplayMode } from '../interfaces/index';
+import { FooterTemplate } from '../templates/footer.template';
+import { ForecastCarouselTemplate } from '../templates/forecast-carousel.template';
+import { ControlsTemplate } from '../templates/controls.template';
+import { HeaderTemplate } from '../templates/header.template';
+import { LocationInfoTemplate } from '../templates/location-info.template';
+import { SearchTemplate } from '../templates/search.template';
+import { ClubListCarouselTemplate } from '../templates/club-list-carousel.template';
+import { GeolocationErrorTemplate } from '../templates/geolocation-error.template';
+import { NotFoundTemplate } from '../templates/not-found.template';
 /* eslint-enable */
 
-export class SkyduckWeatherElements {
+export class SkyduckElements {
     private _dailyForecast: DailyForecast;
     private _forecastCarousel: HTMLZooduckCarouselElement;
     private _forecastDisplayMode: ForecastDisplayMode;

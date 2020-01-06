@@ -8,13 +8,13 @@ import {
     DailyData,
     DarkSkyWeather,
     FormattedWeather,
-} from './interfaces/index';
+} from '../interfaces/index';
 /* eslint-enable no-unused-vars */
-import { darkSkyLookup } from './fetch/dark-sky-lookup.fetch';
-import { querySkydiveClub } from './fetch/skydive-club.fetch';
-import { dbWeatherLookup } from './fetch/db-weather-lookup.fetch';
-import { dbWeatherUpdate } from './fetch/db-weather-update.fetch';
-import { escapeSpecialChars } from './utils/escape-special-chars';
+import { darkSkyLookup } from '../fetch/dark-sky-lookup.fetch';
+import { querySkydiveClub } from '../fetch/skydive-club.fetch';
+import { dbWeatherLookup } from '../fetch/db-weather-lookup.fetch';
+import { dbWeatherUpdate } from '../fetch/db-weather-update.fetch';
+import { escapeSpecialChars } from './escape-special-chars';
 
 export class SkyduckWeather {
     private _floatToInt(float: number): number {

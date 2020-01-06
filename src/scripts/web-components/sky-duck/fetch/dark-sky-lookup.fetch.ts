@@ -1,4 +1,4 @@
-import { graphqlConfig } from '../../../config/graphql.config';
+import { graphqlConfig } from '../config/graphql.config';
 import { darkSkyQuery } from '../graphql-queries/dark-sky-query';
 import { DarkSkyWeather } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 

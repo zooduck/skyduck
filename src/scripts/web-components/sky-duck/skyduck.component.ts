@@ -1,6 +1,6 @@
-import { style } from './skyduck.style';
-import { SkyduckWeatherElements } from './skyduck.elements';
-import { SkyduckWeather } from './skyduck.weather';
+import { SkyduckStyle } from './utils/skyduck-style';
+import { SkyduckElements } from './utils/skyduck-elements';
+import { SkyduckWeather } from './utils/skyduck-weather';
 /* eslint-disable */
 import {
     ModifierClasses,
@@ -19,9 +19,9 @@ import {
 import { LatLonSpin } from './utils/lat-lon-spin';
 import { imageMap } from './utils/image-map';
 import { DateTime } from 'luxon';
-import { isTap } from '../../utils/is-tap/is-tap';
-import { wait } from '../../utils/wait/wait';
-import { PointerEventDetails, EventDetails } from '../../utils/pointer-event-details'; // eslint-disable-line no-unused-vars
+import { isTap } from './utils/is-tap/is-tap';
+import { wait } from './utils/wait/wait';
+import { PointerEventDetails, EventDetails } from './utils/pointer-event-details'; // eslint-disable-line no-unused-vars
 import { LoaderTemplate } from './templates/loader.template';
 import { geocodeLookup } from './fetch/geocode-lookup.fetch';
 import { reverseGeocodeLookup } from './fetch/reverse-geocode-lookup.fetch';
@@ -71,6 +71,7 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _pointerEventDetails: PointerEventDetails;
     private _pointerEvents: PointerEvents;
     private _position: Position;
+    private _style: SkyduckStyle;
     private _transitionSpeedInMillis: number;
     private _userDeniedGeolocation = false;
     private _version: string;
@@ -81,10 +82,9 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this.attachShadow({ mode: 'open' });
 
-        this._defaultClub = 'skydive algarve';
+        this._defaultClub = 'Skydive Algarve';
         this._firstLoadDelayMillis = 5000;
         this._forecastDisplayMode = '3h';
-        this._latLonSpin = new LatLonSpin();
         this._mapDisplayMode = 'on';
         this._modifierClasses = {
             error: '--error',
@@ -93,11 +93,16 @@ class HTMLSkyDuckElement extends HTMLElement {
             loading: '--loading',
             ready: '--ready',
         };
-        this._pointerEventDetails = new PointerEventDetails();
         this._pointerEvents = {
             pointerdown: [],
         };
         this._transitionSpeedInMillis = 250;
+
+        this._latLonSpin = new LatLonSpin();
+        this._pointerEventDetails = new PointerEventDetails();
+        this._style = new SkyduckStyle({
+            transitionSpeedInMillis: this._transitionSpeedInMillis,
+        });
         this._weather = new SkyduckWeather();
     }
 
@@ -318,9 +323,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     private _getStyle(): HTMLStyleElement {
         const styleEl = document.createElement('style');
-        styleEl.textContent = style({
-            transitionSpeedInMillis: this._transitionSpeedInMillis,
-        });
+        styleEl.textContent = this._style.style;
 
         return styleEl;
     }
@@ -618,7 +621,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._setLoaderError();
         }
 
-        const weatherElements: WeatherElements = new SkyduckWeatherElements(
+        const weatherElements: WeatherElements = new SkyduckElements(
             this._locationDetails,
             this._forecast,
             this._googleMapsKey,
@@ -681,7 +684,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         }
 
-        const weatherElements: WeatherElements = new SkyduckWeatherElements(
+        const weatherElements: WeatherElements = new SkyduckElements(
             this._locationDetails,
             this._forecast,
             this._googleMapsKey,

@@ -1,4 +1,4 @@
-import { graphqlConfig } from '../../../config/graphql.config';
+import { graphqlConfig } from '../config/graphql.config';
 import { skydiveClubsQuery } from '../graphql-queries/skydive-clubs-query';
 import { DistanceBetweenPoints } from '../utils/distance-between-points';
 import { SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unused-vars

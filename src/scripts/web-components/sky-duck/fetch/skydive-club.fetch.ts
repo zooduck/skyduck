@@ -1,5 +1,5 @@
 import { SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unused-vars
-import { graphqlConfig } from '../../../config/graphql.config';
+import { graphqlConfig } from '../config/graphql.config';
 import { skydiveClubQuery } from '../graphql-queries/skydive-club-query';
 
 export const querySkydiveClub = async (name: string): Promise<SkydiveClub> => {
