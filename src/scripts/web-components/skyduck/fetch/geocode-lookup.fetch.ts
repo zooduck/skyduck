@@ -1,4 +1,6 @@
-export const geocodeLookup = async (place: string): Promise<any> => {
+import { GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+
+export const geocodeLookup = async (place: string): Promise<GeocodeData> => {
     try {
         const response = await fetch(`/geocode?place=${place}`);
 
@@ -17,7 +19,7 @@ export const geocodeLookup = async (place: string): Promise<any> => {
         const { name, address } = resource;
 
         const geocodeData = {
-            locationQuery: place,
+            query: place,
             address,
             name,
             latitude: coords[0],
