@@ -887,7 +887,6 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     protected async _init(): Promise<void> {
         this.classList.add(this._modifierClasses.init);
-        this.classList.add(this._modifierClasses.loading);
 
         if (!this._club && !this._location) {
             await this._initClubs();
