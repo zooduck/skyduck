@@ -46,7 +46,7 @@ export class SkyduckElements {
         this._hasForecast = this._dailyForecast !== undefined;
         this._locationDetails = locationDetails;
         this._mapDisplayMode = mapDisplayMode;
-        this._version = version ? `v${version.split('-')[0]}` : '';
+        this._version = version ? version.split('-')[0] : '';
         this._clubsSortedByCountry = clubsSortedByCountry;
         this._nearestClub = nearestClub;
         this._position = position;

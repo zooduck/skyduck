@@ -468,8 +468,8 @@ class HTMLSkyDuckElement extends HTMLElement {
                 this._showClubList();
             });
 
-        const geolocationForecastCtrl = this.shadowRoot.querySelector('#getForecastForCurrentLocation');
-        geolocationForecastCtrl && geolocationForecastCtrl
+        const geolocationCtrl = this.shadowRoot.querySelector('#geolocationCtrl');
+        geolocationCtrl && geolocationCtrl
             .addEventListener('click', async () => {
                 if (!this._position) {
                     return;

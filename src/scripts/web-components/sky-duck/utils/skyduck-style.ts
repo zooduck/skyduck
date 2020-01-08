@@ -214,16 +214,13 @@ export class SkyduckStyle {
 
             .header {
                 position: relative;
-                display: grid;
-                grid-template-columns: 1fr auto;
-                align-items: center;
                 color: var(--lightskyblue);
                 padding: 10px 10px 0 10px;
             }
             .header-title-container {
                 position: relative;
-                display: flex;
-                align-items: center;
+                display: grid;
+                grid-template-columns: 1fr auto;
             }
             .header-title-container__title {
                 font-family: 'Luckiest Guy', cursive;
@@ -241,9 +238,6 @@ export class SkyduckStyle {
             }
             .header__skyduck-logo {
                 width: 220px;
-            }
-            .header__location-icon {
-                cursor: pointer;
             }
 
             .search {
@@ -279,7 +273,7 @@ export class SkyduckStyle {
 
             .controls {
                 display: grid;
-                grid-template-columns: repeat(2, 1fr) auto;
+                grid-template-columns: repeat(3, 1fr);
                 grid-gap: 10px;
                 align-items: center;
                 margin: 10px;
@@ -301,11 +295,14 @@ export class SkyduckStyle {
             .controls__view-club-list:hover {
                 text-decoration: underline;
             }
+            .controls__geolocation {
+                justify-self: center;
+                cursor: pointer;
+            }
             .controls__toggles {
                 display: grid;
                 justify-content: right;
                 grid-gap: 10px;
-                grid-column: 2;
             }
             .controls__forecast-display-mode-toggle {
                 justify-self: right;

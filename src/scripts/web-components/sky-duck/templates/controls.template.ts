@@ -27,6 +27,15 @@ export class ControlsTemplate {
         `, 'text/html').body.firstChild as HTMLElement;
     }
 
+    private _buildGeolocationControl(): HTMLElement {
+        return new DOMParser().parseFromString(`
+            <zooduck-icon-location
+                color="var(--lightskyblue)"
+                id="geolocationCtrl"
+                class="controls__geolocation"></zooduck-icon-location>
+        `, 'text/html').body.firstChild as HTMLElement;
+    }
+
     private _buildControls(): void {
         if (!this._hasForecast) {
             this._controls = new NotFoundTemplate('FORECAST_NOT_FOUND').html;
@@ -67,6 +76,7 @@ export class ControlsTemplate {
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
+        this._controls.insertBefore(this._buildGeolocationControl(), this._controls.firstElementChild);
         this._controls.insertBefore(this._buildClubListControl(), this._controls.firstElementChild);
     }
 
