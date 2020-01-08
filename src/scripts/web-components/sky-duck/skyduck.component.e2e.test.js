@@ -3,7 +3,7 @@ describe('sky-duck', () => {
     const timeoutToConnectToDOM = 50;
     const timeoutToFirstLoadStarted = 1000;
     const timeoutToFirstLoadCompleted = 10000;
-0
+
     beforeAll(async () => {
         jest.setTimeout(11000);
         await page.goto(LOCALHOST);
