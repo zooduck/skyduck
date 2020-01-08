@@ -195,6 +195,42 @@ describe('sky-duck', () => {
                     expect(search).toBeDefined();
                     expect(clubList).toBeDefined();
                 });
+
+                it('should display the loader with an error', async () => {
+                    const error = await page.evaluate((el) => {
+                        return el.shadowRoot
+                            .querySelector('#skyduckLoader')
+                            .querySelector('#loaderError').innerHTML;
+                    }, el);
+
+                    expect(error).toEqual('Error: Unable to resolve coordinates for location of \"DOMPER.\"');
+                });
+
+                it('should display the loader with an error until dismissed by the user', async () => {
+                    let loaderDisplay = await page.evaluate((el) => {
+                        const loader = el.shadowRoot
+                            .querySelector('#skyduckLoader');
+
+                        return getComputedStyle(loader).getPropertyValue('display');
+                    }, el);
+
+                    expect(loaderDisplay).toEqual('grid');
+
+                    const loader = await page.evaluateHandle((el) => {
+                        return el.shadowRoot.querySelector('#skyduckLoader');
+                    }, el);
+
+                    await loader.tap();
+                    await page.waitFor(100);
+
+                    loaderDisplay = await page.evaluate((el) => {
+                        const loader = el.shadowRoot.querySelector('#skyduckLoader');
+
+                        return getComputedStyle(loader).getPropertyValue('display');
+                    }, el);
+
+                    expect(loaderDisplay).toEqual('none');
+                });
             });
         });
     });
