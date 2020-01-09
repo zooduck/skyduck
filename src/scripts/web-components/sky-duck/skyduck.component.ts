@@ -143,31 +143,31 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     private async _animateMap(options: AnimateMapOptions) {
         const { hideMap, animationDuration } = options;
-        const clubInfoGrid = this.shadowRoot.querySelector('.club-info-grid') as HTMLElement;
+        const map = this.shadowRoot.querySelector('#map') as HTMLElement;
 
-        if (!clubInfoGrid) {
+        if (!map) {
             return;
         }
 
-        if (typeof(animationDuration) === 'number') {
-            clubInfoGrid.style.transition = `${animationDuration}ms`;
-        } else {
-            clubInfoGrid.style.transition = `${this._transitionSpeedInMillis}ms`;
-        }
+        const transitionSpeedInMillis = typeof(animationDuration) === 'number'
+            ? animationDuration
+            : this._transitionSpeedInMillis;
+
+        map.style.transition = `all ${transitionSpeedInMillis}ms`;
 
         if (hideMap) {
-            clubInfoGrid.style.height = `${clubInfoGrid.offsetHeight}px`;
-            clubInfoGrid.style.transform = 'translateX(-100%)';
+            map.style.height = `${map.offsetHeight}px`;
+            map.style.transform = 'translateX(-100%)';
 
-            await wait(this._transitionSpeedInMillis);
+            await wait(transitionSpeedInMillis);
 
-            clubInfoGrid.style.height = '0';
+            map.style.height = '0';
 
             return;
         }
 
-        clubInfoGrid.style.height = 'auto';
-        clubInfoGrid.style.transform = 'translateX(0)';
+        map.style.height = 'auto';
+        map.style.transform = 'translateX(0)';
     }
 
     private _addStyleAndLoader() {
@@ -705,6 +705,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             geolocationError,
             header,
             locationInfo,
+            map,
             search,
             forecast,
             footer,
@@ -718,6 +719,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         this.shadowRoot.appendChild(header);
         this.shadowRoot.appendChild(search);
+        this.shadowRoot.appendChild(map);
         this.shadowRoot.appendChild(locationInfo);
 
         if (this._mapDisplayMode === 'on') {

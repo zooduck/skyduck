@@ -22,7 +22,12 @@ export class GoogleMapTemplate {
         const queryString = new URLSearchParams(params).toString();
         const url = `https://google.com/maps/embed/v1/place?${queryString}`;
         this._googleMap = new DOMParser().parseFromString(
-            `<iframe src="${url}" frameborder="0" class="club-info-grid__map"></iframe>
+            `<div class="map" id="map">
+                <iframe
+                    src="${url}"
+                    frameborder="0">
+                </iframe>
+            </div>
         `, 'text/html').body.firstChild as HTMLIFrameElement;
     }
 

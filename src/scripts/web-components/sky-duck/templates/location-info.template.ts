@@ -1,4 +1,3 @@
-import { GoogleMapTemplate } from './google-map.template';
 import { PlaceTemplate } from './place.template';
 import { LocalTimeAndUnitsInfoTemplate } from './local-time-and-units-info.template';
 import { LocationDetails } from '../interfaces/index'; // eslint-disable-line no-unused-vars
@@ -26,9 +25,8 @@ export class LocationInfoTemplate {
         this._locationInfo = document.createElement('div') as HTMLElement;
         this._locationInfo.className = 'club-info-grid';
 
-        const { coords, timezone } = this._locationDetails;
+        const { timezone } = this._locationDetails;
 
-        this._locationInfo.appendChild(new GoogleMapTemplate(this._googleMapsKey, coords).html);
         this._locationInfo.appendChild(new PlaceTemplate(this._locationDetails).html);
         this._locationInfo.appendChild(new LocalTimeAndUnitsInfoTemplate(timezone).html);
     }

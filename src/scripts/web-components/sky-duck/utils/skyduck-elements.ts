@@ -9,6 +9,7 @@ import { SearchTemplate } from '../templates/search.template';
 import { ClubListCarouselTemplate } from '../templates/club-list-carousel.template';
 import { GeolocationErrorTemplate } from '../templates/geolocation-error.template';
 import { NotFoundTemplate } from '../templates/not-found.template';
+import { GoogleMapTemplate } from '../templates/google-map.template';
 /* eslint-enable */
 
 export class SkyduckElements {
@@ -96,6 +97,10 @@ export class SkyduckElements {
 
     public get header(): HTMLElement {
         return new HeaderTemplate(this._version, this._userDeniedGeolocation).html;
+    }
+
+    public get map(): HTMLIFrameElement {
+        return new GoogleMapTemplate(this._googleMapsKey, this._locationDetails.coords).html;
     }
 
     public get search(): HTMLElement {

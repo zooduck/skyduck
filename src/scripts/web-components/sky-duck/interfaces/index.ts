@@ -179,6 +179,7 @@ export interface WeatherElements {
     locationInfo: HTMLElement;
     header: HTMLElement;
     search: HTMLElement;
+    map: HTMLIFrameElement;
 }
 
 export interface HTMLZooduckCarouselElement extends HTMLElement {

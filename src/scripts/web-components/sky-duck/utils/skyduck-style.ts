@@ -51,6 +51,7 @@ export class SkyduckStyle {
                 --paleskyblue: rgba(135, 206, 250, .4);
                 --gray: #999;
                 --lightgray: lightgray;
+                --palegray: #eee;
             }
             :host(.--ready) {
                 height: auto;
@@ -242,7 +243,16 @@ export class SkyduckStyle {
             }
 
             .search {
-                padding: 10px;
+                padding: 0 10px;
+            }
+
+            .map {
+                margin-top: 10px;
+                padding: 0 10px;
+            }
+            .map iframe {
+                width: 100%;
+                background-color: var(--palegray);
             }
 
             .club-info-grid {
@@ -250,13 +260,9 @@ export class SkyduckStyle {
                 grid-template-columns: 1fr auto;
                 grid-gap: 10px;
                 padding: 0 10px;
+                margin-top: 10px;
                 overflow: hidden;
                 transition: all ${transitionSpeedInMillis}ms;
-            }
-            .club-info-grid__map {
-                grid-column: 1 / span 2;
-                width: 100%;
-                background-color: #eee;
             }
             .club-info-grid-location-info {
                 display: flex;
