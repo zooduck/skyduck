@@ -87,6 +87,7 @@ export class SkyduckStyle {
             ul {
                 list-style-type: none;
                 margin-block-start: 0;
+                margin-block-end: 0;
                 padding-inline-start: 0;
             }
 
@@ -258,11 +259,8 @@ export class SkyduckStyle {
                 background-color: #eee;
             }
             .club-info-grid-location-info {
-                display: grid;
-            }
-            .club-info-grid-location-info__site-link {
-                justify-self: start;
-                margin-top: 10px;
+                display: flex;
+                flex-direction: column;
             }
 
             .local-time-and-units-info-grid {
@@ -273,17 +271,16 @@ export class SkyduckStyle {
 
             .controls {
                 display: grid;
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, auto) 1fr;
                 grid-gap: 10px;
                 align-items: center;
                 margin: 10px;
-                color: var(--white);
             }
             .controls__view-club-list {
                 justify-self: left;
                 cursor: pointer;
                 background-color: var(--lightskyblue);
-                color: #fff;
+                color: var(--white);
                 width: 100px;
                 height: 60px;
                 font-size: var(--font-size-base);

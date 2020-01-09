@@ -11,18 +11,14 @@ export class PlaceTemplate {
     }
 
     private _buildPlace(): void {
-        const { name, address, site } = this._locationDetails;
+        const { name, address } = this._locationDetails;
         const title = `
             <h3>${name}</h3>
         `;
-        const siteLink = site
-            ? `<a class="club-info-grid-location-info__site-link" href="${site}" target="_blank">${site.replace(/https?:\/+/, '')}</a>`
-            : '';
         this._place = new DOMParser().parseFromString(`
             <div class="club-info-grid-location-info">
                 ${title}
                 ${this._formatAddress(address)}
-                ${siteLink}
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
     }
