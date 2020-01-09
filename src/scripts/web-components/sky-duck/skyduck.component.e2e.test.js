@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 describe('sky-duck', () => {
     let el;
     const timeoutToConnectToDOM = 50;
@@ -127,24 +129,57 @@ describe('sky-duck', () => {
                     expect(googleMap).toBeDefined();
                 });
 
-                it('should display a forecast carousel with 8 slides', async () => {
-                    const forecastCarouselSlides = await page.evaluate((el) => {
-                        return el.shadowRoot
-                            .querySelector('#forecastCarousel')
-                            .querySelector('[slot=slides]').children.length;
-                    }, el);
+                describe('forecast', () => {
+                    let dt, day;
+                    const forecastHoursPerSlideIn3hMode = 3;
+                    const totalSlides = 8;
 
-                    expect(forecastCarouselSlides).toEqual(8);
+                    beforeAll(async () => {
+                        dt = DateTime.local().setZone('Asia/Tokyo');
+                        day = dt.weekdayShort;
+                    });
+
+                    it('should display a forecast carousel with 8 slides', async () => {
+                        const forecastCarouselSlides = await page.evaluate((el) => {
+                            return el.shadowRoot
+                                .querySelector('#forecastCarousel')
+                                .querySelector('[slot=slides]').children.length;
+                        }, el);
+
+                        expect(forecastCarouselSlides).toEqual(8);
+                    });
+
+                    it('should display a forecast for the current day on the first slide', async () => {
+                        const forecastGridHeaderDay = await page.evaluate((el) => {
+                            return el.shadowRoot
+                                .querySelector('#forecastCarousel')
+                                .querySelectorAll('.forecast-grid-header-date__day')[0].innerHTML;
+                        }, el);
+
+                        expect(forecastGridHeaderDay).toEqual(day);
+                    });
+
+                    it('should display the correct number of forecast hours for 3h mode', async () => {
+                        const forecastHours3h = await page.evaluate((el) => {
+                            return el.shadowRoot
+                                .querySelector('#forecastCarousel')
+                                .querySelectorAll('.forecast-grid-forecast.--3h').length;
+                        }, el);
+
+                        expect(forecastHours3h).toEqual(forecastHoursPerSlideIn3hMode * totalSlides);
+                    });
                 });
 
-                it('should display a club list carousel with at least 5 slides', async () => {
-                    const clubListCarouselSlides = await page.evaluate((el) => {
-                        return el.shadowRoot
-                            .querySelector('#clubListCarousel')
-                            .querySelector('[slot=slides]').children.length;
-                    }, el);
+                describe('clubs', () => {
+                    it('should display a club list carousel with at least 5 slides', async () => {
+                        const clubListCarouselSlides = await page.evaluate((el) => {
+                            return el.shadowRoot
+                                .querySelector('#clubListCarousel')
+                                .querySelector('[slot=slides]').children.length;
+                        }, el);
 
-                    expect(clubListCarouselSlides).toBeGreaterThanOrEqual(5);
+                        expect(clubListCarouselSlides).toBeGreaterThanOrEqual(5);
+                    });
                 });
             });
         });

@@ -47,7 +47,7 @@ export class ForecastTemplate {
                     <div class="forecast-grid-header-date">
                         <div class="forecast-grid-header-date__location">${title}</div>
                         <div class="forecast-grid-header-date__date">
-                            <h2>${day}</h2>
+                            <h2 class="forecast-grid-header-date__day">${day}</h2>
                             <h1 class="forecast-grid-header-date__date-string">${dateString}</h1>
                         </div>
                     </div>
