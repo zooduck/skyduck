@@ -158,7 +158,9 @@ class HTMLSkyDuckElement extends HTMLElement {
         if (hideMap) {
             clubInfoGrid.style.height = `${clubInfoGrid.offsetHeight}px`;
             clubInfoGrid.style.transform = 'translateX(-100%)';
-            await wait(10); // some delay necessary for transition on height to work
+
+            await wait(this._transitionSpeedInMillis);
+
             clubInfoGrid.style.height = '0';
 
             return;
