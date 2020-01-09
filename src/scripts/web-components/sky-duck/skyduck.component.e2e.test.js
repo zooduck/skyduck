@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 describe('sky-duck', () => {
     let el;
     const timeoutToConnectToDOM = 50;
-    const timeoutToFirstLoadStarted = 1000;
+    const timeoutToFirstLoadStarted = 2000;
     const timeoutToFirstLoadCompleted = 10000;
 
     beforeAll(async () => {
@@ -66,7 +66,7 @@ describe('sky-duck', () => {
                         return el.shadowRoot.querySelector('#skyduckLoader');
                     }, el);
 
-                    expect(loader).toBeDefined();
+                    expect(loader).not.toBeNull();
                 });
 
                 it('should have a style tag', async () => {
@@ -74,7 +74,7 @@ describe('sky-duck', () => {
                         return el.shadowRoot.querySelector('style');
                     }, el);
 
-                    expect(style).toBeDefined();
+                    expect(style).not.toBeNull();
                 });
             });
 
@@ -106,27 +106,28 @@ describe('sky-duck', () => {
                     const search =  await page.evaluate((el) => {
                         return el.shadowRoot
                             .querySelector('.search')
-                            .querySelector('zooduck-input [label="Location Search"]');
+                            .querySelector('zooduck-input[label="Location Search"]');
                     }, el);
 
-                    expect(header).toBeDefined();
-                    expect(search).toBeDefined();
+                    expect(header).not.toBeNull();
+                    expect(search).not.toBeNull();
                 });
 
-                it('should display location details and map', async () => {
+                it('should display a google map', async () => {
+                    const map = await page.evaluate((el) => {
+                        return el.shadowRoot.querySelector('#map iframe[src*="https://google.com"]');
+                    }, el);
+
+                    expect(map).not.toBeNull();
+                }, el);
+
+                it('should display location info', async () => {
                     const locationInfo = await page.evaluate((el) => {
                         return el.shadowRoot
                             .querySelector('.club-info-grid-location-info').innerText;
                     }, el);
 
-                    const googleMap = await page.evaluate((el) => {
-                        return el.shadowRoot
-                            .querySelector('.club-info-grid')
-                            .querySelector('iframe[src*="https://google.com"]');
-                    }, el);
-
                     expect(locationInfo).toContain('Tokyo');
-                    expect(googleMap).toBeDefined();
                 });
 
                 describe('forecast', () => {
@@ -219,16 +220,16 @@ describe('sky-duck', () => {
                     const search =  await page.evaluate((el) => {
                         return el.shadowRoot
                             .querySelector('.search')
-                            .querySelector('zooduck-input [label="Location Search"]');
+                            .querySelector('zooduck-input[label="Location Search"]');
                     }, el);
 
                     expect(childNodes).toEqual(5);
 
-                    expect(style).toBeDefined();
-                    expect(loader).toBeDefined();
-                    expect(header).toBeDefined();
-                    expect(search).toBeDefined();
-                    expect(clubList).toBeDefined();
+                    expect(style).not.toBeNull();
+                    expect(loader).not.toBeNull();
+                    expect(header).not.toBeNull();
+                    expect(search).not.toBeNull();
+                    expect(clubList).not.toBeNull();
                 });
 
                 it('should display the loader with an error', async () => {
