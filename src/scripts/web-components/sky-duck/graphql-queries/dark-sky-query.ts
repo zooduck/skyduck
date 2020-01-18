@@ -18,10 +18,8 @@ export const darkSkyQuery = `query DarkskyData($lat: Float!, $lon: Float!) {
                 temperatureMax,
                 apparentTemperatureMin,
                 apparentTemperatureMax,
-                humidity,
                 windSpeed,
                 windGust,
-                windBearing,
                 cloudCover,
                 visibility
             }
@@ -37,10 +35,8 @@ export const darkSkyQuery = `query DarkskyData($lat: Float!, $lon: Float!) {
                 precipType,
                 temperature,
                 apparentTemperature,
-                humidity,
                 windSpeed,
                 windGust,
-                windBearing,
                 cloudCover,
                 visibility
             }
