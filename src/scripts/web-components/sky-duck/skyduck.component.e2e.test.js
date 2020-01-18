@@ -159,6 +159,13 @@ describe('sky-duck', () => {
                     });
 
                     it('should display a forecast for the current day on the first slide', async () => {
+                        // @NOTE: This test is expected to fail if the database contains a forecast
+                        // less than 1 hour old but for the previous day. In that case it would be
+                        // a FALSE NEGATIVE
+                        // ---------------------------------------------------------------
+                        // Consider adding a no-cache attribute to force weather requests
+                        // OR simply clear the database before running this test
+                        //----------------------------------------------------------------
                         const forecastGridHeaderDay = await page.evaluate((el) => {
                             return el.shadowRoot
                                 .querySelector('#forecastCarouselStandard')
