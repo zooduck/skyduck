@@ -1,15 +1,11 @@
-import { PlaceTemplate } from './place.template';
-import { LocalTimeAndUnitsInfoTemplate } from './local-time-and-units-info.template';
 import { LocationDetails } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { NotFoundTemplate } from './not-found.template';
 
 export class LocationInfoTemplate {
-    private _googleMapsKey: string;
     private _locationDetails: LocationDetails;
     private _locationInfo: HTMLElement;
 
-    constructor(locationDetails: LocationDetails, googleMapsKey) {
-        this._googleMapsKey = googleMapsKey;
+    constructor(locationDetails: LocationDetails) {
         this._locationDetails = locationDetails;
 
         this._buildLocationInfo();
@@ -22,13 +18,47 @@ export class LocationInfoTemplate {
             return;
         }
 
-        this._locationInfo = document.createElement('div') as HTMLElement;
-        this._locationInfo.className = 'club-info-grid';
+        const { name, address, site } = this._locationDetails;
+        const title = `
+            <h3>${name}</h3>
+        `;
+        const formattedAddress = this._formatAddress(address);
+        const siteLink = site
+            ? `
+                <a
+                    class="location-info-link"
+                    href=${site}
+                    target="_blank">
+                    ${site.replace(/^https?:\/+/, '')}
+                </a>
+            `
+            : '';
 
-        const { timezone } = this._locationDetails;
+        this._locationInfo = new DOMParser().parseFromString(`
+            <div
+                class="location-info"
+                id="locationInfo">
+                ${title}
+                ${formattedAddress}
+                ${siteLink}
+            </div>
+        `, 'text/html').body.firstChild as HTMLElement;
+    }
 
-        this._locationInfo.appendChild(new PlaceTemplate(this._locationDetails).html);
-        this._locationInfo.appendChild(new LocalTimeAndUnitsInfoTemplate(timezone).html);
+    private _formatAddress(address: string): string {
+        const parts = address.split(',');
+        const uniqueParts = [];
+        parts.forEach((part) => {
+            const _part = part.trim();
+            if (!uniqueParts.includes(_part)) {
+                uniqueParts.push(_part);
+            }
+        });
+        const html = uniqueParts.map((part) => {
+            return `<span>${part}</span>`;
+        });
+
+        return html.join('');
     }
 
     public get html(): HTMLElement {

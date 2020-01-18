@@ -14,7 +14,7 @@ import { darkSkyLookup } from '../fetch/dark-sky-lookup.fetch';
 import { querySkydiveClub } from '../fetch/skydive-club.fetch';
 import { dbWeatherLookup } from '../fetch/db-weather-lookup.fetch';
 import { dbWeatherUpdate } from '../fetch/db-weather-update.fetch';
-import { escapeSpecialChars } from './escape-special-chars';
+import { escapeSpecialChars } from '../utils/escape-special-chars';
 
 export class SkyduckWeather {
     private _floatToInt(float: number): number {
@@ -47,18 +47,10 @@ export class SkyduckWeather {
                 windSpeed: this._floatToInt(dailyItem.windSpeed),
                 visibility: this._floatToInt(dailyItem.visibility),
                 hourly: hourlyData.filter((hourlyItem: HourlyData) => {
-                    // Include hourly data from 2 hours before sunrise until 2 hours after sunset
-                    const hourlyItemDate = this._getTZDateString(hourlyItem.time, timezone);
-                    const dailyItemDate = this._getTZDateString(dailyItem.time, timezone);
-                    const hourlyItemHour = this._getTZDateTime(hourlyItem.time, timezone).hour;
-                    const sunriseHour = this._roundHour(this._getTZDateTime(dailyItem.sunriseTime, timezone));
-                    const sunsetHour = this._roundHour(this._getTZDateTime(dailyItem.sunsetTime, timezone));
-                    const requiredHoursBeforeSunrise = sunriseHour - 2;
-                    const requiredHoursAfterSunset = sunsetHour + 2;
+                    const hourlyItemDate = this._getTZDateTime(hourlyItem.time, timezone);
+                    const dailyItemDate = this._getTZDateTime(dailyItem.time, timezone);
 
-                    return hourlyItemDate === dailyItemDate
-                        && hourlyItemHour >= requiredHoursBeforeSunrise
-                        && hourlyItemHour <= requiredHoursAfterSunset;
+                    return hourlyItemDate.hasSame(dailyItemDate, 'day');
                 }).map((hourlyItem: HourlyData) => {
                     return this._formatHourlyData(hourlyItem, timezone);
                 }),
@@ -101,45 +93,6 @@ export class SkyduckWeather {
         }
 
         return dbWeather;
-    }
-
-    public async getDailyForecastByClub(name: string, clubList: SkydiveClub[]): Promise<DailyForecast> {
-        let skydiveClub: SkydiveClub;
-
-        if (clubList) {
-            const clubEscaped = escapeSpecialChars(name);
-
-            skydiveClub = clubList.find((club: SkydiveClub) => {
-                return new RegExp(clubEscaped, 'i').test(club.name);
-            });
-        } else {
-            skydiveClub = await querySkydiveClub(name);
-        }
-
-        if (!skydiveClub) {
-            throw Error(`Could not find club "${name}" in the skyduck database. Try searching by location instead.`);
-        }
-
-        const { latitude,longitude } = skydiveClub;
-
-        const weather = await this._getDBWeather(latitude, longitude, name);
-
-        return {
-            weather,
-        };
-    }
-
-    public async getDailyForecastByQuery(geocodeData: GeocodeData): Promise<DailyForecast> {
-        const { latitude, longitude, query } = geocodeData;
-        const { countryRegion, formattedAddress } = geocodeData.address;
-
-        const weather = await this._getDBWeather(latitude, longitude, query);
-
-        return {
-            weather,
-            countryRegion,
-            formattedAddress,
-        };
     }
 
     private _getTZDateString(timeInSeconds: number, timezone: string): string {
@@ -195,5 +148,44 @@ export class SkyduckWeather {
         const decimalHour = dt.hour + decimalMinute;
 
         return Math.round(decimalHour);
+    }
+
+    public async getDailyForecastByClub(name: string, clubList: SkydiveClub[]): Promise<DailyForecast> {
+        let skydiveClub: SkydiveClub;
+
+        if (clubList) {
+            const clubEscaped = escapeSpecialChars(name);
+
+            skydiveClub = clubList.find((club: SkydiveClub) => {
+                return new RegExp(clubEscaped, 'i').test(club.name);
+            });
+        } else {
+            skydiveClub = await querySkydiveClub(name);
+        }
+
+        if (!skydiveClub) {
+            throw Error(`Could not find club "${name}" in the skyduck database. Try searching by location instead.`);
+        }
+
+        const { latitude,longitude } = skydiveClub;
+
+        const weather = await this._getDBWeather(latitude, longitude, name);
+
+        return {
+            weather,
+        };
+    }
+
+    public async getDailyForecastByQuery(geocodeData: GeocodeData): Promise<DailyForecast> {
+        const { latitude, longitude, query } = geocodeData;
+        const { countryRegion, formattedAddress } = geocodeData.address;
+
+        const weather = await this._getDBWeather(latitude, longitude, query);
+
+        return {
+            weather,
+            countryRegion,
+            formattedAddress,
+        };
     }
 }

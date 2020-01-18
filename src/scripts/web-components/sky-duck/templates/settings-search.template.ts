@@ -8,7 +8,11 @@ export class SearchTemplate {
     private _buildSearch(): void {
         this._search = new DOMParser().parseFromString(`
             <div class="search">
-                <zooduck-input label="Location Search" placeholder="e.g. Perris, CA 92570, USA"></zooduck-input>
+                <zooduck-input
+                    id="searchInput"
+                    label="Location Search"
+                    placeholder="e.g. Perris, CA 92570, USA">
+                </zooduck-input>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
     }

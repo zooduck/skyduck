@@ -8,17 +8,13 @@ describe('sky-duck', () => {
 
     beforeAll(async () => {
         jest.setTimeout(11000);
-        await page.goto(LOCALHOST);
     });
 
     describe('with location attribute set', () => {
         describe('good location', () => {
-            beforeEach(async () => {
-                await page.setContent(`
-                    <sky-duck location="tokyo"></sky-duck>
-                `);
+            beforeAll(async () => {
+                await page.goto(LOCALHOST);
             });
-
             describe('init', () => {
                 beforeAll(async () => {
                     await page.setContent(`
@@ -42,7 +38,6 @@ describe('sky-duck', () => {
 
             describe('load started', () => {
                 beforeAll(async () => {
-                    await page.reload();
                     await page.setContent(`
                         <sky-duck location="tokyo"></sky-duck>
                     `);
@@ -80,11 +75,11 @@ describe('sky-duck', () => {
 
             describe('load completed', () => {
                 beforeAll(async () => {
-                    await page.reload();
                     await page.setContent(`
                         <sky-duck location="tokyo"></sky-duck>
                     `);
                     el = await page.$('sky-duck');
+
                     await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadCompleted);
                 });
 
@@ -93,24 +88,46 @@ describe('sky-duck', () => {
                         return Array.from(el.classList);
                     }, el);
 
-                    expect(modifierClasses).toEqual([
+                    expect(modifierClasses.sort()).toEqual([
+                        '--active-carousel-forecast',
+                        '--forecast-display-mode-standard',
                         '--ready',
                     ]);
                 });
 
-                it('should display header and search', async () => {
+                it('should display a header', async () => {
                     const header = await page.evaluate((el) => {
                         return el.shadowRoot.querySelector('.header');
                     }, el);
 
-                    const search =  await page.evaluate((el) => {
-                        return el.shadowRoot
-                            .querySelector('.search')
-                            .querySelector('zooduck-input[label="Location Search"]');
+                    expect(header).not.toBeNull();
+                });
+
+                it('should display a settings page', async () => {
+                    const settingsPage = await page.evaluate((el) => {
+                        return el.shadowRoot.querySelector('#settings');
+                    }, el);
+                    const settingsPageElements = await page.evaluate((el) => {
+                        const settingsPage = el.shadowRoot.querySelector('#settings');
+                        const settings = [
+                            '.search',
+                            '.map',
+                            '.location-info',
+                            '#activeCarouselSetting',
+                            '#forecastDisplayModeSetting',
+                            '#useCurrentLocationSetting',
+                        ].map((selector) => {
+                            return settingsPage.querySelector(selector);
+                        });
+
+                        return settings;
                     }, el);
 
-                    expect(header).not.toBeNull();
-                    expect(search).not.toBeNull();
+                    expect(settingsPage).not.toBeNull();
+
+                    settingsPageElements.forEach((el) => {
+                        expect(el).not.toBeNull();
+                    });
                 });
 
                 it('should display a google map', async () => {
@@ -121,18 +138,9 @@ describe('sky-duck', () => {
                     expect(map).not.toBeNull();
                 }, el);
 
-                it('should display location info', async () => {
-                    const locationInfo = await page.evaluate((el) => {
-                        return el.shadowRoot
-                            .querySelector('.club-info-grid-location-info').innerText;
-                    }, el);
-
-                    expect(locationInfo).toContain('Tokyo');
-                });
-
                 describe('forecast', () => {
                     let dt, day;
-                    const forecastHoursPerSlideIn3hMode = 3;
+                    const forecastHoursPerSlideInStandardMode = 3;
                     const totalSlides = 8;
 
                     beforeAll(async () => {
@@ -143,7 +151,7 @@ describe('sky-duck', () => {
                     it('should display a forecast carousel with 8 slides', async () => {
                         const forecastCarouselSlides = await page.evaluate((el) => {
                             return el.shadowRoot
-                                .querySelector('#forecastCarousel')
+                                .querySelector('#forecastCarouselStandard')
                                 .querySelector('[slot=slides]').children.length;
                         }, el);
 
@@ -153,21 +161,21 @@ describe('sky-duck', () => {
                     it('should display a forecast for the current day on the first slide', async () => {
                         const forecastGridHeaderDay = await page.evaluate((el) => {
                             return el.shadowRoot
-                                .querySelector('#forecastCarousel')
+                                .querySelector('#forecastCarouselStandard')
                                 .querySelectorAll('.forecast-grid-header-date__day')[0].innerHTML;
                         }, el);
 
                         expect(forecastGridHeaderDay).toEqual(day);
                     });
 
-                    it('should display the correct number of forecast hours for 3h mode', async () => {
-                        const forecastHours3h = await page.evaluate((el) => {
+                    it('should display the correct number of forecast hours for standard mode', async () => {
+                        const forecastHours = await page.evaluate((el) => {
                             return el.shadowRoot
-                                .querySelector('#forecastCarousel')
-                                .querySelectorAll('.forecast-grid-forecast.--3h').length;
+                                .querySelector('#forecastCarouselStandard')
+                                .querySelectorAll('.forecast-grid-hour').length;
                         }, el);
 
-                        expect(forecastHours3h).toEqual(forecastHoursPerSlideIn3hMode * totalSlides);
+                        expect(forecastHours).toEqual(forecastHoursPerSlideInStandardMode * totalSlides);
                     });
                 });
 
@@ -186,9 +194,11 @@ describe('sky-duck', () => {
         });
 
         describe('bad location', () => {
+            beforeAll(async () => {
+                await page.goto(LOCALHOST);
+            });
             describe('load completed', () => {
                 beforeAll(async () => {
-                    await page.reload();
                     await page.setContent(`
                         <sky-duck location="DOMPER"></sky-duck>
                     `);
@@ -196,40 +206,37 @@ describe('sky-duck', () => {
                     await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadCompleted);
                 });
 
-                it('should only display header and search when the location could not be resolved', async () => {
+                it('should not display any forecast carousels when the location could not be resolved', async () => {
+                    const expectedElements = [
+                        'style',
+                        'loader',
+                        'header',
+                        'header-placeholder',
+                        'glass',
+                        'club-list',
+                        'settings',
+                    ];
+
                     const childNodes = await page.evaluate((el) => {
                         return el.shadowRoot.children.length;
                     }, el);
 
-                    const style = await page.evaluate((el) => {
-                        return el.shadowRoot.querySelector('style');
+                    expect(childNodes).toEqual(expectedElements.length);
+
+                    const forecastCarousels = await page.evaluate((el) => {
+                        const forecastCarousels = [
+                            '#forecastCarouselStandard',
+                            '#forecastCarouselExtended'
+                        ].map((selector) => {
+                            return el.querySelector(selector);
+                        });
+
+                        return forecastCarousels;
                     }, el);
 
-                    const loader = await page.evaluate((el) => {
-                        return el.shadowRoot.querySelector('#skyduckLoader');
-                    }, el);
-
-                    const header = await page.evaluate((el) => {
-                        return el.shadowRoot.querySelector('.header');
-                    }, el);
-
-                    const clubList = await page.evaluate((el) => {
-                        return el.shadowRoot.querySelector('#clubListCarousel');
-                    }, el);
-
-                    const search =  await page.evaluate((el) => {
-                        return el.shadowRoot
-                            .querySelector('.search')
-                            .querySelector('zooduck-input[label="Location Search"]');
-                    }, el);
-
-                    expect(childNodes).toEqual(5);
-
-                    expect(style).not.toBeNull();
-                    expect(loader).not.toBeNull();
-                    expect(header).not.toBeNull();
-                    expect(search).not.toBeNull();
-                    expect(clubList).not.toBeNull();
+                    forecastCarousels.forEach((el) => {
+                        expect(el).toBeNull();
+                    });
                 });
 
                 it('should display the loader with an error', async () => {

@@ -6,6 +6,7 @@ export const sortClubsByCountry = (clubs: SkydiveClub[]): ClubListsSortedByCount
         if (!clubsByCountry[club.country]) {
             clubsByCountry[club.country] = {
                 country: club.country,
+                countryAliases: club.countryAliases,
                 furthestDZDistance: .1,
                 list: [],
             };

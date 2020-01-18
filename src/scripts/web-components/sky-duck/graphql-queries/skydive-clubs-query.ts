@@ -5,6 +5,7 @@ export const skydiveClubsQuery = `query SkydiveClubs($country: String) {
         name,
         place,
         country,
+        countryAliases,
         site,
     }
 }`;

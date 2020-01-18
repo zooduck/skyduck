@@ -27,6 +27,8 @@ export const darkSkyQuery = `query DarkskyData($lat: Float!, $lon: Float!) {
             }
         },
         hourly {
+            summary,
+            icon,
             data {
                 time,
                 summary,

@@ -15,17 +15,28 @@ export class LoaderTemplate {
 
     private _buildLoader(): void {
         this._loader = new DOMParser().parseFromString(`
-            <div class="loader" id="skyduckLoader">
+            <div
+                id="skyduckLoader"
+                class="loader --render-once">
                 <div class="loader-info">
                     <div id="loaderInfoLat"></div>
                     <div id="loaderInfoLon"></div>
-                    <div id="loaderInfoPlace" class="loader-info__place"></div>
+                    <div
+                        id="loaderInfoPlace"
+                        class="loader-info__place">
+                    </div>
                     <div id="loaderInfoIANA"></div>
                     <div id="loaderInfoLocalTime"></div>
                 </div>
-                <div id="loaderError" class="loader__error"></div>
+                <div
+                    id="loaderError"
+                    class="loader__error">
+                </div>
                 <div class="loader-bar">
-                    <div id="loaderBarInner" class="loader-bar__inner"></div>
+                    <div
+                        id="loaderBarInner"
+                        class="loader-bar__inner">
+                    </div>
                 </div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
@@ -39,7 +50,8 @@ export class LoaderTemplate {
                 class="loader__icon"
                 size="200"
                 color="var(--white)"
-                backgroundcolor="var(--lightskyblue)"></zooduck-icon-skyduck-in-flight>
+                backgroundcolor="var(--lightskyblue)">
+            </zooduck-icon-skyduck-in-flight>
         `, 'text/html').body.firstChild as HTMLElement;
     }
 

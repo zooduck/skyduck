@@ -87,6 +87,7 @@ type SkydiveClub {
     name: String,
     place: String,
     country: String,
+    countryAliases: [String],
     latitude: Float,
     longitude: Float,
     site: String,

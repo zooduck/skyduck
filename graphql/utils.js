@@ -1,4 +1,4 @@
-const { DateTime } = require('luxon');
+const { DateTime, Interval } = require('luxon');
 
 const escapeSpecialChars = (query) => {
     let queryEscaped = query;
@@ -10,18 +10,33 @@ const escapeSpecialChars = (query) => {
     return queryEscaped;
 };
 
-const isHourlyDataMissing = (data = { date: '', requiredHours: [], hourlyData: [], timezone: '', }) => {
-    const { date, requiredHours, hourlyData, timezone } = data;
 
-    const requiredHoursFound = hourlyData.filter((hourlyItem) => {
-        const hourlyItemDateTime = DateTime.fromSeconds(hourlyItem.time).setZone(timezone);
-        const hourlyItemDate = hourlyItemDateTime.toLocaleString(DateTime.DATE_SHORT);
-        const hourlyItemHour = hourlyItemDateTime.hour;
+const filterHourlyData = (hourlyData, dailyData, timezone) => {
+    const filteredHourlyData = hourlyData.filter((hourlyItem) => {
+        const requiredInterval = getDaylightHoursIntervalFromHourlyData(hourlyItem, dailyData, timezone);
+        const hourlyItemDate = DateTime.fromSeconds(hourlyItem.time).setZone(timezone);
 
-        return hourlyItemDate === date && requiredHours.includes(hourlyItemHour);
+        return requiredInterval.contains(hourlyItemDate);
     });
 
-    return requiredHoursFound.length < requiredHours.length;
+    return filteredHourlyData;
+};
+
+const getDaylightHoursIntervalFromHourlyData = (hourlyItem, dailyData, timezone) => {
+    const hourlyItemDate = DateTime.fromSeconds(hourlyItem.time).setZone(timezone);
+    const dailyDataItemForHour = dailyData.find((dailyDataItem) => {
+        const dailyDataItemDate = DateTime.fromSeconds(dailyDataItem.time).setZone(timezone);
+
+        return dailyDataItemDate.hasSame(hourlyItemDate, 'day');
+    });
+
+    const { sunriseTime, sunsetTime } = dailyDataItemForHour;
+
+    const sunriseTimeDate = DateTime.fromSeconds(sunriseTime);
+    const sunsetTimeDate = DateTime.fromSeconds(sunsetTime);
+    const requiredInterval = Interval.fromDateTimes(sunriseTimeDate.minus({ hours: 2 }), sunsetTimeDate.plus({ hours: 2 }));
+
+    return requiredInterval;
 };
 
 const hourlyDataExists = (darkSkyData, timeMachineHourlyItem) => {
@@ -66,6 +81,6 @@ const mergeTimeMachineResults = (darkSkyData, darkSkyTimeMachineDataToday, darkS
 
 module.exports = {
     escapeSpecialChars,
-    isHourlyDataMissing,
+    filterHourlyData,
     mergeTimeMachineResults,
 };

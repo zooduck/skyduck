@@ -1,15 +1,16 @@
-
-
+import { backgroundImageForMesh } from '../utils/background-image-for-mesh';
 
 interface StyleOptions {
     transitionSpeedInMillis: number;
 }
 
 export class SkyduckStyle {
+    private _backgroundImageForMesh: string;
     private _style: string;
     private _styleOptions: StyleOptions;
 
     constructor(styleOptions: StyleOptions) {
+        this._backgroundImageForMesh = backgroundImageForMesh();
         this._styleOptions = styleOptions;
         this._buildStyle();
     }
@@ -19,14 +20,49 @@ export class SkyduckStyle {
 
         this._style = `
             @import url('https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i&display=swap');
-            @import url('https://fonts.googleapis.com/css?family=Luckiest+Guy&display=swap');
+
+            @keyframes hide-carousel {
+                0% {
+                    height: auto;
+                }
+                100% {
+                    height: 0;
+                }
+            }
+
+            @keyframes loading-bar {
+                0% {
+                    width: 0;
+                }
+                50% {
+                    width: 10%;
+                }
+                60% {
+                    width: 50%;
+                }
+                69% {
+                    width: 55%;
+                }
+                70% {
+                    width: 65%;
+                }
+                79% {
+                    width: 70%;
+                }
+                80% {
+                    width: 80%;
+                }
+                100% {
+                    width: 100%;
+                }
+            }
 
             :host {
                 position: relative;
                 display: block;
                 width: 100%;
                 height: 100vh;
-                max-width: 768px;
+                max-width: 823px;
                 min-height: 100vh;
                 margin: 0 auto;
                 background-color: var(--white);
@@ -37,7 +73,9 @@ export class SkyduckStyle {
                 color: var(--black);
 
                 --font-size-base: 16px;
-                --slide-selectors-height: 60px;
+                --slide-selectors-height: 40px;
+                --header-height: 70px;
+                --footer-height: 40px;
 
                 --red: rgb(255, 99, 71, .8);
                 --amber: rgba(255, 165, 0, .8);
@@ -46,29 +84,32 @@ export class SkyduckStyle {
                 --white: #fff;
                 --black: #222;
                 --charcoal: #333;
-                --pink: hotpink;
+                --paleyellow: #fbfbaa;
                 --lightskyblue: lightskyblue;
                 --paleskyblue: rgba(135, 206, 250, .4);
                 --gray: #999;
+                --icongray: #ccc;
                 --lightgray: lightgray;
                 --palegray: #eee;
+                --whitesmoke: whitesmoke;
+                --translucentwhite: rgba(255, 255, 255, .8);
+
+                --boxshadow: -2px 2px 15px rgba(0, 0, 0, .2);
             }
             :host(.--ready) {
                 height: auto;
+            }
+            :host(.--settings-active) {
+                height: 100vh;
             }
             @media (max-width: 320px) {
                 :host {
                     font-size: 14px;
                 }
             }
-            @media (min-width: 768px) {
+            @media (min-width: 824px) {
                 :host {
-                    font-size: 20px;
-                }
-            }
-            @media (min-width: 1024px) {
-                :host {
-                    font-size: 22px;
+                    box-shadow: var(--boxshadow);
                 }
             }
 
@@ -150,32 +191,6 @@ export class SkyduckStyle {
             .loader__icon {
                 grid-row: 2;
             }
-            @keyframes loadingBar {
-                0% {
-                    width: 0;
-                }
-                50% {
-                    width: 10%;
-                }
-                60% {
-                    width: 50%;
-                }
-                69% {
-                    width: 55%;
-                }
-                70% {
-                    width: 65%;
-                }
-                79% {
-                    width: 70%;
-                }
-                80% {
-                    width: 80%;
-                }
-                100% {
-                    width: 100%;
-                }
-            }
             .loader-bar {
                 display: flex;
                 grid-row: 3;
@@ -189,7 +204,7 @@ export class SkyduckStyle {
                 background-color: var(--white);
                 width: 0;
                 height: 100%;
-                animation: loadingBar linear;
+                animation: loading-bar linear;
             }
             :host(:not(.--init)) .loader-bar {
                 visibility: hidden;
@@ -204,167 +219,145 @@ export class SkyduckStyle {
                 color: rgba(0, 0, 0, .52);
                 font-size: 14px;
                 padding: 10px;
-                transition: all ${transitionSpeedInMillis}ms;
-                box-shadow: 2px 2px 10px #ccc;
-            }
-            @media (min-width: 768px) {
-                .geolocation-error {
-                    margin-left: 10px;
-                    margin-right: 10px;
-                }
             }
 
             .header {
-                position: relative;
-                color: var(--lightskyblue);
-                padding: 10px 10px 0 10px;
-            }
-            .header-title-container {
-                position: relative;
+                position: fixed;
+                z-index: 9;
+                left: 0;
+                top: 0;
+                max-width: 823px;
                 display: grid;
-                grid-template-columns: 1fr auto;
+                grid-template-columns: repeat(2, auto) 1fr auto;
+                grid-gap: 10px;
+                align-items: center;
+                width: 100%;
+                height: var(--header-height);
+                padding: 10px;
+                color: var(--white);
+                background-color: var(--lightskyblue);
             }
-            .header-title-container__title {
-                font-family: 'Luckiest Guy', cursive;
-                justify-self: left;
+            @media (min-width: 824px) {
+                .header {
+                    left: calc(50% - (823px / 2));
+                }
+            }
+            .header__settings-control {
+               grid-column: 1;
+               align-self: start;
+            }
+            .header__logo {
+                grid-column: 2;
+                padding: 5px;
+                background-color: var(--white);
+            }
+            .header__title {
+                grid-column: 3;
+                font-size: 1.5em;
+                font-weight: bold;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .header__version {
+                grid-column: 4;
+                align-self: start;
+            }
+
+            .header-placeholder {
+                display: block;
+                width: 100%;
+                height: var(--header-height);
+            }
+
+            #settingsToggle {
+                cursor: pointer;
+            }
+
+            .glass {
+                display: none;
+                position: fixed;
+                z-index: 97;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, .2);
+                background-image: url(${this._backgroundImageForMesh});
+                background-repeat: repeat;
+            }
+            :host(.--settings-active) .glass {
+                display: block;
+            }
+
+            .settings {
+                position: absolute;
+                z-index: 98;
+                left: 0;
+                top: 0;
+                width: calc(100vw - 50px);
+                max-width: 500px;
+                height: 100%;
+                min-height: 100vh;
+                overflow: auto;
+                box-shadow: var(--boxshadow);
+                background-color: var(--white);
+                transform: translateX(-125%);
+                transition: all ${transitionSpeedInMillis}ms;
+            }
+            :host(.--settings-active) .settings {
+                transform: translateX(0);
+            }
+            .settings__grid {
+                display: grid;
+                grid-gap: 10px;
                 padding: 10px;
             }
-            .header-title-container__title-stripe {
-                position: absolute;
-                top: 0;
-                left: 60px;
-                width: 5px;
-                height: 100%;
-                background: var(--white);
-                transform: rotate(45deg);
+            .settings__control {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-gap: 10px;
+                align-items: center;
+                height: 55px;
+                padding: 10px;
+                background-color: var(--whitesmoke);
             }
-            .header__skyduck-logo {
-                width: 220px;
-            }
-
-            .search {
-                padding: 0 10px;
+            .settings__control h4 {
+                color: var(--gray);
             }
 
-            .map {
-                margin-top: 10px;
-                padding: 0 10px;
-            }
             .map iframe {
                 width: 100%;
                 background-color: var(--palegray);
             }
 
-            .club-info-grid {
-                display: grid;
-                grid-template-columns: 1fr auto;
-                grid-gap: 10px;
-                padding: 0 10px;
-                margin-top: 10px;
-                overflow: hidden;
-                transition: all ${transitionSpeedInMillis}ms;
-            }
-            .club-info-grid-location-info {
+            .location-info {
                 display: flex;
                 flex-direction: column;
             }
-
-            .local-time-and-units-info-grid {
-                color: var(--gray);
-                white-space: nowrap;
-                text-align: right;
+            .location-info-link {
+                margin-top: 10px;
             }
 
-            .controls {
-                display: grid;
-                grid-template-columns: repeat(2, auto) 1fr;
-                grid-gap: 10px;
-                align-items: center;
-                margin: 10px;
+            .forecast-carousel-standard,
+            .forecast-carousel-extended {
+                animation: hide-carousel 50ms linear both;
             }
-            .controls__view-club-list {
-                justify-self: left;
-                cursor: pointer;
-                background-color: var(--lightskyblue);
-                color: var(--white);
-                width: 100px;
-                height: 60px;
-                font-size: var(--font-size-base);
-                display: flex;
-                justify-content: center;
-                padding-top: 10px;
-                clip-path: polygon(100% 0%, 50% 100%, 0% 0%);
+            :host(.--active-carousel-forecast.--forecast-display-mode-standard) .forecast-carousel-standard {
+               animation: none;
             }
-            .controls__view-club-list:hover {
-                text-decoration: underline;
-            }
-            .controls__geolocation {
-                justify-self: center;
-                cursor: pointer;
-            }
-            .controls__toggles {
-                display: grid;
-                justify-content: right;
-                grid-gap: 10px;
-            }
-            .controls__forecast-display-mode-toggle {
-                justify-self: right;
+            :host(.--active-carousel-forecast.--forecast-display-mode-extended) .forecast-carousel-extended {
+                animation: none;
             }
 
-            .forecast-slide-selectors {
+           .forecast-grid {
                 display: grid;
-                grid-template-columns: repeat(8, auto);
-                grid-gap: 5px;
-                height: var(--slide-selectors-height);
-                max-width: 450px;
-                margin: 0 auto;
-                padding: 20px 10px 0 10px;
-            }
-            .forecast-slide-selectors__item {
-                cursor: pointer;
-                transform-origin: right;
-                transform: skewY(10deg);
-                opacity: .5;
-            }
-            .forecast-slide-selectors__item.--active {
-                opacity: 1;
-            }
-            .forecast-slide-selectors__item.--red {
-                background-color: var(--red);
-            }
-            .forecast-slide-selectors__item.--amber {
-                background-color: var(--amber);
-            }
-            .forecast-slide-selectors__item.--green {
-                background-color: var(--green);
-            }
-
-            .forecast-grid {
-                display: grid;
-                grid-template-rows: repeat(2, 0fr) repeat(3, auto);
-                grid-template-columns: 100%;
+                grid-template-rows: repeat(2, 0fr) auto;
                 grid-row-gap: 10px;
-                min-height: calc(100vh - var(--slide-selectors-height));
+                min-height: calc(100vh - var(--header-height) - var(--footer-height));
                 padding: 10px;
             }
-            :host(.--forecast-display-mode-24h) .forecast-grid {
-                grid-template-rows: 0fr auto;
-            }
-            .forecast-grid__title {
-                padding: 10px;
-            }
-            .forecast-grid__title.--red {
-                background-color: var(--red);
-                color: var(--white);
-            }
-            .forecast-grid__title.--amber {
-                background-color: var(--amber);
-                color: var(--black);
-            }
-            .forecast-grid__title.--green {
-                background-color: var(--green);
-                color: var(--white);
-            }
+
             .forecast-grid-header {
                 display: grid;
                 grid-template-columns: 1fr auto;
@@ -372,7 +365,6 @@ export class SkyduckStyle {
                 grid-gap: 10px;
                 align-items: center;
                 border-left: solid 10px var(--lightgray);
-                padding: 0 0 10px 10px;
             }
             .forecast-grid-header.--red {
                 border-color: var(--red);
@@ -384,151 +376,126 @@ export class SkyduckStyle {
                 border-color: var(--green);
             }
             .forecast-grid-header-date {
-                display: grid;
-            }
-            .forecast-grid-header-date__date {
                 display: flex;
                 align-items: center;
                 justify-content: left;
+                margin-left: 10px;
             }
             .forecast-grid-header-date__date-string {
                 margin-left: 5px;
             }
+            .forecast-grid-header__temp {
+                display: block;
+            }
+            .forecast-grid-header__temp h3 {
+                font-weight: normal;
+            }
             .forecast-grid-header__summary {
                 grid-row: 2;
-                grid-column: 1;
+                grid-column: 1 / span 2;
+                margin-left: 10px;
             }
-            .forecast-grid-header__temperature-summary {
+
+            .daylight-hours-indicator {
                 display: grid;
-                grid-template-columns: 1fr auto;
-                align-items: center;
-                justify-items: right;
-                grid-gap: 5px;
+                grid-template-columns: auto 1fr auto;
+                background-color: var(--white);
             }
-            .forecast-grid-header-sun-info__item {
-                text-align: right;
-                white-space: nowrap;
+            .daylight-hours-indicator__section {
+                display: flex;
+                align-items: center;
                 padding: 5px;
                 font-weight: normal;
             }
-            .forecast-grid-header-sun-info__item.--sunset {
-                background-color: #eee;
-                color: var(--gray);
-                font-size: 24px;
+            .daylight-hours-indicator__section.--sunrise {
+                justify-content: flex-end;
             }
-            .forecast-grid-header-sun-info__item.--sunset.--red {
-                background-color: var(--red);
-                color: var(--white);
+            .daylight-hours-indicator__daylight {
+                align-self: center;
+                height: 15px;
+                background-color: var(--lightgray);
             }
-            .forecast-grid-header-sun-info__item.--sunset.--amber {
-                background-color: var(--amber);
-                color: var(--black);
+
+            .forecast-grid-hours {
+                display: grid;
+                grid-row-gap: 5px;
             }
-            .forecast-grid-header-sun-info__item.--sunset.--green {
-                background-color: var(--green);
-                color: var(--white);
-            }
-            .forecast-grid-forecast,
-            .forecast-grid-forecast.--24h {
+
+            .forecast-grid-hour {
                 position: relative;
                 display: grid;
                 grid-template-columns: 1fr auto;
                 grid-template-rows: 1fr auto;
                 grid-gap: 10px;
             }
-            :host(.--forecast-display-mode-24h) .forecast-grid-forecast,
-            :host(.--forecast-display-mode-24h) .forecast-grid-forecast.--24h {
-                grid-template-columns: repeat(2, 1fr);
-                animation: slideOnHourlyForecast ${transitionSpeedInMillis}ms both;
+            .forecast-grid.--extended .forecast-grid-hour {
+                grid-template-rows: auto;
             }
-            .forecast-grid-forecast.--24h {
-                height: 0px;
-                overflow: hidden;
-                grid-column: 1;
-                grid-row: 2;
+            .forecast-grid-hour.--not-daylight {
+                filter: grayscale(1);
             }
-            @keyframes slideOnHourlyForecast {
-                0% {
-                    transform: translateX(-100vw);
-                    opacity: 0;
-                }
-                100% {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
+            .forecast-grid-hour.--not-daylight .forecast-grid-hour__not-daylight-mesh {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-image: url(${this._backgroundImageForMesh});
+                background-repeat: repeat;
             }
-            :host(.--forecast-display-mode-24h) .forecast-grid-forecast.--24h {
-                height: auto;
-                grid-column: auto;
-                grid-row: auto;
-            }
-            .forecast-grid-forecast__weather-photo {
+            .forecast-grid-hour__photo {
                 grid-column: 1 / span 2;
                 grid-row: 1;
                 background-position: 75% center;
                 background-size: cover;
                 background-repeat: no-repeat;
             }
-            @media (min-width: 768px) {
-                :host(:not(.--forecast-display-mode-24h)) .forecast-grid-forecast__weather-photo {
-                    background-position: 25% center;
-                }
-            }
-            :host(.--forecast-display-mode-24h) .forecast-grid-forecast__weather-photo {
+            .forecast-grid.--extended .forecast-grid-hour__photo {
                 grid-column: 1;
-                grid-row: 1 / span 2;
-                background-position: 50% center;
+                background-position: 40% center;
             }
 
             @media (min-aspect-ratio: 1/1) {
-                :host(:not(.--forecast-display-mode-24h)) .forecast-grid-forecast__weather-photo {
-                    min-height: calc(768px / 4);
+                .forecast-grid-hour__photo {
+                    min-height: 200px;
+                }
+                .forecast-grid.--extended .forecast-grid-hour__photo {
+                    grid-column: 1 / span 2;
+                    grid-row: 1;
+                    background-position: 75% center;
                 }
             }
-
-            .forecast-grid-forecast__time {
+            .forecast-grid-hour-time-container {
                 margin: 0 0 10px 10px;
-                background-color: rgba(255, 255, 255, .8);
-                color: #222;
+                background-color: var(--translucentwhite);
+                color: var(--charcoal);
                 grid-column: 1;
                 grid-row: 1;
                 padding: 10px;
                 justify-self: left;
             }
-            :host(.--forecast-display-mode-24h) .forecast-grid-forecast__time {
-                grid-row: 1 / span 2;
-            }
-            .forecast-grid-forecast__time span {
+            .forecast-grid-hour-time-container__time {
                 border-bottom: solid 5px var(--lightgray);
             }
-            .forecast-grid-forecast__time.--red span {
+            .forecast-grid-hour-time-container__time.--red {
                 border-color: var(--red);
             }
-            .forecast-grid-forecast__time.--amber span {
+            .forecast-grid-hour-time-container__time.--amber {
                 border-color: var(--amber);
             }
-            .forecast-grid-forecast__time.--green span {
+            .forecast-grid-hour-time-container__time.--green {
                 border-color: var(--green);
             }
-            .forecast-grid-forecast-weather {
-                grid-column: 1;
+            .forecast-grid-hour__summary {
+                display: block;
                 grid-row: 2;
-                display: flex;
-                align-items: center;
             }
-            :host(.--forecast-display-mode-24h) .forecast-grid-forecast-weather {
-                grid-row: 1;
-                grid-column: 2;
-                align-self: end;
+            .forecast-grid.--extended .forecast-grid-hour__summary {
+                display: none;
             }
-            .forecast-grid-forecast-weather__type {
-                flex-grow: 1;
-                margin-right: 10px;
-                word-break: break-word;
-            }
-            @media (min-width: 768px) {
-                .forecast-grid-forecast-weather__type {
-                    font-size: 22px;
+            @media (min-aspect-ratio: 1/1) {
+                .forecast-grid.--extended .forecast-grid-hour__summary {
+                    display: block;
                 }
             }
 
@@ -541,28 +508,25 @@ export class SkyduckStyle {
                 grid-column-gap: 5px;
                 align-self: end;
             }
-            :host(.--forecast-display-mode-24h) .forecast-data-grid {
-                grid-row: 2;
-                grid-template-rows: auto;
-                align-self: auto;
-                padding-right: 6px;
+            .forecast-grid.--extended .forecast-data-grid {
+                background-color: var(--palegray);
+                grid-row: 1;
+            }
+            @media (min-aspect-ratio: 1/1) {
+                .forecast-grid.--extended .forecast-data-grid {
+                    background-color: transparent;
+                }
             }
             .forecast-data-grid-type {
                 display: grid;
                 grid-gap: 5px;
                 justify-items: center;
                 align-items: center;
-                background: rgba(255, 255, 255, .8);
+                background: var(--translucentwhite);
                 padding: 10px;
-            }
-            :host(.--forecast-display-mode-24h) .forecast-data-grid-type {
-                box-shadow: 2px 2px 6px var(--lightgray);
             }
             .forecast-data-grid-type.--landscape-only {
                 display: none;
-            }
-            zooduck-icon-circle .icon-circle {
-                border-color: pink;
             }
             .forecast-data-grid-type__icon.--red {
                 --zooduck-icon-color: var(--red);
@@ -594,7 +558,7 @@ export class SkyduckStyle {
                 background-color: var(--green);
                 color: var(--white);
             }
-            @media (min-width: 640px) {
+            @media (min-aspect-ratio: 1/1) {
                 .forecast-data-grid {
                     grid-template-columns: repeat(5, minmax(55px, auto));
                 }
@@ -607,28 +571,34 @@ export class SkyduckStyle {
             }
 
             .footer {
-                display: grid;
+                display: none;
                 grid-template-columns: 1fr auto;
                 padding: 10px;
+                height: var(--footer-height);
+            }
+            :host(.--active-carousel-forecast) .footer {
+                display: grid;
+            }
+
+            .club-list-carousel {
+                animation: hide-carousel 50ms linear both;
+            }
+
+            :host(.--active-carousel-club-list) .club-list-carousel {
+                animation: none;
             }
 
             .club-list-container {
                 padding: 10px;
                 cursor: default;
-                min-height: 100vh;
+                min-height: calc(100vh - var(--header-height) - var(--footer-height));
                 user-select: none;
-            }
-            .club-list-container__country {
-                background-color: #eee;
-                padding: 5px;
-                text-align: center;
             }
             .club-list-container__club-list {
                 display: grid;
                 grid-row-gap: 10px;
                 list-style-type: none;
                 padding-inline-start: 0;
-                margin: 10px auto;
             }
             .club-list-item {
                 display: grid;

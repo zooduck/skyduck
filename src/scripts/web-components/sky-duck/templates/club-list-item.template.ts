@@ -1,14 +1,16 @@
-import { SkydiveClub, ClubListSorted } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { SkydiveClub, ClubListSorted, GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 export class ClubListItemTemplate {
     private _club: SkydiveClub;
     private _clubs: ClubListSorted;
     private _clubListItem: HTMLElement;
     private _position: Position;
+    private _userLocation: GeocodeData;
 
-    constructor(clubs: ClubListSorted, club: SkydiveClub, position: Position) {
+    constructor(clubs: ClubListSorted, club: SkydiveClub, position: Position, userLocation: GeocodeData) {
         this._club = club;
         this._clubs = clubs;
         this._position = position;
+        this._userLocation = userLocation;
 
         this._buildClubListItem();
     }
@@ -24,7 +26,7 @@ export class ClubListItemTemplate {
     }
 
     private _buildClubListItemDistance(): HTMLElement {
-        if (this._position) {
+        if (this._isClubListCountrySameAsUserCountry()) {
             const { furthestDZDistance } = this._clubs;
             const distanceFromCurrentLocation = this._club.distance;
             const clubListItemDistanceStyle = `
@@ -53,6 +55,13 @@ export class ClubListItemTemplate {
         `, 'text/html').body.firstChild as HTMLElement;
     }
 
+    private _isClubListCountrySameAsUserCountry(): boolean {
+        if (!this._position) {
+            return false;
+        }
+
+        return this._clubs.countryAliases.includes(this._userLocation.address.countryRegion);
+    }
 
     public get html(): HTMLElement {
         return this._clubListItem;

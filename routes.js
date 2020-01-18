@@ -5,13 +5,22 @@ const bingGeocodeEndpoint = 'http://dev.virtualearth.net/REST/v1/Locations/';
 const fs = require('fs');
 const { DateTime } = require('luxon');
 const cache = require('./cache');
+const httpStatusCodes = {
+    OK: 200,
+    CREATED: 201,
+    BAD_REQUEST: 400,
+    UNAUTHORISED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    CONFLICT: 409,
+};
 
 let db;
 
 const root = {
     path: '/',
     callback: (_request, response) => {
-        response.status(200).send({ message: 'Connection Success' });
+        response.status(httpStatusCodes.OK).send({ message: 'Connection Success' });
     }
 };
 
@@ -53,7 +62,7 @@ const connectPut = {
         };
 
         if (connectDataFromCache && connectDataFromCache.lastConnectionTime > oneMinuteAgo) {
-            response.status(403).send('CONNECT_LIMIT_EXCEEDED');
+            response.status(httpStatusCodes.FORBIDDEN).send('CONNECT_LIMIT_EXCEEDED');
 
             return;
         }
@@ -81,10 +90,10 @@ const connectPut = {
             } else {
                 await db.collection('Log').insertOne(initialDoc);
             }
-            response.status(200).send('HALLO_DOMPER');
+            response.status(httpStatusCodes.OK).send('HALLO_DOMPER');
         } catch (err) {
             console.error(err);
-            response.status(404).send(err.message);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err.message);
         }
     }
 };
@@ -99,9 +108,9 @@ const geocode = {
                 maxRes: 1,
             },
         }).then((result) => {
-            response.status(200).send(JSON.stringify(result.data));
+            response.status(httpStatusCodes.OK).send(JSON.stringify(result.data));
         }).catch((err) => {
-            response.status(400).send(err);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err);
         });
     }
 };
@@ -117,7 +126,7 @@ const reverseGeocode = {
         }).then((result) => {
             response.status(200).send(JSON.stringify(result.data));
         }).catch((err) => {
-            response.status(404).send(err);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err);
         });
     }
 };
@@ -125,7 +134,7 @@ const reverseGeocode = {
 const googleMapsKey = {
     path: '/googlemapskey',
     callback: (_request, response) => {
-        response.status(200).send(process.env.GOOGLE_MAPS_KEY);
+        response.status(httpStatusCodes.OK).send(process.env.GOOGLE_MAPS_KEY);
     }
 };
 
@@ -135,10 +144,10 @@ const version = {
         try {
             const packageJson = fs.readFileSync('./package.json', 'utf-8');
             const version = JSON.parse(packageJson).version;
-            response.status(200).send(version);
+            response.status(httpStatusCodes.OK).send(version);
         } catch (err) {
             console.error(err.message);
-            response.status(404).send(err.message);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err.message);
         }
     }
 };
@@ -158,13 +167,13 @@ const weather = {
         try {
             const result = await db.collection('Weather').findOne(query, options);
             if (result) {
-                response.status(200).send(JSON.stringify(result));
+                response.status(httpStatusCodes.OK).send(JSON.stringify(result));
             } else {
-                response.status(404).send(JSON.stringify({ error: 'Document not found' }));
+                response.status(httpStatusCodes.NOT_FOUND).send(JSON.stringify({ error: 'Document not found' }));
             }
         } catch (err) {
             console.error(err);
-            response.status(404).send(err);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err);
         }
     }
 };
@@ -175,10 +184,10 @@ const weatherPost = {
         const doc = request.body;
         try {
             await db.collection('Weather').insertOne(doc);
-            response.status(200).send(doc);
+            response.status(httpStatusCodes.CREATED).send(doc);
         } catch (err) {
             console.error(err);
-            response.status(404).send(err);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err);
         }
     }
 };
@@ -196,10 +205,10 @@ const weatherPut = {
                     requestTime,
                 }
             });
-            response.status(200).send(doc);
+            response.status(httpStatusCodes.CREATED).send(doc);
         } catch (err) {
             console.error(err);
-            response.status(404).send(err);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err);
         }
     }
 };
@@ -210,10 +219,10 @@ const skydiveClubPost = {
         const doc = request.body;
         try {
             await db.collection('SkydiveClub').insertOne(doc);
-            response.status(200).send(doc);
+            response.status(httpStatusCodes.CREATED).send(doc);
         } catch (err) {
             console.error(err);
-            response.status(404).send(err);
+            response.status(httpStatusCodes.BAD_REQUEST).send(err);
         }
     }
 };

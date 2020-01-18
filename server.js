@@ -14,12 +14,12 @@ server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 
 let db, resolvers;
-const typeDefs = fs.readFileSync(path.join(__dirname, 'db/schema.graphql'), 'utf-8');
+const typeDefs = fs.readFileSync(path.join(__dirname, 'graphql/schema.graphql'), 'utf-8');
 const schema = buildSchema(typeDefs);
 
 database.connect().then((result) => {
     db = result;
-    resolvers = require('./db/resolvers')(db);
+    resolvers = require('./graphql/resolvers')(db);
     console.log(`MongoDB connection to the ${db.databaseName} database was successful`);
 
     server.use('/graphql', expressGraphql({

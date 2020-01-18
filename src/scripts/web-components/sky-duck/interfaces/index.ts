@@ -1,9 +1,10 @@
-export type ColorModifier = '--red'|'--amber'|'--green';
-export type SearchType = 'club'|'location';
-export type Rating = 'red'|'amber'|'green';
+export type ActiveCarousel = 'forecast'|'club-list';
+
+export type ClubCountries = string[];
 
 export interface ClubListSorted {
     country: string;
+    countryAliases: string[];
     furthestDZDistance: number;
     list: SkydiveClub[];
 }
@@ -11,6 +12,8 @@ export interface ClubListSorted {
 export type ClubListsSortedByCountry = {
     [key: string]: ClubListSorted;
 }
+
+export type ColorModifier = '--red'|'--amber'|'--green';
 
 export interface ColorModifiers {
     cloudCover: ColorModifier;
@@ -79,7 +82,7 @@ export interface DarkSkyWeather {
     hourly: Hourly;
 }
 
-export type ForecastDisplayMode = '24h'|'3h';
+export type ForecastType = 'standard'|'extended';
 
 export interface FormattedWeather {
     query: string;
@@ -94,7 +97,14 @@ export interface FormattedWeather {
 export interface GeocodeData {
     query: string;
     name: string;
-    address: any;
+    address: {
+        addressLine: string;
+        adminDistrict: string;
+        countryRegion: string;
+        formattedAddress: string;
+        locality: string;
+        postalCode: string;
+    }
     latitude: number;
     longitude: number;
 }
@@ -123,6 +133,11 @@ export interface HourlyData {
     summary: string;
 }
 
+export interface HTMLZooduckCarouselElement extends HTMLElement {
+    currentslide: any;
+    updateCarouselHeight: any;
+}
+
 export interface ImageMap {
     'clear-day': string,
     'clear-night': string;
@@ -131,10 +146,13 @@ export interface ImageMap {
     fog: string;
     'partly-cloudy-day': string;
     rain: string;
-    'skyduck-logo': string;
     sleet: string;
     snow: string;
     wind: string;
+}
+
+export type LoaderMessageElements = {
+    [key: string]: HTMLElement;
 }
 
 export interface LocationDetails {
@@ -145,18 +163,31 @@ export interface LocationDetails {
     site?: string;
 }
 
-export type MapDisplayMode = 'on'|'off';
-
 export interface ModifierClasses {
+    activeCarouselForecast: string;
+    activeCarouselClubList: string;
     error: string;
-    forecastDisplayMode24h: string;
+    forecastDisplayModeExtended: string;
+    forecastDisplayModeStandard: string;
     init: string;
     loading: string;
     ready: string;
+    settingsActive: string;
+    userDeniedGeolocation: string;
 }
+
+export type Rating = 'red'|'amber'|'green';
+
+export type SearchType = 'club'|'location';
 
 export interface SetContentOptions {
     useLoader: boolean;
+}
+
+export interface Settings {
+    activeCarousel: ActiveCarousel;
+    forecastDisplayMode: ForecastType;
+    locationDetails: LocationDetails;
 }
 
 export interface SkydiveClub {
@@ -165,23 +196,41 @@ export interface SkydiveClub {
     name: string;
     place: string;
     country: string;
+    countryAliases: string[];
     latitude: number;
     longitude: number;
     site: string;
 }
 
-export interface WeatherElements {
-    clubList: HTMLElement;
-    controls: HTMLElement;
-    geolocationError: HTMLElement;
-    footer: HTMLElement;
-    forecast: HTMLElement;
-    locationInfo: HTMLElement;
-    header: HTMLElement;
-    search: HTMLElement;
-    map: HTMLIFrameElement;
+export interface State {
+    currentClubListCountry: string;
+    currentForecastSlide: number;
+    hasLoaded: boolean;
+    headerTitle: string;
+    isLoading: boolean;
+    googleMapsKey: string;
+    settings: Settings;
+    settingsActive: boolean;
+    userDeniedGeolocation: boolean;
+    version: string;
 }
 
-export interface HTMLZooduckCarouselElement extends HTMLElement {
-    updateCarouselHeight: any;
+export interface StateChangeHandlers {
+    activeCarousel: any;
+    currentForecastSlide: any;
+    forecastDisplayMode: any;
+    headerTitle: any;
+    locationDetails: any;
+    settingsActive: any;
+}
+
+export type ToggleState = 'on'|'off';
+
+export interface WeatherElements {
+    clubList: HTMLElement;
+    footer: HTMLElement;
+    forecast: HTMLElement;
+    forecastExtended: HTMLElement;
+    header: HTMLElement;
+    headerPlaceholder: HTMLElement;
 }

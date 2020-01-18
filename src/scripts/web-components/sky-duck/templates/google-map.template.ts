@@ -8,6 +8,7 @@ export class GoogleMapTemplate {
     constructor(googleMapsKey: string, coords: Coords) {
         this._googleMapsKey = googleMapsKey;
         this._coords = coords;
+
         this._buildGoogleMap();
     }
 

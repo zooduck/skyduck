@@ -1,8 +1,8 @@
 const axios = require('axios');
-const { DateTime } = require('luxon');
+const { DateTime, Interval } = require('luxon');
 const {
     escapeSpecialChars,
-    isHourlyDataMissing,
+    filterHourlyData,
     mergeTimeMachineResults
 } = require('./utils');
 
@@ -61,27 +61,28 @@ const resolvers = (db) => {
                 headers: darkSkyHeaders,
             });
 
-            const { timezone } = result.data;
+            const { timezone, daily } = result.data;
             const now = DateTime.local().setZone(timezone);
             const sevenDaysFromNow = now.plus({ days: 7 });
             const nowSeconds = Math.round(now.toSeconds());
             const sevenDaysFromNowSeconds = Math.round(sevenDaysFromNow.toSeconds());
-            const requiredHours = [9, 12, 15];
             const hourlyData = result.data.hourly.data;
 
-            const timeMachineRequestForTodayRequired = isHourlyDataMissing({
-                date: now.toLocaleString(DateTime.DATE_SHORT),
-                requiredHours,
-                hourlyData,
-                timezone,
-            });
+            let twoHoursBeforeSunriseOnTheFirstDay, twoHoursAfterSunsetOnTheLastDay, firstHour, lastHour;
+            try {
 
-            const timeMachineRequestForLastDayRequired = isHourlyDataMissing({
-                date: sevenDaysFromNow.toLocaleString(DateTime.DATE_SHORT),
-                requiredHours,
-                hourlyData,
-                timezone,
-            });
+                firstHour = DateTime.fromSeconds(hourlyData[0].time).setZone(timezone);
+                lastHour = DateTime.fromSeconds(hourlyData.slice(-1)[0].time).setZone(timezone);
+                twoHoursBeforeSunriseOnTheFirstDay = DateTime.fromSeconds(daily.data[0].sunriseTime).setZone(timezone).minus({ hours: 2 });
+                twoHoursAfterSunsetOnTheLastDay = DateTime.fromSeconds(daily.data.slice(-1)[0].sunsetTime).setZone(timezone).plus({ hours: 2 });
+            } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error(err);
+            }
+
+            const requiredInterval = Interval.fromDateTimes(twoHoursBeforeSunriseOnTheFirstDay, twoHoursAfterSunsetOnTheLastDay);
+            const timeMachineRequestForTodayRequired = requiredInterval.start < firstHour;
+            const timeMachineRequestForLastDayRequired = requiredInterval.end > lastHour;
 
             const emptyData = {
                 data: {
@@ -118,7 +119,26 @@ const resolvers = (db) => {
                 mergeTimeMachineResults(result.data, timeMachineResultForToday.data, timeMachineResultForLastDay.data);
             }
 
-            return result.data;
+            let filteredHourlyData;
+            try {
+                const { daily, hourly } = result.data;
+                filteredHourlyData = filterHourlyData(hourly.data, daily.data, timezone);
+            } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error(err);
+            }
+
+            if (!filteredHourlyData) {
+                return result.data;
+            }
+
+            return {
+                ...result.data,
+                hourly: {
+                    ...result.data.hourly,
+                    data: filteredHourlyData,
+                }
+            };
         }
     };
 };
