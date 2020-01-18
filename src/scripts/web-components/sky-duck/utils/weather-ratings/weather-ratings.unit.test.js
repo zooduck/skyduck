@@ -12,35 +12,13 @@ describe('weatherRatings', () => {
 
     describe('average', () => {
         it('should return a `green` average rating', () => {
-
             ratingsExample = [
-                ['green', 'green'],
-                ['green', 'green'],
-                ['green', 'green'],
-            ];
-
-            expect(weatherRatings.average(ratingsExample)).toEqual('green');
-
-            ratingsExample = [
-                ['green', 'green'],
-                ['green', 'green'],
-                ['green', 'amber'],
-            ];
-
-            expect(weatherRatings.average(ratingsExample)).toEqual('green');
-
-            ratingsExample = [
-                ['green', 'green'],
-                ['green', 'amber'],
-                ['red', 'amber'],
-            ];
-
-            expect(weatherRatings.average(ratingsExample)).toEqual('green');
-
-            ratingsExample = [
-                ['green', 'green'],
-                ['amber', 'amber'],
-                ['red', 'red'],
+                'green',
+                'green',
+                'green',
+                'green',
+                'red',
+                'red',
             ];
 
             expect(weatherRatings.average(ratingsExample)).toEqual('green');
@@ -48,25 +26,45 @@ describe('weatherRatings', () => {
 
         it('should return an `amber` average rating', () => {
             ratingsExample = [
-                ['green', 'green'],
-                ['green', 'amber'],
-                ['green', 'amber'],
+                'amber',
+                'amber',
+                'amber',
+                'green',
+                'green',
+                'red',
             ];
 
             expect(weatherRatings.average(ratingsExample)).toEqual('amber');
 
             ratingsExample = [
-                ['red', 'amber'],
-                ['green', 'amber'],
-                ['green', 'amber'],
+                'green',
+                'green',
+                'green',
+                'amber',
+                'amber',
+                'amber',
             ];
 
             expect(weatherRatings.average(ratingsExample)).toEqual('amber');
 
             ratingsExample = [
-                ['red', 'red'],
-                ['green', 'amber'],
-                ['green', 'amber'],
+                'green',
+                'green',
+                'green',
+                'red',
+                'red',
+                'red',
+            ];
+
+            expect(weatherRatings.average(ratingsExample)).toEqual('amber');
+
+            ratingsExample = [
+                'red',
+                'red',
+                'red',
+                'amber',
+                'amber',
+                'green',
             ];
 
             expect(weatherRatings.average(ratingsExample)).toEqual('amber');
@@ -74,33 +72,12 @@ describe('weatherRatings', () => {
 
         it('should return a `red` average rating', () => {
             ratingsExample = [
-                ['red', 'green'],
-                ['red', 'green'],
-                ['green', 'green'],
-            ];
-
-            expect(weatherRatings.average(ratingsExample)).toEqual('red');
-
-            ratingsExample = [
-                ['red', 'amber'],
-                ['red', 'amber'],
-                ['amber', 'amber'],
-            ];
-
-            expect(weatherRatings.average(ratingsExample)).toEqual('red');
-
-            ratingsExample = [
-                ['red', 'green'],
-                ['red', 'green'],
-                ['amber', 'amber'],
-            ];
-
-            expect(weatherRatings.average(ratingsExample)).toEqual('red');
-
-            ratingsExample = [
-                ['red', 'amber'],
-                ['red', 'amber'],
-                ['red', 'amber'],
+                'red',
+                'red',
+                'red',
+                'red',
+                'green',
+                'green',
             ];
 
             expect(weatherRatings.average(ratingsExample)).toEqual('red');

@@ -2,15 +2,14 @@ import { HourlyData, ColorModifier, Rating } from '../interfaces/index'; // esli
 import { weatherRatings } from './weather-ratings/weather-ratings';
 
 export  const averageRatingModifierForDay = (hourlyData: HourlyData[]): ColorModifier => {
-    const hourlyRatings = hourlyData.map((hour: HourlyData): Rating[] => {
+    const ratings: Rating[] = [];
+    hourlyData.forEach((hour: HourlyData) => {
         const { cloudCover, windGust } = hour;
 
-        return [
-            weatherRatings.cloudCover(cloudCover),
-            weatherRatings.windGust(windGust),
-        ];
+        ratings.push(weatherRatings.cloudCover(cloudCover));
+        ratings.push(weatherRatings.windGust(windGust));
     });
-    const averageRatingModifier = `--${weatherRatings.average(hourlyRatings)}` as ColorModifier;
+    const averageRatingModifier = `--${weatherRatings.average(ratings)}` as ColorModifier;
 
     return averageRatingModifier;
 };

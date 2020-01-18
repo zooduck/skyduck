@@ -2,58 +2,70 @@ import { Rating } from '../../interfaces/index'; // eslint-disable-line no-unuse
 import { DateTime } from 'luxon';
 
 export const weatherRatings = (() => {
-    const _getDominantColor = (ratings: Rating[], mode: 'optimist'|'realist') => {
-        if (!mode || (mode !== 'optimist' && mode !== 'realist')) {
-            throw Error('Argument for "mode" is required and the accepted values are "optimist" or "realist".');
-        }
-
-        const reds = ratings.filter((rating) => rating === 'red');
-        const ambers = ratings.filter((rating) => rating === 'amber');
-        const greens = ratings.filter((rating) => rating === 'green');
-
-        const mostlyReds = reds.length > ambers.length && reds.length > greens.length;
-        const mostlyAmbers = ambers.length > reds.length && ambers.length > greens.length;
-        const mostlyGreens = greens.length > reds.length && greens.length > ambers.length;
-
-        if (mode === 'optimist') {
-            return mostlyReds
-                ? 'red'
-                : mostlyAmbers
-                    ? 'amber'
-                    : mostlyGreens
-                        ? 'green'
-                        : greens.length
-                            ? 'green'
-                            : ambers.length
-                                ? 'amber'
-                                : 'red';
-        }
-        if (mode === 'realist') {
-            return mostlyReds
-                ? 'red'
-                : mostlyAmbers
-                    ? 'amber'
-                    : mostlyGreens
-                        ? 'green'
-                        : reds.length
-                            ? 'red'
-                            : ambers.length
-                                ? 'amber'
-                                : 'green';
-        }
-    };
-
-    const _getMostDominantRating = (ratings: Rating[][]) =>{
-        const mostDominantRatings = ratings.map((ratingsSet) => {
-            return _getDominantColor(ratingsSet, 'realist');
+    const getDominantFraction = (fractions: number[]) => {
+        fractions.sort((a: number, b: number) => {
+            return b - a;
         });
 
-        return _getDominantColor(mostDominantRatings, 'optimist');
+        return fractions[0];
+    };
+
+    const round = (float: number, decimalPlaces = 2): Number => {
+        const numberString = float.toString();
+        const floatString = parseFloat(numberString).toFixed(decimalPlaces);
+
+        return Number(floatString);
     };
 
     return {
-        average(ratings: Rating[][]) {
-            return _getMostDominantRating(ratings);
+        average(ratings: Rating[]): Rating {
+            // ----------------------------------------------------
+            // Formula: If any colour is 50% return `amber`
+            // else return the colour with the highest percentage
+            // ----------------------------------------------------
+            const reds = ratings.filter((rating: Rating) => rating === 'red');
+            const ambers = ratings.filter((rating: Rating) => rating === 'amber');
+            const greens = ratings.filter((rating) => rating === 'green');
+            const totalRatings = reds.length + ambers.length + greens.length;
+
+            const redsFraction = round(reds.length / totalRatings);
+            const ambersFraction = round(ambers.length / totalRatings);
+            const greensFraction = round(greens.length / totalRatings);
+
+            const fractions = [
+                {
+                    colour: 'red',
+                    fraction: redsFraction
+                },
+                {
+                    colour: 'amber',
+                    fraction: ambersFraction,
+                },
+                {
+                    colour: 'green',
+                    fraction: greensFraction,
+                },
+            ];
+
+            const fiftyPercentFraction = fractions.find((fractionData) => {
+                return fractionData.fraction === 0.5;
+            });
+
+            if (fiftyPercentFraction) {
+                return 'amber';
+            }
+
+            const dominantFraction = getDominantFraction([
+                redsFraction,
+                ambersFraction,
+                greensFraction,
+            ]);
+
+            const dominantColour = fractions.find((fractionData: any) => {
+                return fractionData.fraction === dominantFraction;
+            }).colour as Rating;
+
+            return dominantColour;
         },
         cloudCover(cloudCover: number): Rating {
             return cloudCover < 50
@@ -96,6 +108,5 @@ export const weatherRatings = (() => {
                     ? 'amber'
                     : 'red';
         },
-
     };
 })();

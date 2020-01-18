@@ -66,7 +66,7 @@ export class ForecastHourTemplate {
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">vis</span>
                     </div>
-                    <div class="forecast-data-grid-type --landscape-only">
+                    <div class="forecast-data-grid-type">
                         <zooduck-icon-circle
                             size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.windSpeed}">
@@ -80,7 +80,7 @@ export class ForecastHourTemplate {
                         </zooduck-icon-circle>
                         <span class="forecast-data-grid-type__text">gust</span>
                     </div>
-                    <div class="forecast-data-grid-type">
+                    <div class="forecast-data-grid-type --landscape-only">
                         <zooduck-icon-circle
                             size="22"
                             class="forecast-data-grid-type__icon ${colorModifiers.precipProbability}">
@@ -90,13 +90,13 @@ export class ForecastHourTemplate {
 
                     <div class="forecast-data-grid__data ${colorModifiers.cloudCover}">${cloudCover}%</div>
                     <div class="forecast-data-grid__data ${colorModifiers.visibility} --landscape-only">${visibility}</div>
-                    <div class="forecast-data-grid__data ${colorModifiers.windSpeed} --landscape-only">
+                    <div class="forecast-data-grid__data ${colorModifiers.windSpeed}">
                         <span>${windSpeed}</span>
                     </div>
                     <div class="forecast-data-grid__data ${colorModifiers.windGust}">
                         <span>${windGust}</span>
                     </div>
-                    <div class="forecast-data-grid__data ${colorModifiers.precipProbability}">${precipProbability}%</div>
+                    <div class="forecast-data-grid__data ${colorModifiers.precipProbability} --landscape-only">${precipProbability}%</div>
                 </div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
