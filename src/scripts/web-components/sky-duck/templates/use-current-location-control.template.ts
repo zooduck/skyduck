@@ -16,9 +16,9 @@ export class UseCurrentLocationControlTemplate {
             <div
                 class="settings__control"
                 id="useCurrentLocationSetting">
-                <div class="use-current-location-setting-col1">
-                    <h4>Use Current Location</h4>
-                    <span class="use-current-location-setting-col1__location-name">${this._userLocation.name}</span>
+                <div class="settings-control-name">
+                    <h4 class="settings-control-name__title">Use Current Location</h4>
+                    <span class="settings-control-name__subtitle">${this._userLocation.name}</span>
                 </div>
                 <zooduck-icon-location
                     id="useCurrentLocationControl"

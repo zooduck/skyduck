@@ -19,7 +19,9 @@ export class SettingsToggleTemplate {
             <div
                 class="settings__control"
                 id="${this._id}">
-                <h4>${this._description}</h4>
+                <div class="settings-control-name">
+                    <h4 class="settings-control-name__title">${this._description}</h4>
+                </div>
                 <zooduck-icon-toggle
                     togglestate="${this._toggleState}"
                     toggleoncolor="var(--lightskyblue)">

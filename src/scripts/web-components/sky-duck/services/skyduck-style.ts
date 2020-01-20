@@ -322,15 +322,14 @@ export class SkyduckStyle {
                 padding: 10px;
                 background-color: var(--whitesmoke);
             }
-            .settings__control h4 {
-                color: var(--gray);
-            }
-
-            .use-current-location-setting-col1 {
+            .settings-control-name {
                 display: grid;
                 grid-template-rows: repeat(2, auto);
             }
-            .use-current-location-setting-col1__location-name {
+            .settings-control-name__title {
+                color: var(--gray);
+            }
+            .settings-control-name__subtitle {
                 color: var(--gray);
                 white-space: nowrap;
                 overflow: hidden;
