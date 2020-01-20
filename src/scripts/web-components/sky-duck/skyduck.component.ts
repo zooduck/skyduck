@@ -70,7 +70,6 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _toggleForecastDisplayModeHandler: EventListener;
     private _toggleSettingsHandler: EventListener;
     private _transitionSpeedInMillis: number;
-    private _userLocation: GeocodeData;
     private _weather: SkyduckWeather;
 
     constructor () {
@@ -293,9 +292,9 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private _getSettings(): HTMLElement {
-        const { googleMapsKey, settings, userDeniedGeolocation } = this._state;
+        const { googleMapsKey, settings, userDeniedGeolocation, userLocation } = this._state;
 
-        return new SettingsTemplate(googleMapsKey, settings, userDeniedGeolocation).html;
+        return new SettingsTemplate(googleMapsKey, settings, userLocation, userDeniedGeolocation).html;
     }
 
     private _getStyle(): HTMLStyleElement {
@@ -386,7 +385,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             try {
                 const geocodeData: GeocodeData = await reverseGeocodeLookup(this._position.coords);
                 this._state.userDeniedGeolocation = false;
-                this._userLocation = geocodeData;
+                this._state.userLocation = geocodeData;
 
                 const { name: location } = geocodeData;
                 const log = new Log(location);
@@ -548,7 +547,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._clubsSortedByCountry,
             this._clubCountries,
             this._position,
-            this._userLocation,
+            this._state.userLocation,
         );
 
         const {
@@ -605,7 +604,7 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._clubsSortedByCountry,
             this._clubCountries,
             this._position,
-            this._userLocation,
+            this._state.userLocation,
         );
 
         const {
@@ -773,10 +772,13 @@ class HTMLSkyDuckElement extends HTMLElement {
             return;
         }
 
+        const { googleMapsKey, settings, userLocation, userDeniedGeolocation } = this._state;
+
         const newSettings = new SettingsTemplate(
-            this._state.googleMapsKey,
-            this._state.settings,
-            this._state.userDeniedGeolocation);
+            googleMapsKey,
+            settings,
+            userLocation,
+            userDeniedGeolocation);
 
         switch (prop) {
         case 'locationDetails':

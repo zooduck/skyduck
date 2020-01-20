@@ -212,6 +212,7 @@ export interface State {
     settings: Settings;
     settingsActive: boolean;
     userDeniedGeolocation: boolean;
+    userLocation: GeocodeData;
     version: string;
 }
 

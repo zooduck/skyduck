@@ -326,6 +326,17 @@ export class SkyduckStyle {
                 color: var(--gray);
             }
 
+            .use-current-location-setting-col1 {
+                display: grid;
+                grid-template-rows: repeat(2, auto);
+            }
+            .use-current-location-setting-col1__location-name {
+                color: var(--gray);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
             .map iframe {
                 width: 100%;
                 background-color: var(--palegray);

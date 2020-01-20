@@ -22,5 +22,19 @@ export const state: State = {
     },
     settingsActive: false,
     userDeniedGeolocation: false,
+    userLocation: {
+        query: '',
+        name: '',
+        address: {
+            addressLine: '',
+            adminDistrict: '',
+            countryRegion: '',
+            formattedAddress: '',
+            locality: '',
+            postalCode: '',
+        },
+        latitude: null,
+        longitude: null,
+    },
     version: '',
 };

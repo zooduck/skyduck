@@ -1,7 +1,13 @@
+// eslint-disable-next-line no-unused-vars
+import { GeocodeData } from '../interfaces/index';
+
 export class UseCurrentLocationControlTemplate {
     private _useCurrentLocationControl: HTMLElement;
+    private _userLocation: GeocodeData;
 
-    constructor() {
+    constructor(userLocation: GeocodeData) {
+        this._userLocation = userLocation;
+
         this._buildUseCurrentLocationControl();
     }
 
@@ -10,7 +16,10 @@ export class UseCurrentLocationControlTemplate {
             <div
                 class="settings__control"
                 id="useCurrentLocationSetting">
-                <h4>Use Current Location</h4>
+                <div class="use-current-location-setting-col1">
+                    <h4>Use Current Location</h4>
+                    <span class="use-current-location-setting-col1__location-name">${this._userLocation.name}</span>
+                </div>
                 <zooduck-icon-location
                     id="useCurrentLocationControl"
                     size="35"

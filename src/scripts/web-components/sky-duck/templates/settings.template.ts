@@ -3,7 +3,7 @@ import { LocationInfoTemplate } from './location-info.template';
 import { SettingsToggleTemplate } from './settings-toggle.template';
 import { SearchTemplate } from './settings-search.template';
 import { GeolocationErrorTemplate } from './geolocation-error.template';
-import { Settings } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { Settings, GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { UseCurrentLocationControlTemplate } from './use-current-location-control.template';
 import { NotFoundTemplate } from './not-found.template';
 
@@ -19,10 +19,12 @@ export class SettingsTemplate {
     private _settingsPage: HTMLElement;
     private _useCurrentLocationControl: HTMLElement;
     private _userDeniedGeolocation: boolean;
+    private _userLocation: GeocodeData;
 
-    constructor(googleMapsKey: string, settings: Settings, userDeniedGeolocation: boolean) {
+    constructor(googleMapsKey: string, settings: Settings, userLocation: GeocodeData, userDeniedGeolocation: boolean) {
         this._googleMapsKey = googleMapsKey;
         this._settings = settings;
+        this._userLocation = userLocation;
         this._userDeniedGeolocation = userDeniedGeolocation;
 
         this._buildSettings();
@@ -98,7 +100,7 @@ export class SettingsTemplate {
     }
 
     private _buildUseCurrentLocationControl(): HTMLElement {
-        return new UseCurrentLocationControlTemplate().html;
+        return new UseCurrentLocationControlTemplate(this._userLocation).html;
     }
 
     public get activeCarouselToggle(): HTMLElement {
