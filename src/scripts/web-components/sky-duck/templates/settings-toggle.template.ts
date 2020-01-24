@@ -2,12 +2,14 @@ import { ToggleState } from '../interfaces/index'; // eslint-disable-line no-unu
 
 export class SettingsToggleTemplate {
     private _description: string;
+    private _eventHandler: any;
     private _id: string;
     private _toggleState: ToggleState;
     private _settingsToggle: HTMLElement;
 
-    constructor(id: string, description: string, toggleState?: ToggleState) {
+    constructor(id: string, description: string, toggleState?: ToggleState, eventHandler?: any) {
         this._id = id || '';
+        this._eventHandler = eventHandler || function () {};
         this._description = description || '';
         this._toggleState = toggleState || 'off';
 
@@ -28,6 +30,10 @@ export class SettingsToggleTemplate {
                 </zooduck-icon-toggle>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
+
+        this._settingsToggle.querySelector('zooduck-icon-toggle').addEventListener('zooduck-icon-toggle:change', () => {
+            this._eventHandler();
+        });
     }
 
     public get html():  HTMLElement {

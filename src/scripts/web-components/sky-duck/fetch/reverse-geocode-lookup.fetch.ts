@@ -1,6 +1,6 @@
-import { GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { GeocodeData, Coords } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
-export const reverseGeocodeLookup = async (point: Coordinates): Promise<GeocodeData> => {
+export const reverseGeocodeLookup = async (point: Coords): Promise<GeocodeData> => {
     try {
         const { latitude, longitude } = point;
         const response = await fetch(`/reverse_geocode?point=${latitude},${longitude}`);
@@ -21,7 +21,7 @@ export const reverseGeocodeLookup = async (point: Coordinates): Promise<GeocodeD
         const { name, address } = resource;
 
         const geocodeData = {
-            query: 'navigator.geolocation.getCurrentPosition',
+            query: `${coords[0]},${coords[1]}`,
             address,
             name,
             latitude: coords[0],

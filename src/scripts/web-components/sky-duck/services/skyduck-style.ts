@@ -277,7 +277,6 @@ export class SkyduckStyle {
             .glass {
                 display: none;
                 position: fixed;
-                z-index: 97;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -286,11 +285,17 @@ export class SkyduckStyle {
                 background-image: url(${this._backgroundImageForMesh});
                 background-repeat: repeat;
             }
-            :host(.--settings-active) .glass {
+            :host(.--settings-active) .glass.--settings {
                 display: block;
+                z-index: 97;
+            }
+            :host(.--sub-settings-active) .glass.--sub-settings {
+                display: block;
+                z-index: 98;
             }
 
-            .settings {
+            .settings,
+            .sub-settings {
                 position: absolute;
                 z-index: 98;
                 left: 0;
@@ -308,7 +313,7 @@ export class SkyduckStyle {
             :host(.--settings-active) .settings {
                 transform: translateX(0);
             }
-            .settings__grid {
+            .settings-grid {
                 display: grid;
                 grid-gap: 10px;
                 padding: 10px;
@@ -326,6 +331,9 @@ export class SkyduckStyle {
                 display: grid;
                 grid-template-rows: repeat(2, auto);
             }
+            .settings__control.--sub-settings .settings-control-name {
+                justify-self: end;
+            }
             .settings-control-name__title {
                 color: var(--gray);
             }
@@ -336,6 +344,16 @@ export class SkyduckStyle {
                 text-overflow: ellipsis;
             }
 
+            .sub-settings {
+                max-width: none;
+                transform: translateX(100vw);
+                box-shadow: none;
+            }
+            :host(.--sub-settings-active) .sub-settings {
+                transform: translateX(50px);
+                box-shadow: var(--boxshadow);
+            }
+
             .map iframe {
                 width: 100%;
                 background-color: var(--palegray);
@@ -344,6 +362,11 @@ export class SkyduckStyle {
             .location-info {
                 display: flex;
                 flex-direction: column;
+            }
+            .location-info.--user-location {
+                padding: 10px;
+                border: dashed 6px var(--lightgray);
+                color: var(--gray);
             }
             .location-info-link {
                 margin-top: 10px;

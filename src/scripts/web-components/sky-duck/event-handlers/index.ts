@@ -1,4 +1,9 @@
 import { reverseGeocodeLookup } from '../fetch/reverse-geocode-lookup.fetch';
+import { geocodeLookup } from '../fetch/geocode-lookup.fetch';
+import { getCurrentPosition } from '../utils/get-current-position';
+// eslint-disable-next-line no-unused-vars
+import { GeocodeData } from '../interfaces/index';
+import { formatAddress } from '../utils/format-address';
 
 // @WARNING: Arrow functions are intentionally NOT being used here
 // since they cannot be bound to "this" using .bind()
@@ -8,31 +13,26 @@ export const onSearchSubmit = function onSearchSubmit(e: CustomEvent): void {
     this.location = value;
 };
 
-export const reverseGeocodeLookupControl = async function reverseGeocodeLookupControl(): Promise<void> {
-    if (!this._position) {
-        return;
-    }
-
-    this._setLoading();
+export const setCurrentLocation = async function setCurrentLocationHandler(e: CustomEvent): Promise<void> {
+    const { value: requestedLocation } = e.detail;
 
     try {
-        const reverseGeocodeLookupResponse = await reverseGeocodeLookup(this._position.coords);
-        this._geocodeData = reverseGeocodeLookupResponse;
-        const { name: location } = this._geocodeData;
+        const geocodeData = await geocodeLookup(requestedLocation);
+        this._state.userLocation = geocodeData;
 
-        if (!location) {
-            // If reverse geocode lookup is successful but returns an empty value for "name"
-            this._error = 'Reverse geocode lookup failed. Unknown error.';
-            this._setLoaderError();
+        const currentLocationDetails = this.shadowRoot.querySelector('#currentLocationDetails');
+        currentLocationDetails.innerHTML = formatAddress(this._state.userLocation.name);
 
-            return;
-        }
-
-        this.location = location;
+        const setCurrentLocationInput = this.shadowRoot.querySelector('#setCurrentLocationInput');
+        setCurrentLocationInput.value = '';
     } catch (err) {
         this._error = err;
-        this._setLoaderError();
+        this._revertContentOnError();
     }
+};
+
+export const setCurrentLocationSetting = function setCurrentLocationSetting(): void {
+    this._state.currentSubSettings = this._subSettings.locationSettings;
 };
 
 export const toggleActiveCarousel = function toggleActiveCarousel(): void {
@@ -49,4 +49,36 @@ export const toggleForecastDisplayMode = function toggleForecastDisplayMode(): v
 
 export const toggleSettings = function toggleSettings(): void {
     this._state.settingsActive = !this._state.settingsActive;
+};
+
+export const toggleSubSettings = function toggleSubSettings(): void {
+    this._state.subSettingsActive = !this._state.subSettingsActive;
+};
+
+export const toggleUseGPSForCurrentLocation = async function toggleUseGPSForCurrentLocation(): Promise<void> {
+    this._state.settings.useGPSForCurrentLocation = !this._state.settings.useGPSForCurrentLocation;
+    this.shadowRoot.querySelector('#setCurrentLocationInput').disabled = this._state.settings.useGPSForCurrentLocation;
+
+    if (this._state.settings.useGPSForCurrentLocation) {
+        try {
+            this._position = await getCurrentPosition();
+            const geocodeData: GeocodeData = await reverseGeocodeLookup(this._position.coords);
+            this._state.userLocation = geocodeData;
+
+            const currentLocationDetails = this.shadowRoot.querySelector('#currentLocationDetails');
+            currentLocationDetails.innerHTML = formatAddress(this._state.userLocation.name);
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error(err);
+        }
+    }
+};
+
+export const useCurrentLocationControl = function useCurrentLocationControl(): void {
+    try {
+        this.location = this._state.userLocation.name;
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+    }
 };

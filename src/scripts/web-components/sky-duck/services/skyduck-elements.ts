@@ -13,6 +13,7 @@ import { HeaderTemplate } from '../templates/header.template';
 import { ClubListCarouselTemplate } from '../templates/club-list-carousel.template';
 import { NotFoundTemplate } from '../templates/not-found.template';
 import { HeaderPlaceholderTemplate } from '../templates/header-placeholder.template';
+import { SubSettingsTemplate } from '../templates/sub-settings.template';
 /* eslint-enable */
 
 export class SkyduckElements {
@@ -58,7 +59,12 @@ export class SkyduckElements {
             return new NotFoundTemplate(this._CLUBS_NOT_FOUND).html;
         }
 
-        return new ClubListCarouselTemplate(this._clubsSortedByCountry, this._clubCountries, this._position, this._userLocation).html;
+        return new ClubListCarouselTemplate(
+            this._clubsSortedByCountry,
+            this._clubCountries,
+            this._position,
+            this._userLocation
+        ).html;
     }
 
     public get footer(): HTMLElement {
@@ -77,7 +83,12 @@ export class SkyduckElements {
         }
 
         const { daily, timezone } = this._dailyForecast.weather;
-        this._forecastCarousel = new ForecastCarouselTemplate(daily.data, this._forecastHours, 'standard', timezone, this._currentForecastSlide).html;
+        this._forecastCarousel = new ForecastCarouselTemplate(
+            daily.data,
+            this._forecastHours,
+            'standard', timezone,
+            this._currentForecastSlide
+        ).html;
 
         return this._forecastCarousel;
     }
@@ -88,7 +99,13 @@ export class SkyduckElements {
         }
 
         const { daily, timezone } = this._dailyForecast.weather;
-        this._forecastCarousel = new ForecastCarouselTemplate(daily.data, this._forecastHoursExtended, 'extended', timezone, this._currentForecastSlide).html;
+        this._forecastCarousel = new ForecastCarouselTemplate(
+            daily.data,
+            this._forecastHoursExtended,
+            'extended',
+            timezone,
+            this._currentForecastSlide
+        ).html;
 
         return this._forecastCarousel;
     }

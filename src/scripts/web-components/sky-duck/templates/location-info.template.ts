@@ -1,12 +1,17 @@
 import { LocationDetails } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { NotFoundTemplate } from './not-found.template';
+import { formatAddress } from '../utils/format-address';
 
 export class LocationInfoTemplate {
+    private _className: string;
+    private _id: string;
     private _locationDetails: LocationDetails;
     private _locationInfo: HTMLElement;
 
-    constructor(locationDetails: LocationDetails) {
+    constructor(locationDetails: LocationDetails, id?: string, className?: string) {
         this._locationDetails = locationDetails;
+        this._id = id;
+        this._className = className || '';
 
         this._buildLocationInfo();
     }
@@ -22,7 +27,7 @@ export class LocationInfoTemplate {
         const title = `
             <h3>${name}</h3>
         `;
-        const formattedAddress = this._formatAddress(address);
+        const formattedAddress = formatAddress(address);
         const siteLink = site
             ? `
                 <a
@@ -35,30 +40,16 @@ export class LocationInfoTemplate {
             : '';
 
         this._locationInfo = new DOMParser().parseFromString(`
-            <div
-                class="location-info"
-                id="locationInfo">
+            <div class="location-info ${this._className}">
                 ${title}
                 ${formattedAddress}
                 ${siteLink}
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
-    }
 
-    private _formatAddress(address: string): string {
-        const parts = address.split(',');
-        const uniqueParts = [];
-        parts.forEach((part) => {
-            const _part = part.trim();
-            if (!uniqueParts.includes(_part)) {
-                uniqueParts.push(_part);
-            }
-        });
-        const html = uniqueParts.map((part) => {
-            return `<span>${part}</span>`;
-        });
-
-        return html.join('');
+        if (this._id) {
+            this._locationInfo.setAttribute('id', this._id);
+        }
     }
 
     public get html(): HTMLElement {

@@ -10,5 +10,6 @@ export const modifierClasses: ModifierClasses = {
     loading: '--loading',
     ready: '--ready',
     settingsActive: '--settings-active',
+    subSettingsActive: '--sub-settings-active',
     userDeniedGeolocation: '--geolocation-error',
 };

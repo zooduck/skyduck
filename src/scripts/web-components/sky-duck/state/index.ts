@@ -3,6 +3,7 @@ import { State } from '../interfaces/index'; //  eslint-disable-line no-unused-v
 export const state: State = {
     currentClubListCountry: '',
     currentForecastSlide: 1,
+    currentSubSettings: '',
     hasLoaded: false,
     headerTitle: '',
     isLoading: false,
@@ -18,9 +19,11 @@ export const state: State = {
                 latitude: null,
                 longitude: null,
             }
-        }
+        },
+        useGPSForCurrentLocation: true,
     },
     settingsActive: false,
+    subSettingsActive: false,
     userDeniedGeolocation: false,
     userLocation: {
         query: '',

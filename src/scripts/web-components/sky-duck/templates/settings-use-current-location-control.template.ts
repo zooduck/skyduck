@@ -8,10 +8,10 @@ export class UseCurrentLocationControlTemplate {
     constructor(userLocation: GeocodeData) {
         this._userLocation = userLocation;
 
-        this._buildUseCurrentLocationControl();
+        this._buildSettingsUseCurrentLocationControl();
     }
 
-    private _buildUseCurrentLocationControl(): void {
+    private _buildSettingsUseCurrentLocationControl(): void {
         this._useCurrentLocationControl = new DOMParser().parseFromString(`
             <div
                 class="settings__control"

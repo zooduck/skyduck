@@ -15,6 +15,7 @@ import {
     ClubCountries,
     StateChangeHandlers,
     HTMLZooduckCarouselElement,
+    SubSettings,
 } from './interfaces/index';
 /* eslint-enable */
 import { imageMap } from './utils/image-map';
@@ -34,14 +35,21 @@ import {
     toggleSettings,
     toggleActiveCarousel,
     toggleForecastDisplayMode,
-    reverseGeocodeLookupControl,
-    onSearchSubmit
+    onSearchSubmit,
+    toggleUseGPSForCurrentLocation,
+    setCurrentLocation,
+    setCurrentLocationSetting,
+    useCurrentLocationControl,
+    toggleSubSettings
 } from './event-handlers/index';
 import { modifierClasses } from './utils/modifier-classes';
 import { state } from './state/index';
 import { setLoaderInfoDisplay } from './utils/set-loader-info-display';
 import { clearLoaderInfoDisplay } from './utils/clear-loader-info-display';
 import { googleMapsKeyLookup } from './fetch/google-maps-key-lookup.fetch';
+import { SubSettingsTemplate } from './templates/sub-settings.template';
+import { SubSettingsCurrentLocationTemplate } from './templates/sub-settings-current-location.template';
+import { subSettings } from './utils/sub-settings';
 
 const tagName = 'sky-duck';
 
@@ -63,13 +71,18 @@ class HTMLSkyDuckElement extends HTMLElement {
     private _nearestClub: SkydiveClub;
     private _onSearchSubmitHandler: EventListener;
     private _position: Position;
-    private _reverseGeocodeLookupHandler: EventListener;
+    private _setCurrentLocationHandler: EventListener;
+    private _setCurrentLocationSettingHandler: EventListener;
     private _state: State;
     private _style: SkyduckStyle;
+    private _subSettings: SubSettings;
     private _toggleActiveCarouselHandler: EventListener;
     private _toggleForecastDisplayModeHandler: EventListener;
     private _toggleSettingsHandler: EventListener;
+    private _toggleSubSettingsHandler: EventListener;
+    private _toggleUseGPSForCurrentLocationHandler: EventListener;
     private _transitionSpeedInMillis: number;
+    private _useCurrentLocationControlHandler: EventListener;
     private _weather: SkyduckWeather;
 
     constructor () {
@@ -91,11 +104,17 @@ class HTMLSkyDuckElement extends HTMLElement {
             ...state,
         }, this._stateController());
 
+        this._subSettings = subSettings;
+
         this._onSearchSubmitHandler = onSearchSubmit.bind(this);
-        this._reverseGeocodeLookupHandler = reverseGeocodeLookupControl.bind(this);
+        this._setCurrentLocationHandler = setCurrentLocation.bind(this);
+        this._setCurrentLocationSettingHandler = setCurrentLocationSetting.bind(this);
         this._toggleSettingsHandler = toggleSettings.bind(this);
+        this._toggleSubSettingsHandler = toggleSubSettings.bind(this);
         this._toggleForecastDisplayModeHandler = toggleForecastDisplayMode.bind(this);
         this._toggleActiveCarouselHandler = toggleActiveCarousel.bind(this);
+        this._toggleUseGPSForCurrentLocationHandler = toggleUseGPSForCurrentLocation.bind(this);
+        this._useCurrentLocationControlHandler = useCurrentLocationControl.bind(this);
     }
 
     static get observedAttributes() {
@@ -110,10 +129,6 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     public set club(val: string) {
-        if (this._club === val) {
-            return;
-        }
-
         this._club = val;
         this._syncStringAttr('club', this.club);
 
@@ -128,10 +143,6 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     public set location(val: string) {
-        if (this._location === val) {
-            return;
-        }
-
         this._location = val;
         this._syncStringAttr('location', this._location);
 
@@ -142,8 +153,10 @@ class HTMLSkyDuckElement extends HTMLElement {
     }
 
     private _addSettings() {
-        this.shadowRoot.appendChild(this._getGlass());
+        this.shadowRoot.appendChild(this._getSettingsGlass());
         this.shadowRoot.appendChild(this._getSettings());
+        this.shadowRoot.appendChild(this._getSubSettingsGlass());
+        this.shadowRoot.appendChild(this._getSubSettings());
     }
 
     private _addStyleAndLoader() {
@@ -236,10 +249,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         }
     }
 
-    private _getGlass(): HTMLElement {
-        return new GlassTemplate().html;
-    }
-
     private async _getGoogleMapsKey(): Promise<string> {
         if (!this._state.googleMapsKey) {
             this._state.googleMapsKey = await googleMapsKeyLookup();
@@ -295,6 +304,18 @@ class HTMLSkyDuckElement extends HTMLElement {
         const { googleMapsKey, settings, userDeniedGeolocation, userLocation } = this._state;
 
         return new SettingsTemplate(googleMapsKey, settings, userLocation, userDeniedGeolocation).html;
+    }
+
+    private _getSettingsGlass(): HTMLElement {
+        return new GlassTemplate('settingsGlass', '--settings').html;
+    }
+
+    private _getSubSettings(): HTMLElement {
+        return new SubSettingsTemplate().html;
+    }
+
+    private _getSubSettingsGlass(): HTMLElement {
+        return new GlassTemplate('subSettingsGlass', '--sub-settings').html;
     }
 
     private _getStyle(): HTMLStyleElement {
@@ -369,7 +390,6 @@ class HTMLSkyDuckElement extends HTMLElement {
         }).catch((err) => {
             this._geocodeData = null;
             this._error = err;
-
             this._revertContentOnError();
         });
     }
@@ -457,6 +477,12 @@ class HTMLSkyDuckElement extends HTMLElement {
         const settingsToggle = this.shadowRoot.querySelector('#settingsToggle');
         settingsToggle && settingsToggle.addEventListener('click', this._toggleSettingsHandler);
 
+        const settingsGlass = this.shadowRoot.querySelector('#settingsGlass');
+        settingsGlass.addEventListener('click', this._toggleSettingsHandler);
+
+        const subSettingsGlass = this.shadowRoot.querySelector('#subSettingsGlass');
+        subSettingsGlass.addEventListener('click', this._toggleSubSettingsHandler);
+
         const clubListCarousel = this.shadowRoot.querySelector('#clubListCarousel') as HTMLElement;
         clubListCarousel.addEventListener('slidechange', (e: CustomEvent) => {
             const { index: clubCountryIndex } = e.detail.currentSlide;
@@ -501,6 +527,7 @@ class HTMLSkyDuckElement extends HTMLElement {
         const excludedClasses = [
             this._modifierClasses.userDeniedGeolocation,
             this._modifierClasses.settingsActive,
+            this._modifierClasses.subSettingsActive,
             this._modifierClasses.loading,
         ];
 
@@ -523,6 +550,7 @@ class HTMLSkyDuckElement extends HTMLElement {
 
         if (this._state.hasLoaded) {
             this._setLoaderError();
+            this._setLoading();
 
             return;
         }
@@ -723,9 +751,15 @@ class HTMLSkyDuckElement extends HTMLElement {
                 ],
             },
             {
+                selector: '#setCurrentLocationSetting',
+                listeners: [
+                    { eventName: 'click', callback: this._setCurrentLocationSettingHandler },
+                ],
+            },
+            {
                 selector: '#useCurrentLocationControl',
                 listeners: [
-                    { eventName: 'click', callback: this._reverseGeocodeLookupHandler },
+                    { eventName: 'click', callback: this._useCurrentLocationControlHandler },
                 ],
             },
         ];
@@ -806,6 +840,16 @@ class HTMLSkyDuckElement extends HTMLElement {
             this.classList.toggle('--settings-active');
 
             break;
+        case 'subSettingsActive':
+            this.classList.toggle('--sub-settings-active');
+
+            break;
+        case 'userLocation':
+            settingsPage.querySelector('#useCurrentLocationSetting').replaceWith(newSettings.useCurrentLocationControl);
+
+            this._registerEventsOnSettings();
+
+            break;
         default: // do nothing
         }
     }
@@ -843,6 +887,27 @@ class HTMLSkyDuckElement extends HTMLElement {
             currentForecastSlide: async (val: number) => {
                 this._updateForecastCarousels(val);
             },
+            currentSubSettings: async (val: string) => {
+                const subSettings = this.shadowRoot.querySelector('#subSettings');
+                const subSettingsSettingsGrid = subSettings.querySelector('.settings-grid');
+
+                const subSettingsCurrentLocation = new SubSettingsCurrentLocationTemplate(
+                    this._state.settings.useGPSForCurrentLocation,
+                    this._state.userLocation,
+                    this._toggleUseGPSForCurrentLocationHandler,
+                    this._setCurrentLocationHandler
+                ).html;
+
+                switch (val) {
+                case this._subSettings.locationSettings:
+                    subSettings.replaceChild(subSettingsCurrentLocation, subSettingsSettingsGrid);
+
+                    break;
+                default: // do nothing
+                }
+
+                this._state.subSettingsActive = true;
+            },
             forecastDisplayMode: async (prop: string) => {
                 this._updateSettingsPage(prop);
 
@@ -861,7 +926,13 @@ class HTMLSkyDuckElement extends HTMLElement {
             },
             settingsActive: async (prop: string) => {
                 this._updateSettingsPage(prop);
-            }
+            },
+            subSettingsActive: async (prop: string) => {
+                this._updateSettingsPage(prop);
+            },
+            userLocation: async (prop: string) => {
+                this._updateSettingsPage(prop);
+            },
         };
     }
 
@@ -886,10 +957,6 @@ class HTMLSkyDuckElement extends HTMLElement {
 
     protected async _updateState(prop: string, val: any) {
         switch (prop) {
-        case 'locationDetails':
-            this._stateChangeHandlers().locationDetails(prop);
-
-            break;
         case 'activeCarousel':
             await this._stateChangeHandlers().activeCarousel(prop, val);
 
@@ -898,18 +965,35 @@ class HTMLSkyDuckElement extends HTMLElement {
             this._stateChangeHandlers().currentForecastSlide(val);
 
             break;
-        case 'forecastDisplayMode':
-            this._stateChangeHandlers().forecastDisplayMode(prop);
+        case 'currentSubSettings':
+            this._stateChangeHandlers().currentSubSettings(val);
 
             break;
-        case 'settingsActive':
-            this._stateChangeHandlers().settingsActive(prop);
+        case 'forecastDisplayMode':
+            this._stateChangeHandlers().forecastDisplayMode(prop);
 
             break;
         case 'headerTitle':
             this._stateChangeHandlers().headerTitle(val);
 
             break;
+        case 'locationDetails':
+            this._stateChangeHandlers().locationDetails(prop);
+
+            break;
+        case 'settingsActive':
+            this._stateChangeHandlers().settingsActive(prop);
+
+            break;
+        case 'subSettingsActive':
+            this._stateChangeHandlers().subSettingsActive(prop);
+
+            break;
+        case 'userLocation':
+            this._stateChangeHandlers().userLocation(prop, val);
+
+            break;
+
         default: // do nothing
         }
     }

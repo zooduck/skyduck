@@ -4,8 +4,9 @@ import { SettingsToggleTemplate } from './settings-toggle.template';
 import { SearchTemplate } from './settings-search.template';
 import { GeolocationErrorTemplate } from './geolocation-error.template';
 import { Settings, GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
-import { UseCurrentLocationControlTemplate } from './use-current-location-control.template';
+import { UseCurrentLocationControlTemplate } from './settings-use-current-location-control.template';
 import { NotFoundTemplate } from './not-found.template';
+import { LocationSettingsControlTemplate } from './settings-location-settings-control.template';
 
 export class SettingsTemplate {
     private _geolocationError: HTMLElement;
@@ -17,6 +18,7 @@ export class SettingsTemplate {
     private _search: HTMLElement;
     private _settings: Settings;
     private _settingsPage: HTMLElement;
+    private _setCurrentLocationControl: HTMLElement;
     private _useCurrentLocationControl: HTMLElement;
     private _userDeniedGeolocation: boolean;
     private _userLocation: GeocodeData;
@@ -35,7 +37,7 @@ export class SettingsTemplate {
             <div
                 id="settings"
                 class="settings --render-once">
-                <div class="settings__grid"></div>
+                <div class="settings-grid"></div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
@@ -47,15 +49,16 @@ export class SettingsTemplate {
             this._map = new NotFoundTemplate('COORDS_FOR_MAP_NOT_FOUND', 'map').html;
             this._locationInfo = new NotFoundTemplate('LOCATION_DETAILS_NOT_FOUND', 'locationInfo').html;
         } else {
-            this._map = new GoogleMapTemplate(this._googleMapsKey, this._settings.locationDetails.coords).html;
-            this._locationInfo = new LocationInfoTemplate(this._settings.locationDetails).html;
+            this._map = new GoogleMapTemplate(this._googleMapsKey, locationDetails.coords).html;
+            this._locationInfo = new LocationInfoTemplate(locationDetails, 'locationInfo').html;
         }
-        this._search = new SearchTemplate().html;
+        this._search = new SearchTemplate('searchInput', 'Location Search', 'e.g. Perris, CA 92570, USA').html;
         this._extendedForecastToggle = this._buildExtendedForecastToggle();
         this._activeCarouselToggle = this._buildActiveCarouselToggle();
         this._useCurrentLocationControl = this._buildUseCurrentLocationControl();
+        this._setCurrentLocationControl = this._buildLocationSettingsControl();
 
-        const settingsGrid = this._settingsPage.querySelector('.settings__grid');
+        const settingsGrid = this._settingsPage.querySelector('.settings-grid');
 
         if (this._userDeniedGeolocation) {
             settingsGrid.appendChild(this._geolocationError);
@@ -72,6 +75,7 @@ export class SettingsTemplate {
         }
 
         settingsGrid.appendChild(this._useCurrentLocationControl);
+        settingsGrid.appendChild(this._setCurrentLocationControl);
     }
 
     private _buildActiveCarouselToggle(): HTMLElement {
@@ -97,6 +101,10 @@ export class SettingsTemplate {
         ];
 
         return new SettingsToggleTemplate(id, desc, toggleState).html;
+    }
+
+    private _buildLocationSettingsControl(): HTMLElement {
+        return new LocationSettingsControlTemplate().html;
     }
 
     private _buildUseCurrentLocationControl(): HTMLElement {
@@ -129,6 +137,10 @@ export class SettingsTemplate {
 
     public get search(): HTMLElement {
         return this._search;
+    }
+
+    public get setCurrentLocationControl(): HTMLElement {
+        return this._setCurrentLocationControl;
     }
 
     public get useCurrentLocationControl():  HTMLElement {

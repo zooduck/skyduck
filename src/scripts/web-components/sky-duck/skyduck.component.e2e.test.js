@@ -217,11 +217,13 @@ describe('sky-duck', () => {
                     const expectedElements = [
                         'style',
                         'loader',
+                        'settings-glass',
+                        'settings',
+                        'sub-settings-glass',
+                        'sub-settings',
+                        'club-list',
                         'header',
                         'header-placeholder',
-                        'glass',
-                        'club-list',
-                        'settings',
                     ];
 
                     const childNodes = await page.evaluate((el) => {

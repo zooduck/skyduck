@@ -158,8 +158,8 @@ export type LoaderMessageElements = {
 export interface LocationDetails {
     name: string;
     address: string;
-    timezone: string;
-    coords: Coords;
+    timezone?: string;
+    coords?: Coords;
     site?: string;
 }
 
@@ -173,6 +173,7 @@ export interface ModifierClasses {
     loading: string;
     ready: string;
     settingsActive: string;
+    subSettingsActive: string;
     userDeniedGeolocation: string;
 }
 
@@ -188,6 +189,11 @@ export interface Settings {
     activeCarousel: ActiveCarousel;
     forecastDisplayMode: ForecastType;
     locationDetails: LocationDetails;
+    useGPSForCurrentLocation: boolean;
+}
+
+export interface SubSettings {
+    locationSettings: string;
 }
 
 export interface SkydiveClub {
@@ -205,12 +211,14 @@ export interface SkydiveClub {
 export interface State {
     currentClubListCountry: string;
     currentForecastSlide: number;
+    currentSubSettings: string;
     hasLoaded: boolean;
     headerTitle: string;
     isLoading: boolean;
     googleMapsKey: string;
     settings: Settings;
     settingsActive: boolean;
+    subSettingsActive: boolean;
     userDeniedGeolocation: boolean;
     userLocation: GeocodeData;
     version: string;
@@ -219,10 +227,13 @@ export interface State {
 export interface StateChangeHandlers {
     activeCarousel: any;
     currentForecastSlide: any;
+    currentSubSettings: any;
     forecastDisplayMode: any;
     headerTitle: any;
     locationDetails: any;
     settingsActive: any;
+    subSettingsActive: any;
+    userLocation: any;
 }
 
 export type ToggleState = 'on'|'off';
