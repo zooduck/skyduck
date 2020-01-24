@@ -1,8 +1,10 @@
 {
-  "name": "skyduck",
-  "version": "1.3.3-alpha",
-  "description": "skydiving weather forecast",
-  "main": "index.js",
+  "name": "@zooduck/skyduck",
+  "version": "1.4.0-alpha",
+  "description": "Skydiving Weather Service",
+  "main": "index.ts",
+  "url": "https://github.com/zooduck/skyduck",
+  "repository": "git://github.com/zooduck/skyduck.git",
   "scripts": {
     "prebuild": "node clean && npm run lint",
     "build": "parcel build src/index.html",
