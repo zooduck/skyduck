@@ -1,6 +1,6 @@
 {
   "name": "@zooduck/skyduck",
-  "version": "1.4.1-alpha",
+  "version": "1.4.2-alpha",
   "description": "Skydiving Weather Service",
   "main": "index.ts",
   "url": "https://github.com/zooduck/skyduck",
