@@ -9,6 +9,17 @@ const server = express();
 const bodyParser = require('body-parser');
 const router = require('./routes.js');
 
+server.enable('trust proxy');
+server.use((request, response, next) => {
+    if (!request.secure && request.hostname !== 'localhost') {
+        console.log('Redirect to https...');
+
+        const secureSite = `https://${request.headers.host}${request.url}`;
+        response.redirect(secureSite);
+    }
+
+    return next();
+});
 server.use(express.static('dist'));
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
