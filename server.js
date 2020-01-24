@@ -15,10 +15,10 @@ server.use((request, response, next) => {
         console.log('Redirect to https...');
 
         const secureSite = `https://${request.headers.host}${request.url}`;
-        response.redirect(secureSite);
+        return response.redirect(secureSite);
     }
 
-    return next();
+    next();
 });
 server.use(express.static('dist'));
 server.use(bodyParser.json());
