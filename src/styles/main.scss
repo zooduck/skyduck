@@ -5,4 +5,8 @@
 body {
     margin: 0 auto;
     max-width: 1366px;
+
+    @media (min-width: 824px) {
+        background-color: whitesmoke;
+    }
 }

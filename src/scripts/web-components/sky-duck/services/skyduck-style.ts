@@ -62,7 +62,7 @@ export class SkyduckStyle {
                 display: block;
                 width: 100%;
                 height: 100vh;
-                max-width: 823px;
+                max-width: var(--max-width);
                 min-height: 100vh;
                 margin: 0 auto;
                 background-color: var(--white);
@@ -71,6 +71,8 @@ export class SkyduckStyle {
                 font-family: Roboto, sans-serif;
                 font-size: var(--font-size-base);
                 color: var(--black);
+
+                --max-width: 823px;
 
                 --font-size-base: 16px;
                 --slide-selectors-height: 40px;
@@ -94,7 +96,7 @@ export class SkyduckStyle {
                 --whitesmoke: whitesmoke;
                 --translucentwhite: rgba(255, 255, 255, .8);
 
-                --boxshadow: -2px 2px 15px rgba(0, 0, 0, .2);
+                --box-shadow: -2px 2px 15px rgba(0, 0, 0, .2);
             }
             :host(.--ready) {
                 height: auto;
@@ -105,11 +107,6 @@ export class SkyduckStyle {
             @media (max-width: 320px) {
                 :host {
                     font-size: 14px;
-                }
-            }
-            @media (min-width: 824px) {
-                :host {
-                    box-shadow: var(--boxshadow);
                 }
             }
 
@@ -152,6 +149,7 @@ export class SkyduckStyle {
                 justify-content: center;
                 justify-items: center;
                 width: 100%;
+                max-width: var(--max-width);
                 height: 100vh;
                 background-color: var(--lightskyblue);
                 color: var(--white);
@@ -226,7 +224,7 @@ export class SkyduckStyle {
                 z-index: 9;
                 left: 0;
                 top: 0;
-                max-width: 823px;
+                max-width: var(--max-width);
                 display: grid;
                 grid-template-columns: repeat(2, auto) 1fr auto;
                 grid-gap: 10px;
@@ -239,7 +237,10 @@ export class SkyduckStyle {
             }
             @media (min-width: 824px) {
                 .header {
-                    left: calc(50% - (823px / 2));
+                    left: calc((100% - var(--max-width)) / 2);
+                }
+                .loader {
+                    left: calc((100% - var(--max-width)) / 2);
                 }
             }
             .header__settings-control {
@@ -276,7 +277,7 @@ export class SkyduckStyle {
 
             .glass {
                 display: none;
-                position: fixed;
+                position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -305,13 +306,13 @@ export class SkyduckStyle {
                 height: 100%;
                 min-height: 100vh;
                 overflow: auto;
-                box-shadow: var(--boxshadow);
                 background-color: var(--white);
-                transform: translateX(-125%);
+                transform: translateX(-100%);
                 transition: all ${transitionSpeedInMillis}ms;
             }
             :host(.--settings-active) .settings {
                 transform: translateX(0);
+                box-shadow: var(--box-shadow);
             }
             .settings-grid {
                 display: grid;
@@ -345,13 +346,14 @@ export class SkyduckStyle {
             }
 
             .sub-settings {
-                max-width: none;
-                transform: translateX(100vw);
+                left: auto;
+                right: 0;
+                transform: translateX(100%);
                 box-shadow: none;
             }
             :host(.--sub-settings-active) .sub-settings {
-                transform: translateX(50px);
-                box-shadow: var(--boxshadow);
+                transform: translateX(0);
+                box-shadow: var(--box-shadow);
             }
 
             .map iframe {
