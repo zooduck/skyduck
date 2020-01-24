@@ -1,1 +1,0 @@
-{"version":3,"sources":["styles\\main.scss"],"names":[],"mappings":"AAAA,EACI,6BAAA,CAAA,sBAGJ,KACI,aAAA,CACA","file":"main.39e3528f.css","sourceRoot":"..\\src","sourcesContent":["* {\r\n    box-sizing: border-box;\r\n}\r\n\r\nbody {\r\n    margin: 0 auto;\r\n    max-width: 1366px;\r\n}\r\n"]}
