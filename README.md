@@ -1,7 +1,7 @@
 # Skyduck
 Weather forecasting tool for skydivers.
 
-Built as a pure <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components" target="_blank">HTML Web Component</a> without frameworks or libraries (<a href="https://moment.github.io/luxon/" target="_blank">Luxon</a> excluded).
+Mobile-first <a href="https://developer.mozilla.org/en-US/docs/Glossary/SPA" target="_blank">SPA</a> built as a pure <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components" target="_blank">HTML Web Component</a> without frameworks or libraries (<a href="https://moment.github.io/luxon/" target="_blank">Luxon</a> excluded).
 
 ![alt text](https://github.com/zooduck/screenshots/blob/master/skyduck/v2.0.0-beta/skyduck-v2.0.0-beta.png)
 
