@@ -14,7 +14,7 @@ Club forecasts are available by clicking on any club name in the club list (curr
 |Name|Description|
 |----|-----------|
 |Dark Sky|Weather data|
-|Bing Maps (Geocode)|Resolve latitude/longitude for location search|
+|Bing Maps (Geocode)|Resolve latitude / longitude for location search|
 |Google Maps (Embed)|Display a Google Map for the current location|
 
 ### Dependencies
