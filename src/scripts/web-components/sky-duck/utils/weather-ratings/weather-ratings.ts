@@ -10,7 +10,7 @@ export const weatherRatings = (() => {
         return fractions[0];
     };
 
-    const round = (float: number, decimalPlaces = 2): Number => {
+    const round = (float: number, decimalPlaces = 2): number => {
         const numberString = float.toString();
         const floatString = parseFloat(numberString).toFixed(decimalPlaces);
 

@@ -1,16 +1,21 @@
 import { SkydiveClub, ClubListSorted, GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+
 export class ClubListItemTemplate {
     private _club: SkydiveClub;
     private _clubs: ClubListSorted;
     private _clubListItem: HTMLElement;
-    private _position: Position;
+    private _eventHandler: CallableFunction;
     private _userLocation: GeocodeData;
 
-    constructor(clubs: ClubListSorted, club: SkydiveClub, position: Position, userLocation: GeocodeData) {
+    constructor(
+        clubListSorted: ClubListSorted,
+        club: SkydiveClub,
+        userLocation: GeocodeData,
+        eventHandler?: CallableFunction) {
         this._club = club;
-        this._clubs = clubs;
-        this._position = position;
+        this._clubs = clubListSorted;
         this._userLocation = userLocation;
+        this._eventHandler = eventHandler;
 
         this._buildClubListItem();
     }
@@ -22,7 +27,16 @@ export class ClubListItemTemplate {
                 <h3 class="club-list-item__name">${this._club.name}</h3>
                 <span class="club-list-item__place">${this._club.place}</span>
                 <a class="club-list-item__site-link" href="${this._club.site}" target="_blank">${this._club.site.replace(/https?:\/\//, '')}</a>
-            </li>`, 'text/html').body.firstChild as HTMLElement;
+            </li>
+        `, 'text/html').body.firstChild as HTMLElement;
+
+        if (!this._eventHandler) {
+            return;
+        }
+
+        this._clubListItem.querySelector('.club-list-item__name').addEventListener('click', () => {
+            this._eventHandler(this._club.name);
+        });
     }
 
     private _buildClubListItemDistance(): HTMLElement {
@@ -37,6 +51,7 @@ export class ClubListItemTemplate {
                 : distanceFromCurrentLocation >= 100
                     ? '--amber'
                     : '--green';
+
             return new DOMParser().parseFromString(`
                 <div class="club-list-item-distance" style="${clubListItemDistanceStyle}">
                     <span class="club-list-item-distance__marker ${distanceColorModifier}"></span>
@@ -56,11 +71,13 @@ export class ClubListItemTemplate {
     }
 
     private _isClubListCountrySameAsUserCountry(): boolean {
-        if (!this._position) {
+        if (!this._userLocation) {
             return false;
         }
 
-        return this._clubs.countryAliases.includes(this._userLocation.address.countryRegion);
+        const { countryRegion } = this._userLocation.address;
+
+        return this._clubs.countryAliases.includes(countryRegion);
     }
 
     public get html(): HTMLElement {

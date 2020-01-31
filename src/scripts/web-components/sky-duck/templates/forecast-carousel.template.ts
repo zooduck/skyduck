@@ -4,17 +4,25 @@ import { DailyData, HTMLZooduckCarouselElement, ForecastType } from '../interfac
 export class ForecastCarouselTemplate {
     private _currentSlide: number;
     private _dailyData: DailyData[];
+    private _eventHandler: CallableFunction;
     private _forecastHours: number[];
     private _forecastType: ForecastType;
     private _timezone: string;
     private _forecastCarousel: HTMLZooduckCarouselElement;
 
-    constructor(dailyData: DailyData[], forecastHours: number[], forecastType: ForecastType, timezone: string, currentSlide: number) {
+    constructor(
+        dailyData: DailyData[],
+        forecastHours: number[],
+        forecastType: ForecastType,
+        timezone: string,
+        currentSlide: number,
+        eventHandler?: CallableFunction) {
         this._dailyData = dailyData;
         this._forecastHours = forecastHours;
         this._forecastType = forecastType;
         this._timezone = timezone;
         this._currentSlide = currentSlide;
+        this._eventHandler = eventHandler;
 
         this._buildForecastCarousel();
     }
@@ -38,7 +46,12 @@ export class ForecastCarouselTemplate {
         const forecastSlides = this._dailyData.filter((dailyData: DailyData) => {
             return dailyData.hourly.length;
         }).map((dailyData: DailyData) => {
-            return new ForecastTemplate(dailyData, this._forecastHours, this._forecastType, this._timezone).html;
+            return new ForecastTemplate(
+                dailyData,
+                this._forecastHours,
+                this._forecastType,
+                this._timezone
+            ).html;
         });
 
         const slidesSlot = this._buildSlidesSlot();
@@ -48,6 +61,14 @@ export class ForecastCarouselTemplate {
         });
 
         this._forecastCarousel.appendChild(slidesSlot);
+
+        if (!this._eventHandler) {
+            return;
+        }
+
+        this._forecastCarousel.addEventListener('slidechange', (e: CustomEvent) => {
+            this._eventHandler(e);
+        });
     }
 
     private _buildSlidesSlot(): HTMLElement {

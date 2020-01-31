@@ -1,5 +1,5 @@
 export class NotFoundTemplate {
-    private _clubListNotFound: HTMLElement;
+    private _notFound: HTMLElement;
     private _id: string;
     private _text: string;
 
@@ -7,20 +7,22 @@ export class NotFoundTemplate {
         this._text = text;
         this._id = id;
 
-        this._buildClubListNotFound();
+        this._buildNotFound();
     }
 
-    private _buildClubListNotFound(): void {
-        this._clubListNotFound = new DOMParser().parseFromString(`
+    private _buildNotFound(): void {
+        this._notFound = new DOMParser().parseFromString(`
             <span style="display: none;">${this._text}</span>
         `, 'text/html').body.firstChild as HTMLElement;
 
-        if (this._id) {
-            this._clubListNotFound.setAttribute('id', this._id);
+        if (!this._id) {
+            return;
         }
+
+        this._notFound.id = this._id;
     }
 
     public get html(): HTMLElement {
-        return this._clubListNotFound;
+        return this._notFound;
     }
 }

@@ -29,8 +29,9 @@ export class SkyduckWeather {
         return dailyData.map((dailyItem: any) => {
             return {
                 ...dailyItem,
-                dateString: this._getTZDateString(dailyItem.time, timezone).substr(0, 5),
-                timeString: this._getTZTimeString(dailyItem.time, timezone).substr(0, 2),
+                // dateString: this._getTZDateString(dailyItem.time, timezone).substr(0, 5),
+                dateString: this._getTZDateString(dailyItem.time, timezone),
+                timeString: this._getTZTimeString(dailyItem.time, timezone),
                 sunriseTimeString: this._getTZTimeString(dailyItem.sunriseTime, timezone),
                 sunsetTimeString: this._getTZTimeString(dailyItem.sunsetTime, timezone),
                 day: this._getTZDateTime(dailyItem.time, timezone).weekdayShort,
@@ -61,8 +62,8 @@ export class SkyduckWeather {
     private _formatHourlyData(hourlyData: HourlyData, timezone: string): any {
         return {
             ...hourlyData,
-            dateString: this._getTZDateString(hourlyData.time, timezone).substr(0, 5),
-            timeString: this._getTZTimeString(hourlyData.time, timezone).substr(0, 2),
+            dateString: this._getTZDateString(hourlyData.time, timezone),
+            timeString: this._getTZTimeString(hourlyData.time, timezone),
             day: this._getTZDateTime(hourlyData.time, timezone).weekdayShort,
             cloudCover: this._fractionToPercent(hourlyData.cloudCover),
             precipProbability: this._fractionToPercent(hourlyData.precipProbability),
@@ -81,7 +82,7 @@ export class SkyduckWeather {
         try {
             dbWeather = await dbWeatherLookup(latitude, longitude);
         } catch (err) {
-            // (404) continue...
+            // (400 or 404) continue...
         }
 
         if (!dbWeather || !dbWeather.isFresh) {
@@ -89,7 +90,14 @@ export class SkyduckWeather {
             const { weather } = darkSkyData;
 
             const method = !dbWeather ? 'POST' : 'PUT';
-            dbWeather = await dbWeatherUpdate(weather, method);
+
+            await dbWeatherUpdate(weather, method);
+
+            try {
+                dbWeather = await dbWeatherLookup(latitude, longitude);
+            } catch (err) {
+                // (400 or 404) continue...
+            }
         }
 
         return dbWeather;
@@ -97,8 +105,11 @@ export class SkyduckWeather {
 
     private _getTZDateString(timeInSeconds: number, timezone: string): string {
         const tzTime = this._getTZDateTime(timeInSeconds, timezone);
+        const parts = tzTime.toLocaleString(DateTime.DATE_SHORT).split('/').filter((_part, i: number) => {
+            return i < 2;
+        });
 
-        return tzTime.toLocaleString(DateTime.DATE_SHORT);
+        return parts.join('/');
     }
 
     private _getTZDateTime(timeInSeconds: number, timezone: string): DateTime {
@@ -111,7 +122,7 @@ export class SkyduckWeather {
     private _getTZTimeString(timeInSeconds: number, timezone: string): string {
         const tzTime = this._getTZDateTime(timeInSeconds, timezone);
 
-        return tzTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+        return tzTime.toLocaleString(DateTime.TIME_24_SIMPLE).split(':')[0];
     }
 
     private _formatDarkSkyData(weather: DarkSkyWeather, query: string): DailyForecast {
@@ -141,13 +152,6 @@ export class SkyduckWeather {
         }
 
         return this._formatDarkSkyData(weather, query);
-    }
-
-    private _roundHour(dt: DateTime): number {
-        const decimalMinute = dt.minute / 60;
-        const decimalHour = dt.hour + decimalMinute;
-
-        return Math.round(decimalHour);
     }
 
     public async getDailyForecastByClub(name: string, clubList: SkydiveClub[]): Promise<DailyForecast> {

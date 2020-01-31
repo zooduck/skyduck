@@ -6,6 +6,7 @@ import {
     ClubListsSortedByCountry,
     ClubCountries,
     GeocodeData,
+    EventHandlers,
 } from '../interfaces/index';
 import { FooterTemplate } from '../templates/footer.template';
 import { ForecastCarouselTemplate } from '../templates/forecast-carousel.template';
@@ -13,7 +14,7 @@ import { HeaderTemplate } from '../templates/header.template';
 import { ClubListCarouselTemplate } from '../templates/club-list-carousel.template';
 import { NotFoundTemplate } from '../templates/not-found.template';
 import { HeaderPlaceholderTemplate } from '../templates/header-placeholder.template';
-import { SubSettingsTemplate } from '../templates/sub-settings.template';
+import { StateAPotamus } from '../state/stateapotamus';
 /* eslint-enable */
 
 export class SkyduckElements {
@@ -23,35 +24,37 @@ export class SkyduckElements {
     private _clubsSortedByCountry: ClubListsSortedByCountry;
     private _currentForecastSlide: number;
     private _dailyForecast: DailyForecast;
+    private _eventHandlers: EventHandlers;
     private _forecastCarousel: HTMLZooduckCarouselElement;
     private _forecastHours: number[];
     private _forecastHoursExtended: number[];
     private _hasClubList: boolean;
     private _locationDetails: LocationDetails;
     private _version: string;
-    private _position: Position;
     private _userLocation: GeocodeData;
 
-    constructor(
-        locationDetails: LocationDetails,
-        currentForecastSlide: number,
-        dailyForecast: DailyForecast,
-        version: string,
-        clubsSortedByCountry: ClubListsSortedByCountry,
-        clubCountries: ClubCountries,
-        position: Position,
-        userLocation: GeocodeData) {
+    constructor(eventHandlers: EventHandlers) {
+        const {
+            clubCountries,
+            clubsSortedByCountry,
+            currentForecastSlide,
+            forecast: dailyForecast,
+            locationDetails,
+            userLocation,
+            version,
+        } = StateAPotamus.getState();
+
         this._currentForecastSlide = currentForecastSlide;
         this._dailyForecast = dailyForecast;
         this._forecastHours = [9, 12, 15];
         this._forecastHoursExtended = Array.from({ length: 24 }).map((_item, i) => i);
-        this._hasClubList = Object.keys(clubsSortedByCountry).length > 0;
+        this._hasClubList = clubsSortedByCountry && Object.keys(clubsSortedByCountry).length > 0;
         this._locationDetails = locationDetails;
-        this._version = version ? version.split('-')[0] : '';
+        this._version = version;
         this._clubsSortedByCountry = clubsSortedByCountry;
         this._clubCountries = clubCountries;
-        this._position = position;
         this._userLocation = userLocation;
+        this._eventHandlers = eventHandlers;
     }
 
     public get clubList(): HTMLElement {
@@ -62,8 +65,9 @@ export class SkyduckElements {
         return new ClubListCarouselTemplate(
             this._clubsSortedByCountry,
             this._clubCountries,
-            this._position,
-            this._userLocation
+            this._userLocation,
+            this._eventHandlers.onClubListCarouselSlideChangeHandler,
+            this._eventHandlers.onClubChangeHandler,
         ).html;
     }
 
@@ -86,8 +90,10 @@ export class SkyduckElements {
         this._forecastCarousel = new ForecastCarouselTemplate(
             daily.data,
             this._forecastHours,
-            'standard', timezone,
-            this._currentForecastSlide
+            'standard',
+            timezone,
+            this._currentForecastSlide,
+            this._eventHandlers.onForecastCarouselSlideChangeHandler,
         ).html;
 
         return this._forecastCarousel;
@@ -104,14 +110,20 @@ export class SkyduckElements {
             this._forecastHoursExtended,
             'extended',
             timezone,
-            this._currentForecastSlide
+            this._currentForecastSlide,
+            this._eventHandlers.onForecastCarouselSlideChangeHandler,
         ).html;
 
         return this._forecastCarousel;
     }
 
     public get header(): HTMLElement {
-        return new HeaderTemplate(this._version, this._locationDetails.name).html;
+        return new HeaderTemplate(
+            this._version,
+            this._locationDetails.name,
+            this._locationDetails.address,
+            this._eventHandlers.toggleSettingsHandler
+        ).html;
     }
 
     public get headerPlaceholder(): HTMLElement {

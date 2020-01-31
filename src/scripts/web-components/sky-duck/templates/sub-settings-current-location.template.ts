@@ -3,18 +3,21 @@ import { SearchTemplate } from './settings-search.template';
 // eslint-disable-next-line no-unused-vars
 import { GeocodeData } from '../interfaces/index';
 import { LocationInfoTemplate } from './location-info.template';
+import { StateAPotamus } from '../state/stateapotamus';
 
 export class SubSettingsCurrentLocationTemplate {
-    private _gpsToggleEventHandler: any;
-    private _setCurrentLocationEventHandler: any;
+    private _gpsToggleEventHandler: CallableFunction;
+    private _setCurrentLocationEventHandler: CallableFunction;
     private _subSettingsCurrentLocation: HTMLElement;
     private _useGPSForCurrentLocation: boolean;
     private _userLocation: GeocodeData;
 
-    constructor(useGPSForCurrentLocation: boolean, userLocation: GeocodeData, gpsToggleEventHandler: any, setCurrentLocationEventHandler: any) {
+    constructor(gpsToggleEventHandler: CallableFunction, setCurrentLocationEventHandler: CallableFunction) {
+        const { settings, userLocation } = StateAPotamus.getState();
+
         this._gpsToggleEventHandler = gpsToggleEventHandler;
         this._setCurrentLocationEventHandler = setCurrentLocationEventHandler;
-        this._useGPSForCurrentLocation = useGPSForCurrentLocation;
+        this._useGPSForCurrentLocation = settings.useGPSForCurrentLocation;
         this._userLocation = userLocation;
 
         this._buildSubSettingsCurrentLocation();
@@ -40,6 +43,7 @@ export class SubSettingsCurrentLocationTemplate {
             'setCurrentLocationInput',
             'Set Location',
             'e.g. Hill Valley, California, USA',
+            this._useGPSForCurrentLocation,
             this._setCurrentLocationEventHandler
         ).html);
 
@@ -48,12 +52,11 @@ export class SubSettingsCurrentLocationTemplate {
             address: this._userLocation.address.formattedAddress,
         };
 
-        this._subSettingsCurrentLocation.appendChild(new LocationInfoTemplate(locationDetails, 'currentLocationDetails', '--user-location').html);
-
-        if (this._useGPSForCurrentLocation) {
-            const searchInput = this._subSettingsCurrentLocation.querySelector('zooduck-input') as HTMLElement;
-            searchInput.setAttribute('disabled', '');
-        }
+        this._subSettingsCurrentLocation.appendChild(new LocationInfoTemplate(
+            locationDetails,
+            'currentLocationDetails',
+            '--user-location'
+        ).html);
     }
 
     public get html(): HTMLElement {

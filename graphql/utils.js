@@ -10,7 +10,6 @@ const escapeSpecialChars = (query) => {
     return queryEscaped;
 };
 
-
 const filterHourlyData = (hourlyData, dailyData, timezone) => {
     const filteredHourlyData = hourlyData.filter((hourlyItem) => {
         const requiredInterval = getDaylightHoursIntervalFromHourlyData(hourlyItem, dailyData, timezone);

@@ -29,11 +29,11 @@ export class ForecastTemplate {
             hourly,
         } = this._dayForecast;
 
-        const hourlyStandard = hourly.filter((hour: HourlyData) => {
+        const hourlyData = hourly.filter((hour: HourlyData) => {
             return this._forecastHours.includes((parseInt(hour.timeString, 10)));
         });
 
-        const hours = hourlyStandard.map((hour: HourlyData) => {
+        const hours = hourlyData.map((hour: HourlyData) => {
             const isDaylight = this._isDaylight(sunriseTime, sunsetTime, hour.time);
 
             return new ForecastHourTemplate(hour, isDaylight).html;

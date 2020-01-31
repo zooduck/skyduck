@@ -1,19 +1,20 @@
 import { wait } from './wait/wait';
 import { DateTime } from 'luxon';
 import { LatLonSpin } from './lat-lon-spin';
-import { LoaderMessageElements, DailyForecast, SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { LoaderInfoElements, DailyForecast } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { StateAPotamus } from '../state/stateapotamus';
 
 export const setLoaderInfoDisplay = async function setLoaderInfoDisplay(
     forecast: DailyForecast,
-    clubData: SkydiveClub,
-    loaderMessageElements: LoaderMessageElements): Promise<void> {
+    loaderInfoElements: LoaderInfoElements): Promise<void> {
+    const { currentClub } = StateAPotamus.getState();
     const { weather, formattedAddress, countryRegion } = forecast;
     const { latitude, longitude, timezone } = weather;
     const delayBetweenInfoMessages = 500;
     const latLonSpin = new LatLonSpin();
 
-    const place = clubData
-        ? clubData.place
+    const place = currentClub
+        ? currentClub.place
         : `${formattedAddress},${countryRegion}`;
 
     const {
@@ -22,7 +23,11 @@ export const setLoaderInfoDisplay = async function setLoaderInfoDisplay(
         loaderInfoPlace,
         loaderInfoIANA,
         loaderInfoLocalTime,
-    } = loaderMessageElements;
+    } = loaderInfoElements;
+
+    const locationTime = DateTime.local()
+        .setZone(timezone)
+        .toLocaleString(DateTime.TIME_24_SIMPLE);
 
     latLonSpin.apply(loaderInfoLat, 'Lat:&nbsp;');
     await wait(delayBetweenInfoMessages);
@@ -37,10 +42,6 @@ export const setLoaderInfoDisplay = async function setLoaderInfoDisplay(
 
     loaderInfoIANA.innerHTML = `${timezone}`;
     await wait(delayBetweenInfoMessages);
-
-    const locationTime = DateTime.local()
-        .setZone(timezone)
-        .toLocaleString(DateTime.TIME_24_SIMPLE);
 
     loaderInfoLocalTime.innerHTML = `Local Time: ${locationTime}`;
     await wait(delayBetweenInfoMessages);

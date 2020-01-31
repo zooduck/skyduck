@@ -82,6 +82,14 @@ export interface DarkSkyWeather {
     hourly: Hourly;
 }
 
+export interface EventHandlers {
+    onClubChangeHandler: CallableFunction;
+    onClubListCarouselSlideChangeHandler: CallableFunction;
+    onForecastCarouselSlideChangeHandler: CallableFunction;
+    toggleSettingsHandler: CallableFunction;
+    toggleSubSettingsHandler: CallableFunction;
+}
+
 export type ForecastType = 'standard'|'extended';
 
 export interface FormattedWeather {
@@ -138,6 +146,10 @@ export interface HTMLZooduckCarouselElement extends HTMLElement {
     updateCarouselHeight: any;
 }
 
+export interface HTMLZooduckInputElement extends HTMLElement {
+    disabled: boolean;
+}
+
 export interface ImageMap {
     'clear-day': string,
     'clear-night': string;
@@ -151,7 +163,7 @@ export interface ImageMap {
     wind: string;
 }
 
-export type LoaderMessageElements = {
+export type LoaderInfoElements = {
     [key: string]: HTMLElement;
 }
 
@@ -188,12 +200,24 @@ export interface SetContentOptions {
 export interface Settings {
     activeCarousel: ActiveCarousel;
     forecastDisplayMode: ForecastType;
-    locationDetails: LocationDetails;
     useGPSForCurrentLocation: boolean;
 }
 
+export interface SettingsPageEventHandlers {
+    getForecastForCurrentLocationHandler: CallableFunction;
+    onLocationChangeHandler: CallableFunction;
+    toggleForecastDisplayModeHandler: CallableFunction;
+    toggleActiveCarouselHandler: CallableFunction;
+    toggleLocationSettingsHandler: CallableFunction;
+}
+
 export interface SubSettings {
-    locationSettings: string;
+    LOCATION_SETTINGS: string;
+}
+
+export interface SubSettingsLocationSettingsEventHandlers {
+    setCurrentLocationHandler: CallableFunction;
+    toggleUseGPSForCurrentLocationHandler: CallableFunction;
 }
 
 export interface SkydiveClub {
@@ -209,31 +233,66 @@ export interface SkydiveClub {
 }
 
 export interface State {
+    club: string;
+    clubs: SkydiveClub[];
+    clubsSortedByCountry: ClubListsSortedByCountry;
+    clubCountries: string[];
+    currentClub: SkydiveClub;
     currentClubListCountry: string;
     currentForecastSlide: number;
     currentSubSettings: string;
-    hasLoaded: boolean;
-    headerTitle: string;
-    isLoading: boolean;
+    error: string;
+    forecast: DailyForecast;
+    geocodeData: GeocodeData;
     googleMapsKey: string;
+    hasLoaded: boolean;
+    headerSubTitle: string;
+    headerTitle: string;
+    imagesReady: boolean;
+    isLoading: boolean;
+    location:  string;
+    locationDetails: LocationDetails;
+    nearestClub: SkydiveClub;
+    position: Position;
     settings: Settings;
     settingsActive: boolean;
+    setupStarted: boolean;
     subSettingsActive: boolean;
     userDeniedGeolocation: boolean;
     userLocation: GeocodeData;
     version: string;
 }
 
-export interface StateChangeHandlers {
-    activeCarousel: any;
-    currentForecastSlide: any;
-    currentSubSettings: any;
-    forecastDisplayMode: any;
-    headerTitle: any;
-    locationDetails: any;
-    settingsActive: any;
-    subSettingsActive: any;
-    userLocation: any;
+export interface StateActions {
+    CLEAR_ERROR: CallableFunction;
+    CLUB_CHANGE: CallableFunction;
+    CLUB_LIST_CAROUSEL_SLIDE_CHANGE: CallableFunction;
+    ERROR: CallableFunction;
+    FORECAST_CAROUSEL_SLIDE_CHANGE: CallableFunction;
+    GEOCODE_DATA_CHANGE: CallableFunction;
+    GET_FORECAST_BY_CLUB: CallableFunction;
+    GET_FORECAST_BY_LOCATION: CallableFunction;
+    HAS_LOADED: CallableFunction;
+    IMAGES_READY: CallableFunction;
+    LOCATION_CHANGE: CallableFunction;
+    LOCATION_DETAILS_CHANGE: CallableFunction;
+    NEAREST_CLUB_CHANGE: CallableFunction;
+    TOGGLE_ACTIVE_CAROUSEL: CallableFunction;
+    TOGGLE_FORECAST_DISPLAY_MODE: CallableFunction;
+    TOGGLE_SETTINGS: CallableFunction;
+    TOGGLE_SUB_SETTINGS: CallableFunction;
+    TOGGLE_SUB_SETTINGS_LOCATION_SETTINGS: CallableFunction;
+    TOGGLE_USE_GPS_FOR_CURRENT_LOCATION: CallableFunction;
+    USER_LOCATION_CHANGE: CallableFunction;
+    SET_CLUBS: CallableFunction;
+    SET_CURRENT_CLUB: CallableFunction;
+    SET_LOADED: CallableFunction;
+    SET_LOADING:CallableFunction;
+    SET_POSITION: CallableFunction;
+    SET_READY: CallableFunction;
+    SETUP: CallableFunction;
+    SORT_CLUBS: CallableFunction;
+    USER_DENIED_GEOLOCATION: CallableFunction;
 }
 
 export type ToggleState = 'on'|'off';

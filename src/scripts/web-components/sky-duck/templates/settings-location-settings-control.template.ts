@@ -1,7 +1,10 @@
 export class LocationSettingsControlTemplate {
+    private _eventHandler: CallableFunction;
     private _locationSettingsControl: HTMLElement;
 
-    constructor() {
+    constructor(eventHandler?: CallableFunction) {
+        this._eventHandler = eventHandler;
+
         this._buildSettingsSetCurrentLocationControl();
     }
 
@@ -15,6 +18,14 @@ export class LocationSettingsControlTemplate {
                 </div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
+
+        if (!this._eventHandler) {
+            return;
+        }
+
+        this._locationSettingsControl.addEventListener('click', (e: Event) => {
+            this._eventHandler(e);
+        });
     }
 
     public get html(): HTMLElement {

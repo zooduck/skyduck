@@ -2,5 +2,5 @@
 import { SubSettings } from '../interfaces/index';
 
 export const subSettings: SubSettings = {
-    locationSettings: 'LOCATION_SETTINGS',
+    LOCATION_SETTINGS: 'LOCATION_SETTINGS',
 };

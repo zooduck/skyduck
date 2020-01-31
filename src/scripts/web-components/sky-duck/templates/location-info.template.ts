@@ -8,7 +8,10 @@ export class LocationInfoTemplate {
     private _locationDetails: LocationDetails;
     private _locationInfo: HTMLElement;
 
-    constructor(locationDetails: LocationDetails, id?: string, className?: string) {
+    constructor(
+        locationDetails: LocationDetails,
+        id?: string,
+        className?: string) {
         this._locationDetails = locationDetails;
         this._id = id;
         this._className = className || '';
@@ -48,7 +51,7 @@ export class LocationInfoTemplate {
         `, 'text/html').body.firstChild as HTMLElement;
 
         if (this._id) {
-            this._locationInfo.setAttribute('id', this._id);
+            this._locationInfo.id = this._id;
         }
     }
 

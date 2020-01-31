@@ -2,10 +2,12 @@
 import { GeocodeData } from '../interfaces/index';
 
 export class UseCurrentLocationControlTemplate {
+    private _eventHandler: CallableFunction;
     private _useCurrentLocationControl: HTMLElement;
     private _userLocation: GeocodeData;
 
-    constructor(userLocation: GeocodeData) {
+    constructor(userLocation: GeocodeData, eventHandler?: CallableFunction) {
+        this._eventHandler = eventHandler;
         this._userLocation = userLocation;
 
         this._buildSettingsUseCurrentLocationControl();
@@ -27,6 +29,14 @@ export class UseCurrentLocationControlTemplate {
                 </zooduck-icon-location>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
+
+        if (!this._eventHandler) {
+            return;
+        }
+
+        this._useCurrentLocationControl.addEventListener('click', (e: Event) => {
+            this._eventHandler(e);
+        });
     }
 
     public get html(): HTMLElement {

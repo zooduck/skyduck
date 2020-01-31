@@ -3,14 +3,25 @@ import { LocationInfoTemplate } from './location-info.template';
 import { SettingsToggleTemplate } from './settings-toggle.template';
 import { SearchTemplate } from './settings-search.template';
 import { GeolocationErrorTemplate } from './geolocation-error.template';
-import { Settings, GeocodeData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { Settings, GeocodeData, SettingsPageEventHandlers, LocationDetails, SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { UseCurrentLocationControlTemplate } from './settings-use-current-location-control.template';
 import { NotFoundTemplate } from './not-found.template';
 import { LocationSettingsControlTemplate } from './settings-location-settings-control.template';
+import { StateAPotamus } from '../state/stateapotamus';
 
 export class SettingsTemplate {
+    private _ACTIVE_CAROUSEL_SETTING_ID: string;
+    private _FORECAST_DISPLAY_MODE_SETTING_ID: string;
+    private _GOOGLE_MAP_ID: string;
+    private _LOCATION_INFO_ID: string;
+    private _LOCATION_SEARCH_INPUT_ID: string;
+    private _SET_CURRENT_LOCATION_SETTING_ID: string;
+    private _USE_CURRENT_LOCATION_SETTING_ID: string;
+
+    private _clubs: SkydiveClub[];
     private _geolocationError: HTMLElement;
     private _googleMapsKey: string;
+    private _locationDetails: LocationDetails;
     private _locationInfo: HTMLElement;
     private _map: HTMLElement;
     private _activeCarouselToggle: HTMLElement;
@@ -18,14 +29,28 @@ export class SettingsTemplate {
     private _search: HTMLElement;
     private _settings: Settings;
     private _settingsPage: HTMLElement;
+    private _settingsPageEventHandlers: SettingsPageEventHandlers;
     private _setCurrentLocationControl: HTMLElement;
     private _useCurrentLocationControl: HTMLElement;
     private _userDeniedGeolocation: boolean;
     private _userLocation: GeocodeData;
 
-    constructor(googleMapsKey: string, settings: Settings, userLocation: GeocodeData, userDeniedGeolocation: boolean) {
+    constructor(settingsPageEventHandlers: SettingsPageEventHandlers) {
+        const { clubs, googleMapsKey, settings, locationDetails, userLocation, userDeniedGeolocation } = StateAPotamus.getState();
+
+        this._ACTIVE_CAROUSEL_SETTING_ID = 'activeCarouselSetting';
+        this._GOOGLE_MAP_ID = 'map';
+        this._FORECAST_DISPLAY_MODE_SETTING_ID = 'forecastDisplayModeSetting';
+        this._LOCATION_INFO_ID = 'locationInfo';
+        this._LOCATION_SEARCH_INPUT_ID = 'locationSearchInput';
+        this._SET_CURRENT_LOCATION_SETTING_ID = 'setCurrentLocationSetting';
+        this._USE_CURRENT_LOCATION_SETTING_ID = 'useCurrentLocationSetting';
+
+        this._clubs = clubs;
         this._googleMapsKey = googleMapsKey;
+        this._locationDetails = locationDetails;
         this._settings = settings;
+        this._settingsPageEventHandlers = settingsPageEventHandlers;
         this._userLocation = userLocation;
         this._userDeniedGeolocation = userDeniedGeolocation;
 
@@ -41,18 +66,10 @@ export class SettingsTemplate {
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
-        this._geolocationError = new GeolocationErrorTemplate().html;
-
-        const { locationDetails } = this._settings;
-
-        if (!locationDetails.name) {
-            this._map = new NotFoundTemplate('COORDS_FOR_MAP_NOT_FOUND', 'map').html;
-            this._locationInfo = new NotFoundTemplate('LOCATION_DETAILS_NOT_FOUND', 'locationInfo').html;
-        } else {
-            this._map = new GoogleMapTemplate(this._googleMapsKey, locationDetails.coords).html;
-            this._locationInfo = new LocationInfoTemplate(locationDetails, 'locationInfo').html;
-        }
-        this._search = new SearchTemplate('searchInput', 'Location Search', 'e.g. Perris, CA 92570, USA').html;
+        this._geolocationError = this._buildGeolocationError();
+        this._map = this._buildMap();
+        this._locationInfo = this._buildLocationInfo();
+        this._search = this._buildLocationSearchInput();
         this._extendedForecastToggle = this._buildExtendedForecastToggle();
         this._activeCarouselToggle = this._buildActiveCarouselToggle();
         this._useCurrentLocationControl = this._buildUseCurrentLocationControl();
@@ -69,46 +86,104 @@ export class SettingsTemplate {
         settingsGrid.appendChild(this._locationInfo);
         settingsGrid.appendChild(this._extendedForecastToggle);
         settingsGrid.appendChild(this._activeCarouselToggle);
-
-        if (this._userDeniedGeolocation) {
-            return;
-        }
-
         settingsGrid.appendChild(this._useCurrentLocationControl);
         settingsGrid.appendChild(this._setCurrentLocationControl);
     }
 
     private _buildActiveCarouselToggle(): HTMLElement {
+        if (!this._clubs) {
+            return new NotFoundTemplate('CLUBS_NOT_FOUND', this._ACTIVE_CAROUSEL_SETTING_ID).html;
+        }
+
         const toggleState = this._settings.activeCarousel === 'club-list'
             ? 'on'
             : 'off';
 
         const [id, desc] = [
-            'activeCarouselSetting',
+            this._ACTIVE_CAROUSEL_SETTING_ID,
             'View Clubs',
         ];
 
-        return new SettingsToggleTemplate(id, desc, toggleState).html;
+        const eventHandler = this._settingsPageEventHandlers.toggleActiveCarouselHandler;
+
+        return new SettingsToggleTemplate(
+            id,
+            desc,
+            toggleState,
+            eventHandler
+        ).html;
     }
 
     private _buildExtendedForecastToggle(): HTMLElement {
         const toggleState = this._settings.forecastDisplayMode === 'extended'
             ? 'on'
             : 'off';
+
         const [id, desc] = [
-            'forecastDisplayModeSetting',
+            this._FORECAST_DISPLAY_MODE_SETTING_ID,
             'Hourly Forecast',
         ];
 
-        return new SettingsToggleTemplate(id, desc, toggleState).html;
+        const eventHandler =  this._settingsPageEventHandlers.toggleForecastDisplayModeHandler;
+
+        return new SettingsToggleTemplate(
+            id,
+            desc,
+            toggleState,
+            eventHandler
+        ).html;
+    }
+
+    private _buildGeolocationError(): HTMLElement {
+        return new GeolocationErrorTemplate().html;
     }
 
     private _buildLocationSettingsControl(): HTMLElement {
-        return new LocationSettingsControlTemplate().html;
+        if (!this._userLocation) {
+            return new NotFoundTemplate('USER_LOCATION_NOT_FOUND', this._SET_CURRENT_LOCATION_SETTING_ID).html;
+        }
+
+        const eventHandler = this._settingsPageEventHandlers.toggleLocationSettingsHandler;
+
+        return new LocationSettingsControlTemplate(eventHandler).html;
+    }
+
+    private _buildMap(): HTMLElement {
+        if (!this._locationDetails.name) {
+            return new NotFoundTemplate('COORDS_FOR_MAP_NOT_FOUND', this._GOOGLE_MAP_ID).html;
+        }
+
+        return new GoogleMapTemplate(this._googleMapsKey, this._locationDetails.coords).html;
+    }
+
+    private _buildLocationInfo(): HTMLElement {
+        if (!this._locationDetails.name) {
+            return new NotFoundTemplate('LOCATION_DETAILS_NOT_FOUND', this._LOCATION_INFO_ID).html;
+        }
+
+        return new LocationInfoTemplate(this._locationDetails, this._LOCATION_INFO_ID).html;
+    }
+
+    private _buildLocationSearchInput(): HTMLElement {
+        const eventHandler =  this._settingsPageEventHandlers.onLocationChangeHandler;
+
+        return new SearchTemplate(
+            this._LOCATION_SEARCH_INPUT_ID,
+            'Location Search',
+            'e.g. Perris, CA 92570, USA',
+            false,
+            eventHandler
+        ).html;
     }
 
     private _buildUseCurrentLocationControl(): HTMLElement {
-        return new UseCurrentLocationControlTemplate(this._userLocation).html;
+        if (!this._userLocation) {
+            return new NotFoundTemplate('USER_LOCATION_NOT_FOUND', this._USE_CURRENT_LOCATION_SETTING_ID).html;
+        }
+
+        const eventHandler = this._settingsPageEventHandlers.getForecastForCurrentLocationHandler;
+
+        return new UseCurrentLocationControlTemplate(this._userLocation, eventHandler).html;
     }
 
     public get activeCarouselToggle(): HTMLElement {

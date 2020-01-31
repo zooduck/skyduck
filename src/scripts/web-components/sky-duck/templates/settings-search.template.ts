@@ -1,15 +1,21 @@
 export class SearchTemplate {
-    private _eventHandler: any;
+    private _disabled: boolean;
+    private _eventHandler: CallableFunction;
     private _search: HTMLElement;
     private _id: string;
     private _label: string;
     private _placeholder: string;
 
-    constructor(id: string, label?: string, placeholder?: string, eventHandler?: any) {
-        this._eventHandler = eventHandler || function () {};
+    constructor(
+        id: string, label?:
+        string, placeholder?:
+        string, disabled = false,
+        eventHandler?: CallableFunction) {
         this._id = id;
         this._label = label || '';
         this._placeholder = placeholder || '';
+        this._disabled = disabled;
+        this._eventHandler = eventHandler || function () {};
 
         this._buildSearch();
     }
@@ -20,10 +26,15 @@ export class SearchTemplate {
                 <zooduck-input
                     id="${this._id}"
                     label="${this._label}"
-                    placeholder="${this._placeholder}">
+                    placeholder="${this._placeholder}"
+                    ${this._disabled ? 'disabled' : ''}>
                 </zooduck-input>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
+
+        if (!this._eventHandler) {
+            return;
+        }
 
         this._search.querySelector('zooduck-input').addEventListener('keyup:enter', (e: CustomEvent) => {
             this._eventHandler(e);

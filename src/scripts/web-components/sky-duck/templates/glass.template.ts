@@ -1,9 +1,14 @@
 export class GlassTemplate {
     private _className: string;
+    private _eventHandler: CallableFunction;
     private _glass: HTMLElement;
     private _id: string;
 
-    constructor(id: string, className: string) {
+    constructor(
+        id: string,
+        className: string,
+        eventHandler?: CallableFunction) {
+        this._eventHandler = eventHandler;
         this._id = id;
         this._className = className;
 
@@ -17,6 +22,14 @@ export class GlassTemplate {
                 id="${this._id}">
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
+
+        if (!this._eventHandler) {
+            return;
+        }
+
+        this._glass.addEventListener('click', (e: Event) => {
+            this._eventHandler(e);
+        });
     }
 
     public get html(): HTMLElement {

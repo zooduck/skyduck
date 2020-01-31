@@ -1,0 +1,57 @@
+import { State } from '../interfaces/index'; //  eslint-disable-line no-unused-vars
+
+export const state: State = {
+    club: '',
+    clubs: null,
+    clubsSortedByCountry: null,
+    clubCountries: [],
+    currentClub: null,
+    currentClubListCountry: '',
+    currentForecastSlide: 1,
+    currentSubSettings: '',
+    error: null,
+    forecast: null,
+    geocodeData: {
+        query: '',
+        name: '',
+        address: {
+            addressLine: '',
+            adminDistrict: '',
+            countryRegion: '',
+            formattedAddress: '',
+            locality: '',
+            postalCode: '',
+        },
+        latitude: null,
+        longitude: null,
+    },
+    googleMapsKey: '',
+    hasLoaded: false,
+    headerSubTitle: '',
+    headerTitle: '',
+    imagesReady: false,
+    isLoading: false,
+    location: '',
+    locationDetails: {
+        name: '',
+        address: '',
+        timezone: '',
+        coords: {
+            latitude: null,
+            longitude: null,
+        }
+    },
+    nearestClub: null,
+    position: null,
+    settings: {
+        activeCarousel: 'forecast',
+        forecastDisplayMode: 'standard',
+        useGPSForCurrentLocation: true,
+    },
+    settingsActive: false,
+    setupStarted: false,
+    subSettingsActive: false,
+    userDeniedGeolocation: false,
+    userLocation: null,
+    version: '',
+};

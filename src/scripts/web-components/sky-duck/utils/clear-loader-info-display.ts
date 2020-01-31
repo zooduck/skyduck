@@ -1,13 +1,13 @@
-import { LoaderMessageElements } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { LoaderInfoElements } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
-export const clearLoaderInfoDisplay = function clearLoaderInfoDisplay(loaderMessageElements: LoaderMessageElements) {
+export const clearLoaderInfoDisplay = function clearLoaderInfoDisplay(loaderInfoElements: LoaderInfoElements) {
     const {
         loaderInfoLat,
         loaderInfoLon,
         loaderInfoPlace,
         loaderInfoIANA,
         loaderInfoLocalTime,
-    } = loaderMessageElements;
+    } = loaderInfoElements;
 
     [
         loaderInfoLat,

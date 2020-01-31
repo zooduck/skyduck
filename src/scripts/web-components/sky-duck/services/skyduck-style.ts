@@ -12,6 +12,7 @@ export class SkyduckStyle {
     constructor(styleOptions: StyleOptions) {
         this._backgroundImageForMesh = backgroundImageForMesh();
         this._styleOptions = styleOptions;
+
         this._buildStyle();
     }
 
@@ -73,6 +74,13 @@ export class SkyduckStyle {
                 color: var(--black);
 
                 --max-width: 823px;
+
+                --header-z-index: 1;
+                --settings-glass-z-index: 97;
+                --settings-z-index: 98;
+                --sub-settings-glass-z-index: 99;
+                --sub-settings-z-index: 100;
+                --loader-z-index: 101;
 
                 --font-size-base: 16px;
                 --slide-selectors-height: 40px;
@@ -137,13 +145,16 @@ export class SkyduckStyle {
             a:hover {
                 text-decoration: underline;
             }
+            zooduck-carousel {
+                transition: none;
+            }
 
             .loader {
                 display: none;
                 position: fixed;
                 left: 0;
                 top: 0;
-                z-index: 99;
+                z-index: var(--loader-z-index);
                 grid-template-rows: 1fr auto 1fr;
                 grid-gap: 50px;
                 justify-content: center;
@@ -221,7 +232,7 @@ export class SkyduckStyle {
 
             .header {
                 position: fixed;
-                z-index: 9;
+                z-index: var(--header-z-index);
                 left: 0;
                 top: 0;
                 max-width: var(--max-width);
@@ -265,6 +276,23 @@ export class SkyduckStyle {
                 align-self: start;
             }
 
+            .header-title {
+                display: grid;
+                grid-template-rows: repeat(2, auto);
+
+                grid-column: 3;
+                font-size: 1.5em;
+                font-weight: bold;
+            }
+            .header-title__item {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .header-title__item.--sub-title {
+                font-size: 70%;
+            }
+
             .header-placeholder {
                 display: block;
                 width: 100%;
@@ -288,17 +316,17 @@ export class SkyduckStyle {
             }
             :host(.--settings-active) .glass.--settings {
                 display: block;
-                z-index: 97;
+                z-index: var(--settings-glass-z-index);
             }
             :host(.--sub-settings-active) .glass.--sub-settings {
                 display: block;
-                z-index: 98;
+                z-index: var(--sub-settings-glass-z-index);
             }
 
             .settings,
             .sub-settings {
                 position: absolute;
-                z-index: 98;
+                z-index: var(--settings-z-index);
                 left: 0;
                 top: 0;
                 width: calc(100vw - 50px);
@@ -346,6 +374,7 @@ export class SkyduckStyle {
             }
 
             .sub-settings {
+                z-index: var(--sub-settings-z-index);
                 left: auto;
                 right: 0;
                 transform: translateX(100%);

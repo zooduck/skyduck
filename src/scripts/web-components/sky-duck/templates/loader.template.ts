@@ -1,16 +1,10 @@
-interface InfoElements {
-    [key: string]: HTMLElement;
-}
-
 export class LoaderTemplate {
     private _loader: HTMLElement;
-    private _infoElements: InfoElements;
     private _spinner: HTMLElement;
 
     constructor() {
         this._buildSpinner();
         this._buildLoader();
-        this._setIds();
     }
 
     private _buildLoader(): void {
@@ -55,21 +49,7 @@ export class LoaderTemplate {
         `, 'text/html').body.firstChild as HTMLElement;
     }
 
-    private _setIds(): void {
-        this._infoElements = {
-            loaderInfoLat: this._loader.querySelector('#loaderInfoLat'),
-            loaderInfoLon: this._loader.querySelector('#loaderInfoLon'),
-            loaderInfoPlace: this._loader.querySelector('#loaderInfoPlace'),
-            loaderInfoIANA: this._loader.querySelector('#loaderInfoIANA'),
-            loaderInfoLocalTime: this._loader.querySelector('#loaderInfoLocalTime'),
-        };
-    }
-
     public get html(): HTMLElement {
         return this._loader;
-    }
-
-    public get infoElements(): InfoElements {
-        return this._infoElements;
     }
 }
