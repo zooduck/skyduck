@@ -29,7 +29,6 @@ export class SkyduckWeather {
         return dailyData.map((dailyItem: any) => {
             return {
                 ...dailyItem,
-                // dateString: this._getTZDateString(dailyItem.time, timezone).substr(0, 5),
                 dateString: this._getTZDateString(dailyItem.time, timezone),
                 timeString: this._getTZTimeString(dailyItem.time, timezone),
                 sunriseTimeString: this._getTZTimeString(dailyItem.sunriseTime, timezone),
@@ -122,7 +121,7 @@ export class SkyduckWeather {
     private _getTZTimeString(timeInSeconds: number, timezone: string): string {
         const tzTime = this._getTZDateTime(timeInSeconds, timezone);
 
-        return tzTime.toLocaleString(DateTime.TIME_24_SIMPLE).split(':')[0];
+        return tzTime.toLocaleString(DateTime.TIME_24_SIMPLE);
     }
 
     private _formatDarkSkyData(weather: DarkSkyWeather, query: string): DailyForecast {

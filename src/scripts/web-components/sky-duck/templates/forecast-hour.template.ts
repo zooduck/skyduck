@@ -46,7 +46,7 @@ export class ForecastHourTemplate {
                 <div class="forecast-grid-hour__photo" style="${weatherPhotoStyle}"></div>
 
                 <h2 class="forecast-grid-hour-time-container">
-                    <span class="forecast-grid-hour-time-container__time ${averageRatingModifier}">${timeString}</span>
+                    <span class="forecast-grid-hour-time-container__time ${averageRatingModifier}">${timeString.split(':')[0]}</span>
                 </h2>
 
                 <h4 class="forecast-grid-hour__summary">${summary || ''}</h4>
