@@ -1,7 +1,6 @@
 import { SettingsTemplate } from '../templates/settings.template';
 import { StateAPotamus } from '../state/stateapotamus';
 import { settingsPageEventHandlers } from '../event-handlers/settings-page.event-handlers';
-import { wait } from './wait/wait';
 
 export const updateSettingsPage = async function updateSettingsPage(prop: string) {
     const settingsPage = this.shadowRoot.querySelector('#settings');
@@ -20,14 +19,10 @@ export const updateSettingsPage = async function updateSettingsPage(prop: string
 
         break;
     case 'activeCarousel':
-        await wait(this._transitionSpeedInMillis); // Let the toggle switch animation complete
-
         settingsPage.querySelector('#activeCarouselSetting').replaceWith(newSettings.activeCarouselToggle);
 
         break;
     case 'forecastDisplayMode':
-        await wait(this._transitionSpeedInMillis); // Let the toggle switch animation complete
-
         settingsPage.querySelector('#forecastDisplayModeSetting').replaceWith(newSettings.extendedForecastToggle);
 
         break;
