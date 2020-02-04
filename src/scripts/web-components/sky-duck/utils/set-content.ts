@@ -48,10 +48,11 @@ export const setContent = async function setContent() {
 
     if (!hasLoaded) {
         // Render once only
-        const { headerPlaceholder, header, clubList } = weatherElements;
+        const { headerPlaceholder, header, forecastHeader, clubList } = weatherElements;
 
         this.shadowRoot.appendChild(headerPlaceholder);
         this.shadowRoot.appendChild(header);
+        this.shadowRoot.appendChild(forecastHeader);
         this.shadowRoot.appendChild(clubList);
     }
 

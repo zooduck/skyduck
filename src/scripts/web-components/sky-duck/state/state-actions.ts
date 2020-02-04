@@ -26,6 +26,7 @@ import { getClubData } from '../utils/get-club-data';
 import { getLoaderInfoElements } from '../utils/get-loader-info-elements';
 import { setContent } from '../utils/set-content';
 import { subSettingsLocationSettingsEventHandlers } from '../event-handlers/sub-settings-location-settings.event-handlers';
+import { updateForecastHeader } from '../utils/update-forecast-header';
 
 export const stateActions = function stateActions(): StateActions {
     return {
@@ -92,7 +93,7 @@ export const stateActions = function stateActions(): StateActions {
             // Do nothing
         },
         FORECAST_CAROUSEL_SLIDE_CHANGE: () => {
-            const { currentForecastSlide } = StateAPotamus.getState();
+            const { currentForecastSlide, hasLoaded } = StateAPotamus.getState();
             [
                 this.shadowRoot.querySelector('#forecastCarouselStandard'),
                 this.shadowRoot.querySelector('#forecastCarouselExtended')
@@ -103,6 +104,12 @@ export const stateActions = function stateActions(): StateActions {
 
                 forecastCarousel.currentslide = currentForecastSlide;
             });
+
+            if (!hasLoaded) {
+                return;
+            }
+
+            updateForecastHeader.call(this);
         },
         GEOCODE_DATA_CHANGE: () => {
             // Do nothing

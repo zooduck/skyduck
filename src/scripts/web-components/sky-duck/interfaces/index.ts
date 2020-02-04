@@ -302,6 +302,7 @@ export interface WeatherElements {
     footer: HTMLElement;
     forecast: HTMLElement;
     forecastExtended: HTMLElement;
+    forecastHeader: HTMLElement;
     header: HTMLElement;
     headerPlaceholder: HTMLElement;
 }

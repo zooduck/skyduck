@@ -7,20 +7,17 @@ export class ForecastCarouselTemplate {
     private _eventHandler: CallableFunction;
     private _forecastHours: number[];
     private _forecastType: ForecastType;
-    private _timezone: string;
     private _forecastCarousel: HTMLZooduckCarouselElement;
 
     constructor(
         dailyData: DailyData[],
         forecastHours: number[],
         forecastType: ForecastType,
-        timezone: string,
         currentSlide: number,
         eventHandler?: CallableFunction) {
         this._dailyData = dailyData;
         this._forecastHours = forecastHours;
         this._forecastType = forecastType;
-        this._timezone = timezone;
         this._currentSlide = currentSlide;
         this._eventHandler = eventHandler;
 
@@ -50,7 +47,6 @@ export class ForecastCarouselTemplate {
                 dailyData,
                 this._forecastHours,
                 this._forecastType,
-                this._timezone
             ).html;
         });
 

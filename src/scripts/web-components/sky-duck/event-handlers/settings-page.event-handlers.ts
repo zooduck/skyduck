@@ -27,7 +27,7 @@ export const settingsPageEventHandlers = function settingsPageEventHandlers(): S
         if (StateAPotamus.getState().settings.activeCarousel === 'forecast') {
             activeCarousel = 'club-list';
             headerTitle = StateAPotamus.getState().currentClubListCountry;
-            headerSubTitle = '';
+            headerSubTitle = 'Dropzones';
         } else {
             activeCarousel = 'forecast';
             headerTitle = StateAPotamus.getState().locationDetails.name;

@@ -306,8 +306,8 @@ describe('zooduck-skyduck', () => {
                             //----------------------------------------------------------------
                             const forecastGridHeaderDay = await page.evaluate((el) => {
                                 return el.shadowRoot
-                                    .querySelector('#forecastCarouselStandard')
-                                    .querySelectorAll('.forecast-grid-header-date__day')[0].innerHTML;
+                                    .querySelector('#forecastHeader')
+                                    .querySelectorAll('.forecast-header-info-grid-date__day')[0].innerHTML;
                             }, el);
 
                             expect(forecastGridHeaderDay).toEqual(day);

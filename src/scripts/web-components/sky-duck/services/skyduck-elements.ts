@@ -15,6 +15,7 @@ import { ClubListCarouselTemplate } from '../templates/club-list-carousel.templa
 import { NotFoundTemplate } from '../templates/not-found.template';
 import { HeaderPlaceholderTemplate } from '../templates/header-placeholder.template';
 import { StateAPotamus } from '../state/stateapotamus';
+import { ForecastHeaderTemplate } from '../templates/forecast-header.template';
 /* eslint-enable */
 
 export class SkyduckElements {
@@ -86,12 +87,11 @@ export class SkyduckElements {
             return new NotFoundTemplate(this._FORECAST_NOT_FOUND).html;
         }
 
-        const { daily, timezone } = this._dailyForecast.weather;
+        const { data: dailyData } = this._dailyForecast.weather.daily;
         this._forecastCarousel = new ForecastCarouselTemplate(
-            daily.data,
+            dailyData,
             this._forecastHours,
             'standard',
-            timezone,
             this._currentForecastSlide,
             this._eventHandlers.onForecastCarouselSlideChangeHandler,
         ).html;
@@ -104,17 +104,24 @@ export class SkyduckElements {
             return new NotFoundTemplate(this._FORECAST_NOT_FOUND).html;
         }
 
-        const { daily, timezone } = this._dailyForecast.weather;
+        const { data: dailyData } = this._dailyForecast.weather.daily;
         this._forecastCarousel = new ForecastCarouselTemplate(
-            daily.data,
+            dailyData,
             this._forecastHoursExtended,
             'extended',
-            timezone,
             this._currentForecastSlide,
             this._eventHandlers.onForecastCarouselSlideChangeHandler,
         ).html;
 
         return this._forecastCarousel;
+    }
+
+    public get forecastHeader(): HTMLElement {
+        if (!this._dailyForecast) {
+            return new NotFoundTemplate(this._FORECAST_NOT_FOUND).html;
+        }
+
+        return new ForecastHeaderTemplate().html;
     }
 
     public get header(): HTMLElement {

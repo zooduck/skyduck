@@ -1,7 +1,5 @@
 import { HourlyData, DailyData, ForecastType } from '../interfaces/index'; // eslint-disable-line no-unused-vars
-import { DaylightHoursIndicatorTemplate } from './daylight-hours-indicator.template';
 import { ForecastHourTemplate } from './forecast-hour.template';
-import { ForecastGridHeaderTemplate } from './forecast-grid-header.template';
 import { DateTime, Interval } from 'luxon';
 
 export class ForecastTemplate {
@@ -9,13 +7,11 @@ export class ForecastTemplate {
     private _forecastHours: number[];
     private _forecast: HTMLElement;
     private _forecastType: ForecastType;
-    private _timezone: string;
 
-    constructor(dayForecast: DailyData, forecastHours: number[], forecastType: ForecastType, timezone: string) {
+    constructor(dayForecast: DailyData, forecastHours: number[], forecastType: ForecastType) {
         this._dayForecast = dayForecast;
         this._forecastHours = forecastHours;
         this._forecastType = forecastType;
-        this._timezone = timezone;
 
         this._buildForecast();
     }
@@ -23,9 +19,7 @@ export class ForecastTemplate {
     private _buildForecast(): void {
         const {
             sunriseTime,
-            sunriseTimeString,
             sunsetTime,
-            sunsetTimeString,
             hourly,
         } = this._dayForecast;
 
@@ -47,13 +41,7 @@ export class ForecastTemplate {
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
-        const forecastGridHeader = new ForecastGridHeaderTemplate(this._dayForecast, this._timezone).html;
-        const daylightHoursIndicator = new DaylightHoursIndicatorTemplate(sunriseTime, sunriseTimeString, sunsetTime, sunsetTimeString, this._timezone).html;
-
         const forecastGridHours = this._forecast.querySelector('.forecast-grid-hours');
-
-        this._forecast.insertBefore(forecastGridHeader, forecastGridHours);
-        this._forecast.insertBefore(daylightHoursIndicator, forecastGridHours);
 
         hours.forEach((hour: HTMLElement) => {
             forecastGridHours.appendChild(hour);

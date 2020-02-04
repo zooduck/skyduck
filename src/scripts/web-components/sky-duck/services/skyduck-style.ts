@@ -76,6 +76,7 @@ export class SkyduckStyle {
                 --max-width: 823px;
 
                 --header-z-index: 1;
+                --forecast-header-z-index: 1;
                 --settings-glass-z-index: 97;
                 --settings-z-index: 98;
                 --sub-settings-glass-z-index: 99;
@@ -85,6 +86,7 @@ export class SkyduckStyle {
                 --font-size-base: 16px;
                 --slide-selectors-height: 40px;
                 --header-height: 70px;
+                --forecast-header-height: 117px;
                 --footer-height: 40px;
 
                 --red: rgb(255, 99, 71, .8);
@@ -111,11 +113,6 @@ export class SkyduckStyle {
             }
             :host(.--settings-active) {
                 height: 100vh;
-            }
-            @media (max-width: 320px) {
-                :host {
-                    font-size: 14px;
-                }
             }
 
             * {
@@ -246,14 +243,6 @@ export class SkyduckStyle {
                 color: var(--white);
                 background-color: var(--lightskyblue);
             }
-            @media (min-width: 824px) {
-                .header {
-                    left: calc((100% - var(--max-width)) / 2);
-                }
-                .loader {
-                    left: calc((100% - var(--max-width)) / 2);
-                }
-            }
             .header__settings-control {
                grid-column: 1;
                align-self: start;
@@ -297,6 +286,9 @@ export class SkyduckStyle {
                 display: block;
                 width: 100%;
                 height: var(--header-height);
+            }
+            :host(.--active-carousel-forecast) .header-placeholder {
+                height: calc(var(--header-height) + var(--forecast-header-height));
             }
 
             #settingsToggle {
@@ -414,50 +406,60 @@ export class SkyduckStyle {
                 animation: none;
             }
 
-           .forecast-grid {
+            .forecast-header {
+                position: fixed;
+                left: 0;
+                top: 70px;
+                z-index: var(--forecast-header-z-index);
+                width: 100%;
+                max-width: var(--max-width);
+                max-height: var(--forecast-header-height);
                 display: grid;
-                grid-template-rows: repeat(2, 0fr) auto;
-                grid-row-gap: 10px;
-                min-height: calc(100vh - var(--header-height) - var(--footer-height));
-                padding: 10px;
+                grid-gap: 10px;
+                padding: 10px 10px 0 10px;
+                background-color: var(--white);
             }
-
-            .forecast-grid-header {
+            :host(:not(.--active-carousel-forecast)) .forecast-header {
+                display: none;
+            }
+            .forecast-header-info-grid {
                 display: grid;
                 grid-template-columns: 1fr auto;
-                grid-template-rows: repeat(2, auto);
                 grid-gap: 10px;
                 align-items: center;
                 border-left: solid 10px var(--lightgray);
             }
-            .forecast-grid-header.--red {
+            .forecast-header-info-grid.--red {
                 border-color: var(--red);
             }
-            .forecast-grid-header.--amber {
+            .forecast-header-info-grid.--amber {
                 border-color: orange;
             }
-            .forecast-grid-header.--green {
+            .forecast-header-info-grid.--green {
                 border-color: var(--green);
             }
-            .forecast-grid-header-date {
+            .forecast-header-info-grid-date {
                 display: flex;
                 align-items: center;
                 justify-content: left;
                 margin-left: 10px;
             }
-            .forecast-grid-header-date__date-string {
+            .forecast-header-info-grid-date__date-string {
                 margin-left: 5px;
             }
-            .forecast-grid-header__temp {
+            .forecast-header-info-grid__temperature {
                 display: block;
             }
-            .forecast-grid-header__temp h3 {
+            .forecast-header-info-grid__temperature h3 {
                 font-weight: normal;
             }
-            .forecast-grid-header__summary {
+            .forecast-header-info-grid__summary {
                 grid-row: 2;
                 grid-column: 1 / span 2;
                 margin-left: 10px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .daylight-hours-indicator {
@@ -480,11 +482,16 @@ export class SkyduckStyle {
                 background-color: var(--lightgray);
             }
 
+            .forecast-grid {
+                display: grid;
+                grid-row-gap: 10px;
+                min-height: calc(100vh - var(--header-height) - var(--forecast-header-height) - var(--footer-height));
+                padding: 10px;
+            }
             .forecast-grid-hours {
                 display: grid;
                 grid-row-gap: 5px;
             }
-
             .forecast-grid-hour {
                 position: relative;
                 display: grid;
@@ -518,7 +525,6 @@ export class SkyduckStyle {
                 grid-column: 1;
                 background-position: 40% center;
             }
-
             .forecast-grid-hour-time-container {
                 margin: 0 0 10px 10px;
                 background-color: var(--translucentwhite);
@@ -527,6 +533,8 @@ export class SkyduckStyle {
                 grid-row: 1;
                 padding: 10px;
                 justify-self: left;
+                display: flex;
+                align-items: flex-end;
             }
             .forecast-grid-hour-time-container__time {
                 border-bottom: solid 5px var(--lightgray);
@@ -694,6 +702,18 @@ export class SkyduckStyle {
                 }
                 .forecast-grid.--extended .forecast-data-grid {
                     background-color: transparent;
+                }
+            }
+
+            @media (min-width: 824px) {
+                .header {
+                    left: calc((100% - var(--max-width)) / 2);
+                }
+                .forecast-header {
+                    left: calc((100% - var(--max-width)) / 2);
+                }
+                .loader {
+                    left: calc((100% - var(--max-width)) / 2);
                 }
             }
         `;
