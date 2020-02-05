@@ -3,7 +3,7 @@ import { SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unu
 export const addClub = async (data: SkydiveClub) => {
     const method = 'POST';
 
-    const response = await fetch('/skydive_club', {
+    const response = await fetch('/skydive_club/add', {
         method,
         headers: {
             'Content-type': 'application/json'

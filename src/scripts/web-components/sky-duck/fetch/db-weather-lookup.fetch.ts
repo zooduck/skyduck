@@ -5,7 +5,7 @@ export const dbWeatherLookup = async (latitude: number, longitude: number): Prom
     const oneHourAgo = DateTime.local().minus({ hours: 1 }).toMillis();
 
     try {
-        const response = await fetch(`/weather?latitude=${latitude}&longitude=${longitude}`);
+        const response = await fetch(`/weather/find?latitude=${latitude}&longitude=${longitude}`);
 
         if (!response.ok) {
             throw(`(${response.status}) ${response.statusText}`);

@@ -263,6 +263,9 @@ export class SkyduckStyle {
             .header__version {
                 grid-column: 4;
                 align-self: start;
+                border: solid 1px var(--white);
+                padding: 5px;
+                font-size: .75em;
             }
 
             .header-title {

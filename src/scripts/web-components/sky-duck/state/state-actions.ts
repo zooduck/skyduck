@@ -141,8 +141,8 @@ export const stateActions = function stateActions(): StateActions {
         },
         GET_FORECAST_BY_LOCATION: () => {
             const site = '';
-            const { latitude, longitude, timezone, } = StateAPotamus.getState().forecast.weather;
-            const { countryRegion, formattedAddress, } = StateAPotamus.getState().forecast;
+            const { latitude, longitude, timezone } = StateAPotamus.getState().forecast.weather;
+            const { countryRegion, formattedAddress } = StateAPotamus.getState().forecast;
             const coords = {
                 latitude,
                 longitude,
@@ -157,7 +157,7 @@ export const stateActions = function stateActions(): StateActions {
             }
 
             const name = formattedAddressPieces[0];
-            const address = formattedAddressPieces.slice(1).join(',');
+            const address = formattedAddressPieces.slice(1).join(', ');
 
             StateAPotamus.dispatch('LOCATION_DETAILS_CHANGE', {
                 headerSubTitle: address,

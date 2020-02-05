@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-require('dotenv').config();
+const dotenv = require('dotenv');
 const axios = require('axios');
-const bingGeocodeEndpoint = 'http://dev.virtualearth.net/REST/v1/Locations/';
+const BING_GEOCODE_API = 'http://dev.virtualearth.net/REST/v1/Locations/';
 const fs = require('fs');
 const { DateTime } = require('luxon');
 const cache = require('./cache');
@@ -15,6 +15,8 @@ const httpStatusCodes = {
     CONFLICT: 409,
 };
 
+dotenv.config();
+
 let db;
 
 const root = {
@@ -25,7 +27,7 @@ const root = {
 };
 
 const connectPut = {
-    path: '/connect',
+    path: '/connect/update',
     callback: async (request, response) => {
         const { ip } = request;
         const { location } = request.query;
@@ -101,7 +103,7 @@ const connectPut = {
 const geocode = {
     path: '/geocode',
     callback: async (request, response) => {
-        axios.get(bingGeocodeEndpoint, {
+        axios.get(BING_GEOCODE_API, {
             params: {
                 key: process.env.BING_MAPS_KEY,
                 q: request.query.place,
@@ -118,7 +120,7 @@ const geocode = {
 const reverseGeocode = {
     path: '/reverse_geocode',
     callback: async (request, response) => {
-        axios.get(`${bingGeocodeEndpoint}/${request.query.point}`, {
+        axios.get(`${BING_GEOCODE_API}/${request.query.point}`, {
             params: {
                 key: process.env.BING_MAPS_KEY,
                 maxRes: 1,
@@ -153,7 +155,7 @@ const version = {
 };
 
 const weather = {
-    path: '/weather',
+    path: '/weather/find',
     callback: async (request, response) => {
         const query = {
             latitude: parseFloat(request.query.latitude),
@@ -179,7 +181,7 @@ const weather = {
 };
 
 const weatherPost = {
-    path: '/weather',
+    path: '/weather/add',
     callback: async (request, response) => {
         const doc = request.body;
         try {
@@ -193,7 +195,7 @@ const weatherPost = {
 };
 
 const weatherPut = {
-    path: '/weather',
+    path: '/weather/update',
     callback: async (request, response) =>  {
         const doc = request.body;
         const { requestTime, latitude, longitude, daily } = doc;
@@ -214,7 +216,7 @@ const weatherPut = {
 };
 
 const skydiveClubPost = {
-    path: '/skydive_club',
+    path: '/skydive_club/add',
     callback: async (request, response) => {
         const doc = request.body;
         try {
