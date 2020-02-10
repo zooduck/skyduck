@@ -126,7 +126,6 @@ export class SkyduckElements {
 
     public get header(): HTMLElement {
         return new HeaderTemplate(
-            this._version,
             this._locationDetails.name,
             this._locationDetails.address,
             this._eventHandlers.toggleSettingsHandler

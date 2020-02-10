@@ -99,6 +99,7 @@ export class SkyduckStyle {
                 --paleyellow: #fbfbaa;
                 --lightskyblue: lightskyblue;
                 --paleskyblue: rgba(135, 206, 250, .4);
+                --cornflowerblue: cornflowerblue;
                 --gray: #999;
                 --icongray: #ccc;
                 --lightgray: lightgray;
@@ -136,7 +137,7 @@ export class SkyduckStyle {
             }
 
             a {
-                color: cornflowerblue;
+                color: var(--cornflowerblue);
                 text-decoration: none;
             }
             a:hover {
@@ -242,6 +243,7 @@ export class SkyduckStyle {
                 padding: 10px;
                 color: var(--white);
                 background-color: var(--lightskyblue);
+                touch-action: none;
             }
             .header__settings-control {
                grid-column: 1;
@@ -259,13 +261,6 @@ export class SkyduckStyle {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-            }
-            .header__version {
-                grid-column: 4;
-                align-self: start;
-                border: solid 1px var(--white);
-                padding: 5px;
-                font-size: .75em;
             }
 
             .header-title {
@@ -341,13 +336,15 @@ export class SkyduckStyle {
                 display: grid;
                 grid-gap: 10px;
                 padding: 10px;
+                grid-template-rows: repeat(8, auto) 1fr;
+                min-height: 100vh;
             }
             .settings__control {
                 display: grid;
                 grid-template-columns: 1fr auto;
                 grid-gap: 10px;
                 align-items: center;
-                height: 55px;
+                min-height: 55px;
                 padding: 10px;
                 background-color: var(--whitesmoke);
             }
@@ -366,6 +363,11 @@ export class SkyduckStyle {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+            }
+            .settings__version-info {
+                align-self: end;
+                color: var(--gray);
+                font-size: .9em;
             }
 
             .sub-settings {
@@ -421,6 +423,7 @@ export class SkyduckStyle {
                 grid-gap: 10px;
                 padding: 10px 10px 0 10px;
                 background-color: var(--white);
+                touch-action: none;
             }
             :host(:not(.--active-carousel-forecast)) .forecast-header {
                 display: none;

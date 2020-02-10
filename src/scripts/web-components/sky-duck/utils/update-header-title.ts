@@ -3,7 +3,7 @@ import { generalEventHandlers } from '../event-handlers/general.event-handlers';
 import { HeaderTemplate } from '../templates/header.template';
 
 export const updateHeaderTitle = function updateHeaderTitle() {
-    const { version, headerTitle, headerSubTitle } = StateAPotamus.getState();
+    const { headerTitle, headerSubTitle } = StateAPotamus.getState();
 
     const header = this.shadowRoot.querySelector('#header');
 
@@ -14,7 +14,6 @@ export const updateHeaderTitle = function updateHeaderTitle() {
     const eventHandler = generalEventHandlers.call(this).toggleSettingsHandler;
 
     const newHeader = new HeaderTemplate(
-        version,
         headerTitle,
         headerSubTitle,
         eventHandler

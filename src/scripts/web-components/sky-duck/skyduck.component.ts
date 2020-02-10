@@ -214,7 +214,7 @@ class HTMLZooduckSkyduckElement extends HTMLElement {
         await this._initClubs();
 
         StateAPotamus.dispatch('SETUP', {
-            version: version.split('-')[0],
+            version,
             googleMapsKey,
             setupStarted: true,
         });

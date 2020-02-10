@@ -3,11 +3,20 @@ import { LocationInfoTemplate } from './location-info.template';
 import { SettingsToggleTemplate } from './settings-toggle.template';
 import { SearchTemplate } from './settings-search.template';
 import { GeolocationErrorTemplate } from './geolocation-error.template';
-import { Settings, GeocodeData, SettingsPageEventHandlers, LocationDetails, SkydiveClub } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+/* eslint-disable no-unused-vars */
+import {
+    Settings,
+    GeocodeData,
+    SettingsPageEventHandlers,
+    LocationDetails,
+    SkydiveClub
+} from '../interfaces/index';
+/* eslint-enable no-unused-vars */
 import { UseCurrentLocationControlTemplate } from './settings-use-current-location-control.template';
 import { NotFoundTemplate } from './not-found.template';
 import { LocationSettingsControlTemplate } from './settings-location-settings-control.template';
 import { StateAPotamus } from '../state/stateapotamus';
+import { SettingsVersionInfoTemplate } from './settings-version-info.template';
 
 export class SettingsTemplate {
     private _ACTIVE_CAROUSEL_SETTING_ID: string;
@@ -36,6 +45,7 @@ export class SettingsTemplate {
     private _useCurrentLocationControl: HTMLElement;
     private _userDeniedGeolocation: boolean;
     private _userLocation: GeocodeData;
+    private _versionInfo: HTMLElement;
 
     constructor(settingsPageEventHandlers: SettingsPageEventHandlers) {
         const { clubs, googleMapsKey, settings, locationDetails, userLocation, userDeniedGeolocation } = StateAPotamus.getState();
@@ -78,6 +88,7 @@ export class SettingsTemplate {
         this._useCurrentLocationControl = this._buildUseCurrentLocationControl();
         this._setCurrentLocationControl = this._buildLocationSettingsControl();
         this._includeNighttimeWeatherToggle = this._buildNighttimeWeatherToggle();
+        this._versionInfo = this._buildVersionInfo();
 
         const settingsGrid = this._settingsPage.querySelector('.settings-grid');
 
@@ -93,6 +104,7 @@ export class SettingsTemplate {
         settingsGrid.appendChild(this._activeCarouselToggle);
         settingsGrid.appendChild(this._useCurrentLocationControl);
         settingsGrid.appendChild(this._setCurrentLocationControl);
+        settingsGrid.appendChild(this._versionInfo);
     }
 
     private _buildActiveCarouselToggle(): HTMLElement {
@@ -221,6 +233,12 @@ export class SettingsTemplate {
         return new UseCurrentLocationControlTemplate(this._userLocation, eventHandler).html;
     }
 
+    private _buildVersionInfo(): HTMLElement {
+        const { version } = StateAPotamus.getState();
+
+        return new SettingsVersionInfoTemplate(version).html;
+    }
+
     public get activeCarouselToggle(): HTMLElement {
         return this._activeCarouselToggle;
     }
@@ -257,7 +275,11 @@ export class SettingsTemplate {
         return this._setCurrentLocationControl;
     }
 
-    public get useCurrentLocationControl():  HTMLElement {
+    public get useCurrentLocationControl(): HTMLElement {
         return this._useCurrentLocationControl;
+    }
+
+    public get versionInfo(): HTMLElement {
+        return this._versionInfo;
     }
 }

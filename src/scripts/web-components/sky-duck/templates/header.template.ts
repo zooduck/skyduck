@@ -3,17 +3,14 @@ export class HeaderTemplate {
     private _header: HTMLElement;
     private _subTitle: string;
     private _title: string;
-    private _version: string;
 
     constructor(
-        version: string,
         title: string,
         subTitle: string,
         eventHandler?: CallableFunction) {
         this._eventHandler = eventHandler;
         this._subTitle = subTitle || '';
         this._title = title || '';
-        this._version = version || '';
 
         this._buildHeader();
     }
@@ -41,7 +38,6 @@ export class HeaderTemplate {
                     <div class="header-title__item">${this._title}</div>
                     <div class="header-title__item --sub-title">${this._subTitle}</div>
                 </div>
-                <div class="header__version">${this._version}</div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
 
