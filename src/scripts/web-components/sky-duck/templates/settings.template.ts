@@ -13,6 +13,7 @@ export class SettingsTemplate {
     private _ACTIVE_CAROUSEL_SETTING_ID: string;
     private _FORECAST_DISPLAY_MODE_SETTING_ID: string;
     private _GOOGLE_MAP_ID: string;
+    private _INCLUDE_NIGHTTIME_WEATHER_SETTING_ID: string;
     private _LOCATION_INFO_ID: string;
     private _LOCATION_SEARCH_INPUT_ID: string;
     private _SET_CURRENT_LOCATION_SETTING_ID: string;
@@ -26,6 +27,7 @@ export class SettingsTemplate {
     private _map: HTMLElement;
     private _activeCarouselToggle: HTMLElement;
     private _extendedForecastToggle: HTMLElement;
+    private _includeNighttimeWeatherToggle: HTMLElement;
     private _search: HTMLElement;
     private _settings: Settings;
     private _settingsPage: HTMLElement;
@@ -41,6 +43,7 @@ export class SettingsTemplate {
         this._ACTIVE_CAROUSEL_SETTING_ID = 'activeCarouselSetting';
         this._GOOGLE_MAP_ID = 'map';
         this._FORECAST_DISPLAY_MODE_SETTING_ID = 'forecastDisplayModeSetting';
+        this._INCLUDE_NIGHTTIME_WEATHER_SETTING_ID = 'includeNighttimeWeatherSetting';
         this._LOCATION_INFO_ID = 'locationInfo';
         this._LOCATION_SEARCH_INPUT_ID = 'locationSearchInput';
         this._SET_CURRENT_LOCATION_SETTING_ID = 'setCurrentLocationSetting';
@@ -74,6 +77,7 @@ export class SettingsTemplate {
         this._activeCarouselToggle = this._buildActiveCarouselToggle();
         this._useCurrentLocationControl = this._buildUseCurrentLocationControl();
         this._setCurrentLocationControl = this._buildLocationSettingsControl();
+        this._includeNighttimeWeatherToggle = this._buildNighttimeWeatherToggle();
 
         const settingsGrid = this._settingsPage.querySelector('.settings-grid');
 
@@ -85,6 +89,7 @@ export class SettingsTemplate {
         settingsGrid.appendChild(this._map);
         settingsGrid.appendChild(this._locationInfo);
         settingsGrid.appendChild(this._extendedForecastToggle);
+        settingsGrid.appendChild(this._includeNighttimeWeatherToggle);
         settingsGrid.appendChild(this._activeCarouselToggle);
         settingsGrid.appendChild(this._useCurrentLocationControl);
         settingsGrid.appendChild(this._setCurrentLocationControl);
@@ -99,17 +104,20 @@ export class SettingsTemplate {
             ? 'on'
             : 'off';
 
-        const [id, desc] = [
+        const [id, title, subTitle] = [
             this._ACTIVE_CAROUSEL_SETTING_ID,
             'View Clubs',
+            '',
         ];
 
         const eventHandler = this._settingsPageEventHandlers.toggleActiveCarouselHandler;
 
         return new SettingsToggleTemplate(
             id,
-            desc,
+            title,
+            subTitle,
             toggleState,
+            false,
             eventHandler
         ).html;
     }
@@ -119,23 +127,50 @@ export class SettingsTemplate {
             ? 'on'
             : 'off';
 
-        const [id, desc] = [
+        const [id, title, subTitle] = [
             this._FORECAST_DISPLAY_MODE_SETTING_ID,
             'Hourly Forecast',
+            '',
         ];
 
         const eventHandler =  this._settingsPageEventHandlers.toggleForecastDisplayModeHandler;
 
         return new SettingsToggleTemplate(
             id,
-            desc,
+            title,
+            subTitle,
             toggleState,
+            false,
             eventHandler
         ).html;
     }
 
     private _buildGeolocationError(): HTMLElement {
         return new GeolocationErrorTemplate().html;
+    }
+
+    private _buildNighttimeWeatherToggle(): HTMLElement {
+        const toggleState = this._settings.includeNighttimeWeather
+            ? 'on'
+            : 'off';
+
+        const [id, title, subTitle] = [
+            this._INCLUDE_NIGHTTIME_WEATHER_SETTING_ID,
+            'Include night-time weather',
+            'Hourly Forecast only',
+        ];
+
+        const eventHandler =  this._settingsPageEventHandlers.toggleIncludeNighttimeWeatherHandler;
+        const disabled = this._settings.forecastDisplayMode !== 'extended';
+
+        return new SettingsToggleTemplate(
+            id,
+            title,
+            subTitle,
+            toggleState,
+            disabled,
+            eventHandler
+        ).html;
     }
 
     private _buildLocationSettingsControl(): HTMLElement {
@@ -200,6 +235,10 @@ export class SettingsTemplate {
 
     public get html(): HTMLElement {
         return this._settingsPage;
+    }
+
+    public get includeNighttimeWeatherToggle(): HTMLElement {
+        return this._includeNighttimeWeatherToggle;
     }
 
     public get locationInfo(): HTMLElement {

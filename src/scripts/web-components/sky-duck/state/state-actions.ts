@@ -59,8 +59,6 @@ export const stateActions = function stateActions(): StateActions {
                     error,
                 });
 
-                revertContentOnError.call(this);
-
                 return;
             }
 
@@ -75,11 +73,12 @@ export const stateActions = function stateActions(): StateActions {
                     error: null,
                 });
             } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error(err);
+
                 StateAPotamus.dispatch('ERROR', {
                     error: err,
                 });
-
-                revertContentOnError.call(this);
             }
         },
         CLUB_LIST_CAROUSEL_SLIDE_CHANGE: () => {
@@ -90,7 +89,7 @@ export const stateActions = function stateActions(): StateActions {
             updateHeaderTitle.call(this);
         },
         ERROR: () => {
-            // Do nothing
+            revertContentOnError.call(this);
         },
         FORECAST_CAROUSEL_SLIDE_CHANGE: () => {
             const { currentForecastSlide, hasLoaded } = StateAPotamus.getState();
@@ -185,7 +184,6 @@ export const stateActions = function stateActions(): StateActions {
             const { hasLoaded, isLoading, location } = StateAPotamus.getState();
 
             if (hasLoaded && isLoading) {
-                alert('has loaded and is loading');
                 return;
             }
 
@@ -208,8 +206,6 @@ export const stateActions = function stateActions(): StateActions {
                     StateAPotamus.dispatch('ERROR', {
                         error: err,
                     });
-
-                    revertContentOnError.call(this);
                 }
             }).catch((err) => {
                 StateAPotamus.dispatch('GEOCODE_DATA_CHANGE', {
@@ -219,8 +215,6 @@ export const stateActions = function stateActions(): StateActions {
                 StateAPotamus.dispatch('ERROR', {
                     error: err,
                 });
-
-                revertContentOnError.call(this);
             });
         },
         LOCATION_DETAILS_CHANGE: () => {
@@ -320,6 +314,25 @@ export const stateActions = function stateActions(): StateActions {
                 : this._modifierClasses.forecastDisplayModeStandard;
 
             this.classList.add(forecastDisplayModeModifierClass);
+
+            updateSettingsPage.call(this, 'includeNighttimeWeather');
+        },
+        TOGGLE_INCLUDE_NIGHTTIME_WEATHER: () => {
+            const { club, location } = StateAPotamus.getState();
+
+            this.classList.toggle(this._modifierClasses.includeNighttimeWeather);
+
+            if (club) {
+                StateAPotamus.dispatch('CLUB_CHANGE');
+
+                return;
+            }
+
+            if (location) {
+                StateAPotamus.dispatch('LOCATION_CHANGE');
+
+                return;
+            }
         },
         TOGGLE_SETTINGS: () => {
             this.classList.toggle(this._modifierClasses.settingsActive);

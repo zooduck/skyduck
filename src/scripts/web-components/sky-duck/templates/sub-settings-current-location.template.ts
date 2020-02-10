@@ -35,7 +35,9 @@ export class SubSettingsCurrentLocationTemplate {
         this._subSettingsCurrentLocation.appendChild(new SettingsToggleTemplate(
             'useGPSForCurrentLocationToggle',
             'Use GPS',
+            '',
             useGPSForCurrentLocationToggleState,
+            false,
             this._gpsToggleEventHandler
         ).html);
 

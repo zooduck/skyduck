@@ -4,10 +4,12 @@ const axios = require('axios');
 const BING_GEOCODE_API = 'http://dev.virtualearth.net/REST/v1/Locations/';
 const fs = require('fs');
 const { DateTime } = require('luxon');
+const { filterHourlyDataForDaylightHours } = require('./utils/index');
 const cache = require('./cache');
 const httpStatusCodes = {
     OK: 200,
     CREATED: 201,
+    NO_CONTENT: 204,
     BAD_REQUEST: 400,
     UNAUTHORISED: 401,
     FORBIDDEN: 403,
@@ -157,6 +159,7 @@ const version = {
 const weather = {
     path: '/weather/find',
     callback: async (request, response) => {
+        const { includeNighttimeWeather } = request.query;
         const query = {
             latitude: parseFloat(request.query.latitude),
             longitude: parseFloat(request.query.longitude),
@@ -168,25 +171,35 @@ const weather = {
         };
         try {
             const result = await db.collection('Weather').findOne(query, options);
-            if (result) {
-                response.status(httpStatusCodes.OK).send(JSON.stringify(result));
-            } else {
-                response.status(httpStatusCodes.NOT_FOUND).send(JSON.stringify({ error: 'Document not found' }));
-            }
-        } catch (err) {
-            console.error(err);
-            response.status(httpStatusCodes.BAD_REQUEST).send(err);
-        }
-    }
-};
 
-const weatherPost = {
-    path: '/weather/add',
-    callback: async (request, response) => {
-        const doc = request.body;
-        try {
-            await db.collection('Weather').insertOne(doc);
-            response.status(httpStatusCodes.CREATED).send(doc);
+            if (!result) {
+                response.status(httpStatusCodes.NOT_FOUND).send(JSON.stringify({ error: 'Document not found' }));
+
+                return;
+            }
+
+            let filteredResult = result;
+
+            if (includeNighttimeWeather === 'false') {
+                const dailyData = result.daily.data.map((dailyDataItem) => {
+                    const filteredHourlyData = filterHourlyDataForDaylightHours(dailyDataItem, result.timezone);
+
+                    return {
+                        ...dailyDataItem,
+                        hourly: filteredHourlyData,
+                    };
+                });
+
+                filteredResult = {
+                    ...result,
+                    daily: {
+                        ...result.daily,
+                        data: dailyData,
+                    },
+                };
+            }
+
+            response.status(httpStatusCodes.OK).send(JSON.stringify(filteredResult));
         } catch (err) {
             console.error(err);
             response.status(httpStatusCodes.BAD_REQUEST).send(err);
@@ -201,13 +214,22 @@ const weatherPut = {
         const { requestTime, latitude, longitude, daily } = doc;
 
         try {
+            await db.collection('Weather').insertOne(doc);
+            response.status(httpStatusCodes.CREATED).send(doc);
+
+            return;
+        } catch (err) {
+            // Collection already exists, continue...
+        }
+
+        try {
             await db.collection('Weather').updateOne({ latitude, longitude }, {
                 $set: {
                     daily,
                     requestTime,
                 }
             });
-            response.status(httpStatusCodes.CREATED).send(doc);
+            response.status(httpStatusCodes.OK).send(doc);
         } catch (err) {
             console.error(err);
             response.status(httpStatusCodes.BAD_REQUEST).send(err);
@@ -239,7 +261,6 @@ const routes = {
         weather,
     ],
     post: [
-        weatherPost,
         skydiveClubPost,
     ],
     put: [

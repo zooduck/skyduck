@@ -1,27 +1,26 @@
-import { DailyData } from '../interfaces/index'; // eslint-disable-line no-unused-vars
+import { DailyData, DailyForecast } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 import { averageRatingModifierForDay } from '../utils/average-rating-modifier-for-day';
 import { Hours } from '../utils/hours';
 import { DaylightHoursIndicatorTemplate } from './daylight-hours-indicator.template';
 import { StateAPotamus } from '../state/stateapotamus';
 
 export class ForecastHeaderTemplate {
-    private _dailyData: DailyData;
+    private _currentForecastSlide: number;
+    private _forecast: DailyForecast;
     private _forecastHeader: HTMLElement;
-    private _timezone: string;
 
     constructor() {
         const { currentForecastSlide, forecast } = StateAPotamus.getState();
 
-        this._dailyData = forecast.weather.daily.data[currentForecastSlide - 1];
-        this._timezone = forecast.weather.timezone;
+        this._currentForecastSlide = currentForecastSlide;
+        this._forecast = forecast;
 
         this._buildForecastHeader();
     }
 
     private _buildDaylightHoursIndicator(): HTMLElement {
-        const { currentForecastSlide, forecast } = StateAPotamus.getState();
-        const { daily, timezone } = forecast.weather;
-        const { sunriseTime, sunriseTimeString, sunsetTime, sunsetTimeString } = daily.data[currentForecastSlide - 1];
+        const { daily, timezone } = this._forecast.weather;
+        const { sunriseTime, sunriseTimeString, sunsetTime, sunsetTimeString } = daily.data[this._currentForecastSlide - 1];
 
         return new DaylightHoursIndicatorTemplate(
             sunriseTime,
@@ -33,16 +32,19 @@ export class ForecastHeaderTemplate {
     }
 
     private _buildForecastHeader(): void {
+        const dailyData = this._forecast.weather.daily.data[this._currentForecastSlide - 1];
+        const timezone = this._forecast.weather.timezone;
+
         const {
             day,
             dateString,
             summary,
             temperatureMin,
             temperatureMax,
-        } = this._dailyData;
+        } = dailyData;
 
         const defaultSummary = 'Partly potato with a chance of twilight sparkle in the evening.';
-        const daylightHours = new Hours(this._dailyData, this._timezone).daylightHours;
+        const daylightHours = new Hours(dailyData, timezone).daylightHours;
         const averageRatingModifier = averageRatingModifierForDay(daylightHours);
 
         this._forecastHeader = new DOMParser().parseFromString(`

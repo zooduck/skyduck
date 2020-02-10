@@ -57,6 +57,17 @@ export const settingsPageEventHandlers = function settingsPageEventHandlers(): S
         });
     };
 
+    const toggleIncludeNighttimeWeatherHandler = (): void => {
+        const { includeNighttimeWeather } = StateAPotamus.getState().settings;
+
+        StateAPotamus.dispatch('TOGGLE_INCLUDE_NIGHTTIME_WEATHER', {
+            settings: {
+                ...StateAPotamus.getState().settings,
+                includeNighttimeWeather: !includeNighttimeWeather,
+            }
+        });
+    };
+
     const toggleLocationSettingsHandler = (): void => {
         StateAPotamus.dispatch('TOGGLE_SUB_SETTINGS_LOCATION_SETTINGS', {
             currentSubSettings: subSettings.LOCATION_SETTINGS,
@@ -69,5 +80,6 @@ export const settingsPageEventHandlers = function settingsPageEventHandlers(): S
         toggleActiveCarouselHandler: toggleActiveCarouselHandler.bind(this),
         toggleForecastDisplayModeHandler: toggleForecastDisplayModeHandler.bind(this),
         toggleLocationSettingsHandler: toggleLocationSettingsHandler.bind(this),
+        toggleIncludeNighttimeWeatherHandler: toggleIncludeNighttimeWeatherHandler.bind(this),
     };
 };

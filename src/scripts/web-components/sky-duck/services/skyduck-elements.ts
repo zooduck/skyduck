@@ -118,7 +118,7 @@ export class SkyduckElements {
 
     public get forecastHeader(): HTMLElement {
         if (!this._dailyForecast) {
-            return new NotFoundTemplate(this._FORECAST_NOT_FOUND).html;
+            return new NotFoundTemplate(this._FORECAST_NOT_FOUND, 'forecastHeader', '--render-once').html;
         }
 
         return new ForecastHeaderTemplate().html;

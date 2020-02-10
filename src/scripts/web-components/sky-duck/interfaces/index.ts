@@ -48,7 +48,7 @@ export interface DailyData {
     cloudCover: number;
     dateString: string;
     day: string;
-    hourly: HourlyData[];
+    hourly:  Hourly;
     humidity: number;
     icon: string;
     precipType: string;
@@ -181,6 +181,7 @@ export interface ModifierClasses {
     error: string;
     forecastDisplayModeExtended: string;
     forecastDisplayModeStandard: string;
+    includeNighttimeWeather: string;
     init: string;
     loading: string;
     ready: string;
@@ -200,6 +201,7 @@ export interface SetContentOptions {
 export interface Settings {
     activeCarousel: ActiveCarousel;
     forecastDisplayMode: ForecastType;
+    includeNighttimeWeather: boolean;
     useGPSForCurrentLocation: boolean;
 }
 
@@ -208,6 +210,7 @@ export interface SettingsPageEventHandlers {
     onLocationChangeHandler: CallableFunction;
     toggleForecastDisplayModeHandler: CallableFunction;
     toggleActiveCarouselHandler: CallableFunction;
+    toggleIncludeNighttimeWeatherHandler: CallableFunction;
     toggleLocationSettingsHandler: CallableFunction;
 }
 
@@ -279,6 +282,7 @@ export interface StateActions {
     NEAREST_CLUB_CHANGE: CallableFunction;
     TOGGLE_ACTIVE_CAROUSEL: CallableFunction;
     TOGGLE_FORECAST_DISPLAY_MODE: CallableFunction;
+    TOGGLE_INCLUDE_NIGHTTIME_WEATHER: CallableFunction;
     TOGGLE_SETTINGS: CallableFunction;
     TOGGLE_SUB_SETTINGS: CallableFunction;
     TOGGLE_SUB_SETTINGS_LOCATION_SETTINGS: CallableFunction;

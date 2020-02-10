@@ -46,6 +46,7 @@ export const state: State = {
     settings: {
         activeCarousel: 'forecast',
         forecastDisplayMode: 'standard',
+        includeNighttimeWeather: false,
         useGPSForCurrentLocation: true,
     },
     settingsActive: false,

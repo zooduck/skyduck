@@ -493,23 +493,28 @@ export class SkyduckStyle {
             }
             .forecast-grid-hours {
                 display: grid;
-                grid-row-gap: 5px;
+                grid-row-gap: 10px;
             }
             .forecast-grid-hour {
                 position: relative;
                 display: grid;
                 grid-template-columns: 1fr auto;
                 grid-template-rows: 1fr auto;
-                grid-gap: 10px;
+                grid-column-gap: 10px;
             }
             .forecast-grid.--extended .forecast-grid-hour {
                 grid-template-rows: auto;
             }
-            .forecast-grid-hour.--not-daylight {
+            :host(:not(.--include-nighttime)) .forecast-grid-hour.--not-daylight {
                 filter: grayscale(1);
             }
-            .forecast-grid-hour.--not-daylight .forecast-grid-hour__not-daylight-mesh {
+            .forecast-grid-hour__not-daylight-mesh {
+                grid-row: 1;
+                grid-column: 1 / span 2;
+            }
+            :host(:not(.--include-nighttime)) .forecast-grid-hour.--not-daylight .forecast-grid-hour__not-daylight-mesh {
                 position: absolute;
+                z-index: 2;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -524,11 +529,15 @@ export class SkyduckStyle {
                 background-size: cover;
                 background-repeat: no-repeat;
             }
+            .forecast-grid-hour.--not-daylight .forecast-grid-hour__photo {
+                filter: grayscale(1);
+            }
             .forecast-grid.--extended .forecast-grid-hour__photo {
                 grid-column: 1;
                 background-position: 40% center;
             }
             .forecast-grid-hour-time-container {
+                z-index: 1;
                 margin: 0 0 10px 10px;
                 background-color: var(--translucentwhite);
                 color: var(--charcoal);
@@ -540,7 +549,7 @@ export class SkyduckStyle {
                 align-items: flex-end;
             }
             .forecast-grid-hour-time-container__time {
-                border-bottom: solid 5px var(--lightgray);
+                border-bottom: solid 20px var(--lightgray);
             }
             .forecast-grid-hour-time-container__time.--red {
                 border-color: var(--red);
@@ -554,12 +563,14 @@ export class SkyduckStyle {
             .forecast-grid-hour__summary {
                 display: block;
                 grid-row: 2;
+                padding: 10px 0;
             }
             .forecast-grid.--extended .forecast-grid-hour__summary {
                 display: none;
             }
 
             .forecast-data-grid {
+                z-index: 1;
                 grid-column: 2;
                 grid-row: 1 / span 2;
                 display: grid;
@@ -682,7 +693,48 @@ export class SkyduckStyle {
                 font-size: 22px;
             }
 
-            @media (min-aspect-ratio: 1/1) {
+            @media (min-aspect-ratio: 360/640) and (max-height: 640px) {
+                .forecast-grid .forecast-grid-hour {
+                    grid-template-rows: auto;
+                }
+                .forecast-grid .forecast-grid-hour__photo {
+                    grid-column: 1;
+                    background-position: 40% center;
+                }
+                .forecast-grid .forecast-grid-hour__summary {
+                    display: none;
+                }
+                .forecast-grid .forecast-data-grid {
+                    background-color: var(--palegray);
+                    grid-row: 1;
+                }
+            }
+
+            @media (min-aspect-ratio: 100/133) {
+                .forecast-grid .forecast-data-grid {
+                    background-color: transparent;
+                }
+                .forecast-grid.--extended .forecast-grid-hour__photo {
+                    min-height: 120px;
+                }
+                .forecast-grid:not(.--extended) .forecast-grid-hour__photo {
+                    min-height: 200px;
+                }
+                .forecast-grid .forecast-grid-hour__photo {
+                    grid-column: 1 / span 2;
+                    grid-row: 1;
+                    background-position: 75% center;
+                }
+                .forecast-grid .forecast-grid-hour__summary {
+                    display: block;
+                }
+                .forecast-grid .forecast-data-grid {
+                    background-color: transparent;
+                    grid-row: 1 / span 2;
+                }
+            }
+
+            @media (min-width: 450px) {
                 .forecast-data-grid {
                     grid-template-columns: repeat(5, minmax(55px, auto));
                 }
@@ -691,20 +743,6 @@ export class SkyduckStyle {
                 }
                 .forecast-data-grid__data.--landscape-only {
                     display: flex;
-                }
-                .forecast-grid-hour__photo {
-                    min-height: 200px;
-                }
-                .forecast-grid.--extended .forecast-grid-hour__photo {
-                    grid-column: 1 / span 2;
-                    grid-row: 1;
-                    background-position: 75% center;
-                }
-                .forecast-grid.--extended .forecast-grid-hour__summary {
-                    display: block;
-                }
-                .forecast-grid.--extended .forecast-data-grid {
-                    background-color: transparent;
                 }
             }
 

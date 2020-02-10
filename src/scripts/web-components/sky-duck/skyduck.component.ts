@@ -117,7 +117,8 @@ class HTMLZooduckSkyduckElement extends HTMLElement {
 
             log.connection();
         } catch (err) {
-            console.error(err); // eslint-disable-line no-console
+            // eslint-disable-next-line no-console
+            console.error(err);
         }
     }
 

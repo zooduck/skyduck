@@ -363,6 +363,7 @@ describe('zooduck-skyduck', () => {
                             'club-list',
                             'header',
                             'header-placeholder',
+                            'forecast-header',
                         ];
 
                         const childNodes = await page.evaluate((el) => {

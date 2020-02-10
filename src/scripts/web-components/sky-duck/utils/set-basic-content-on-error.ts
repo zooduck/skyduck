@@ -20,13 +20,15 @@ export const setBasicContentOnError = async function setBasicContentOnError() {
     const weatherElements: WeatherElements = new SkyduckElements(generalEventHandlers.call(this));
 
     const {
-        header,
         headerPlaceholder,
+        header,
+        forecastHeader,
         clubList,
     } = weatherElements;
 
     this.shadowRoot.appendChild(headerPlaceholder);
     this.shadowRoot.appendChild(header);
+    this.shadowRoot.appendChild(forecastHeader);
     this.shadowRoot.appendChild(clubList);
 
     StateAPotamus.dispatch('HAS_LOADED', {

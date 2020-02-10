@@ -2,9 +2,8 @@ const axios = require('axios');
 const { DateTime, Interval } = require('luxon');
 const {
     escapeSpecialChars,
-    filterHourlyData,
     mergeTimeMachineResults
-} = require('./utils');
+} = require('../utils/index');
 
 
 const resolvers = (db) => {
@@ -68,77 +67,56 @@ const resolvers = (db) => {
             const sevenDaysFromNowSeconds = Math.round(sevenDaysFromNow.toSeconds());
             const hourlyData = result.data.hourly.data;
 
-            let twoHoursBeforeSunriseOnTheFirstDay, twoHoursAfterSunsetOnTheLastDay, firstHour, lastHour;
             try {
+                const firstHour = DateTime.fromSeconds(hourlyData[0].time).setZone(timezone);
+                const lastHour = DateTime.fromSeconds(hourlyData.slice(-1)[0].time).setZone(timezone);
+                const firstRequiredHour = DateTime.fromSeconds(daily.data[0].time).setZone(timezone).set({ hour: 9});
+                const lastRequiredHour = DateTime.fromSeconds(daily.data.slice(-1)[0].time).setZone(timezone).set({ hour: 15 });
 
-                firstHour = DateTime.fromSeconds(hourlyData[0].time).setZone(timezone);
-                lastHour = DateTime.fromSeconds(hourlyData.slice(-1)[0].time).setZone(timezone);
-                twoHoursBeforeSunriseOnTheFirstDay = DateTime.fromSeconds(daily.data[0].sunriseTime).setZone(timezone).minus({ hours: 2 });
-                twoHoursAfterSunsetOnTheLastDay = DateTime.fromSeconds(daily.data.slice(-1)[0].sunsetTime).setZone(timezone).plus({ hours: 2 });
-            } catch (err) {
-                // eslint-disable-next-line no-console
-                console.error(err);
-            }
+                const requiredInterval = Interval.fromDateTimes(firstRequiredHour, lastRequiredHour);
+                const timeMachineRequestForTodayRequired = requiredInterval.start < firstHour;
+                const timeMachineRequestForLastDayRequired = requiredInterval.end > lastHour;
 
-            const requiredInterval = Interval.fromDateTimes(twoHoursBeforeSunriseOnTheFirstDay, twoHoursAfterSunsetOnTheLastDay);
-            const timeMachineRequestForTodayRequired = requiredInterval.start < firstHour;
-            const timeMachineRequestForLastDayRequired = requiredInterval.end > lastHour;
-
-            const emptyData = {
-                data: {
-                    daily: {
-                        data: [],
+                const emptyData = {
+                    data: {
+                        daily: {
+                            data: [],
+                        },
+                        hourly: {
+                            data: [],
+                        },
                     },
-                    hourly: {
-                        data: [],
-                    },
-                },
-            };
+                };
 
-            const timeMachineResultForToday = timeMachineRequestForTodayRequired
-                ? await axios.get(`${darkskyURL},${nowSeconds}`, {
-                    params: {
-                        ...darkSkyQueryParams,
-                        extend: null,
-                    },
-                    headers: darkSkyHeaders,
-                })
-                : emptyData;
+                const timeMachineResultForToday = timeMachineRequestForTodayRequired
+                    ? await axios.get(`${darkskyURL},${nowSeconds}`, {
+                        params: {
+                            ...darkSkyQueryParams,
+                            extend: null,
+                        },
+                        headers: darkSkyHeaders,
+                    })
+                    : emptyData;
 
-            const timeMachineResultForLastDay = timeMachineRequestForLastDayRequired
-                ? await axios.get(`${darkskyURL},${sevenDaysFromNowSeconds}`, {
-                    params: {
-                        ...darkSkyQueryParams,
-                        extend: null,
-                    },
-                    headers: darkSkyHeaders,
-                })
-                : emptyData;
+                const timeMachineResultForLastDay = timeMachineRequestForLastDayRequired
+                    ? await axios.get(`${darkskyURL},${sevenDaysFromNowSeconds}`, {
+                        params: {
+                            ...darkSkyQueryParams,
+                            extend: null,
+                        },
+                        headers: darkSkyHeaders,
+                    })
+                    : emptyData;
 
-            if (timeMachineRequestForTodayRequired || timeMachineRequestForLastDayRequired) {
-                mergeTimeMachineResults(result.data, timeMachineResultForToday.data, timeMachineResultForLastDay.data);
-            }
-
-            let filteredHourlyData;
-            try {
-                const { daily, hourly } = result.data;
-                filteredHourlyData = filterHourlyData(hourly.data, daily.data, timezone);
-            } catch (err) {
-                // eslint-disable-next-line no-console
-                console.error(err);
-            }
-
-            if (!filteredHourlyData) {
-                return result.data;
-            }
-
-            return {
-                ...result.data,
-                hourly: {
-                    ...result.data.hourly,
-                    data: filteredHourlyData,
+                if (timeMachineRequestForTodayRequired || timeMachineRequestForLastDayRequired) {
+                    mergeTimeMachineResults(result.data, timeMachineResultForToday.data, timeMachineResultForLastDay.data);
                 }
-            };
+            } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error(err);
+            }
+
+            return result.data;
         }
     };
 };

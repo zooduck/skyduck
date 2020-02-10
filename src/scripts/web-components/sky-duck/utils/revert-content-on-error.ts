@@ -1,10 +1,13 @@
 import { StateAPotamus } from '../state/stateapotamus';
 import { setBasicContentOnError } from './set-basic-content-on-error';
+import { setLoaderError } from './set-loader-error';
 
 export const revertContentOnError = function revertContentOnError() {
-    const { error, hasLoaded } = StateAPotamus.getState();
+    const { hasLoaded } = StateAPotamus.getState();
 
     if (hasLoaded) {
+
+        setLoaderError.call(this);
 
         StateAPotamus.dispatch('SET_LOADING', {
             isLoading: true,
@@ -14,10 +17,4 @@ export const revertContentOnError = function revertContentOnError() {
     }
 
     setBasicContentOnError.call(this);
-
-    if (!error) {
-        return;
-    }
-
-    console.error(error); // eslint-disable-line no-console
 };

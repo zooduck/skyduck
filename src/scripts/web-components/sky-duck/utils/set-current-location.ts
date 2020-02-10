@@ -1,6 +1,5 @@
 import { StateAPotamus } from '../state/stateapotamus';
 import { geocodeLookup } from '../fetch/geocode-lookup.fetch';
-import { revertContentOnError } from './revert-content-on-error';
 
 export const setCurrentLocationHandler = async function setCurrentLocationHandler(e: CustomEvent): Promise<void> {
     const { value: requestedLocation } = e.detail;
@@ -15,7 +14,5 @@ export const setCurrentLocationHandler = async function setCurrentLocationHandle
         StateAPotamus.dispatch('ERROR', {
             error: err,
         });
-
-        revertContentOnError.call(this);
     }
 };

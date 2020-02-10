@@ -10,29 +10,22 @@ const escapeSpecialChars = (query) => {
     return queryEscaped;
 };
 
-const filterHourlyData = (hourlyData, dailyData, timezone) => {
-    const filteredHourlyData = hourlyData.filter((hourlyItem) => {
-        const requiredInterval = getDaylightHoursIntervalFromHourlyData(hourlyItem, dailyData, timezone);
-        const hourlyItemDate = DateTime.fromSeconds(hourlyItem.time).setZone(timezone);
+const filterHourlyDataForDaylightHours = (dailyData, timezone) => {
+    const filteredHourlyData = dailyData.hourly.filter((hourlyDataItem) => {
+        const { sunriseTime, sunsetTime } = dailyData;
+        const requiredInterval = getDaylightHoursInterval(sunriseTime, sunsetTime);
+        const hourlyDataItemDate = DateTime.fromSeconds(hourlyDataItem.time).setZone(timezone);
 
-        return requiredInterval.contains(hourlyItemDate);
+        return requiredInterval.contains(hourlyDataItemDate);
     });
 
     return filteredHourlyData;
 };
 
-const getDaylightHoursIntervalFromHourlyData = (hourlyItem, dailyData, timezone) => {
-    const hourlyItemDate = DateTime.fromSeconds(hourlyItem.time).setZone(timezone);
-    const dailyDataItemForHour = dailyData.find((dailyDataItem) => {
-        const dailyDataItemDate = DateTime.fromSeconds(dailyDataItem.time).setZone(timezone);
-
-        return dailyDataItemDate.hasSame(hourlyItemDate, 'day');
-    });
-
-    const { sunriseTime, sunsetTime } = dailyDataItemForHour;
-
+const getDaylightHoursInterval = (sunriseTime, sunsetTime) => {
     const sunriseTimeDate = DateTime.fromSeconds(sunriseTime);
     const sunsetTimeDate = DateTime.fromSeconds(sunsetTime);
+
     const requiredInterval = Interval.fromDateTimes(sunriseTimeDate.minus({ hours: 2 }), sunsetTimeDate.plus({ hours: 2 }));
 
     return requiredInterval;
@@ -78,8 +71,9 @@ const mergeTimeMachineResults = (darkSkyData, darkSkyTimeMachineDataToday, darkS
     return darkSkyData;
 };
 
+
 module.exports = {
     escapeSpecialChars,
-    filterHourlyData,
+    filterHourlyDataForDaylightHours,
     mergeTimeMachineResults,
 };

@@ -6,6 +6,7 @@ export const modifierClasses: ModifierClasses = {
     error: '--error',
     forecastDisplayModeExtended: '--forecast-display-mode-extended',
     forecastDisplayModeStandard: '--forecast-display-mode-standard',
+    includeNighttimeWeather: '--include-nighttime',
     init: '--init',
     loading: '--loading',
     ready: '--ready',

@@ -2,10 +2,11 @@ import { StateAPotamus } from '../state/stateapotamus';
 
 export const resetModifierClasses = function resetModifierClasses() {
     const excludedClasses = [
-        this._modifierClasses.userDeniedGeolocation,
+        this._modifierClasses.includeNighttimeWeather,
+        this._modifierClasses.loading,
         this._modifierClasses.settingsActive,
         this._modifierClasses.subSettingsActive,
-        this._modifierClasses.loading,
+        this._modifierClasses.userDeniedGeolocation,
     ];
 
     Object.keys(this._modifierClasses).forEach((key: string) => {

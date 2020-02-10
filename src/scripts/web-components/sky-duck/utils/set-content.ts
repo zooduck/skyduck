@@ -9,12 +9,19 @@ import { generalEventHandlers } from '../event-handlers/general.event-handlers';
 import { wait } from './wait/wait';
 import { SkyduckElements } from '../services/skyduck-elements';
 import { getLoaderInfoElements } from './get-loader-info-elements';
+import { setLoaderError } from './set-loader-error';
 
 export const setContent = async function setContent() {
-    const { hasLoaded, imagesReady } = StateAPotamus.getState();
+    const { error, hasLoaded, imagesReady } = StateAPotamus.getState();
 
     if (!hasLoaded) {
         await onFirstLoad.call(this);
+    }
+
+    if (error) {
+        setLoaderError.call(this);
+
+        return;
     }
 
     if (!imagesReady) {
@@ -48,7 +55,12 @@ export const setContent = async function setContent() {
 
     if (!hasLoaded) {
         // Render once only
-        const { headerPlaceholder, header, forecastHeader, clubList } = weatherElements;
+        const {
+            headerPlaceholder,
+            header,
+            forecastHeader,
+            clubList,
+        } = weatherElements;
 
         this.shadowRoot.appendChild(headerPlaceholder);
         this.shadowRoot.appendChild(header);

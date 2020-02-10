@@ -26,6 +26,10 @@ export const updateSettingsPage = async function updateSettingsPage(prop: string
         settingsPage.querySelector('#forecastDisplayModeSetting').replaceWith(newSettings.extendedForecastToggle);
 
         break;
+    case 'includeNighttimeWeather':
+        settingsPage.querySelector('#includeNighttimeWeatherSetting').replaceWith(newSettings.includeNighttimeWeatherToggle);
+
+        break;
     case 'userLocation':
         settingsPage.querySelector('#useCurrentLocationSetting').replaceWith(newSettings.useCurrentLocationControl);
 

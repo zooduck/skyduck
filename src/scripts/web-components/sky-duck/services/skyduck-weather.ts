@@ -15,6 +15,7 @@ import { querySkydiveClub } from '../fetch/skydive-club.fetch';
 import { dbWeatherLookup } from '../fetch/db-weather-lookup.fetch';
 import { dbWeatherUpdate } from '../fetch/db-weather-update.fetch';
 import { escapeSpecialChars } from '../utils/escape-special-chars';
+import { StateAPotamus } from '../state/stateapotamus';
 
 export class SkyduckWeather {
     private _floatToInt(float: number): number {
@@ -78,8 +79,10 @@ export class SkyduckWeather {
     private async _getDBWeather(latitude: number, longitude: number, locationQuery: string): Promise<FormattedWeather> {
         let dbWeather: FormattedWeather;
 
+        const { includeNighttimeWeather } = StateAPotamus.getState().settings;
+
         try {
-            dbWeather = await dbWeatherLookup(latitude, longitude);
+            dbWeather = await dbWeatherLookup(latitude, longitude, includeNighttimeWeather);
         } catch (err) {
             // (400 or 404) continue...
         }
@@ -88,12 +91,8 @@ export class SkyduckWeather {
             const darkSkyData = await this._queryDarkSky(latitude, longitude, locationQuery);
             const { weather } = darkSkyData;
 
-            const method = !dbWeather ? 'POST' : 'PUT';
-
-            await dbWeatherUpdate(weather, method);
-
             try {
-                dbWeather = await dbWeatherLookup(latitude, longitude);
+                dbWeather = await dbWeatherUpdate(weather);
             } catch (err) {
                 // (400 or 404) continue...
             }
@@ -170,9 +169,13 @@ export class SkyduckWeather {
             throw Error(`Could not find club "${name}" in the skyduck database. Try searching by location instead.`);
         }
 
-        const { latitude,longitude } = skydiveClub;
+        const { latitude, longitude } = skydiveClub;
 
         const weather = await this._getDBWeather(latitude, longitude, name);
+
+        if (!weather) {
+            throw Error(`Unable to get forecast for club "${name}". Unknown Error.`);
+        }
 
         return {
             weather,
