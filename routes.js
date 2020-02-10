@@ -215,7 +215,7 @@ const weatherPut = {
 
         try {
             await db.collection('Weather').insertOne(doc);
-            response.status(httpStatusCodes.CREATED).send(doc);
+            response.status(httpStatusCodes.CREATED).send();
 
             return;
         } catch (err) {
@@ -229,7 +229,7 @@ const weatherPut = {
                     requestTime,
                 }
             });
-            response.status(httpStatusCodes.OK).send(doc);
+            response.status(httpStatusCodes.NO_CONTENT).send();
         } catch (err) {
             console.error(err);
             response.status(httpStatusCodes.BAD_REQUEST).send(err);

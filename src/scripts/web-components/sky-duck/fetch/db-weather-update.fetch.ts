@@ -1,6 +1,6 @@
 import { FormattedWeather } from '../interfaces/index'; // eslint-disable-line no-unused-vars
 
-export const dbWeatherUpdate = async (darkSkyData: FormattedWeather): Promise<FormattedWeather> => {
+export const dbWeatherUpdate = async (darkSkyData: FormattedWeather): Promise<void> => {
     const weatherAPI = '/weather/update';
     const method = 'PUT';
 
@@ -15,8 +15,4 @@ export const dbWeatherUpdate = async (darkSkyData: FormattedWeather): Promise<Fo
     if (!response.ok) {
         throw Error(`${response.status} (${response.statusText})`);
     }
-
-    const weather: FormattedWeather = await response.json();
-
-    return weather;
 };

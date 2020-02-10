@@ -92,9 +92,11 @@ export class SkyduckWeather {
             const { weather } = darkSkyData;
 
             try {
-                dbWeather = await dbWeatherUpdate(weather);
+                await dbWeatherUpdate(weather);
+                dbWeather = await dbWeatherLookup(latitude, longitude, includeNighttimeWeather);
             } catch (err) {
-                // (400 or 404) continue...
+                // eslint-disable-next-line no-console
+                console.error(err);
             }
         }
 
