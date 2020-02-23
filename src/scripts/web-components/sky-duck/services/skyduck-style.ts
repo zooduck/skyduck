@@ -697,6 +697,11 @@ export class SkyduckStyle {
             }
 
             /* iPhone 5/SE and below */
+            /* @TODO: Investigate why this media query affects Samsung Galaxy S7 Edge which has a viewport of 360/640 */
+            /* ------------------------------------------------------------------- */
+            /* This block is commented out pending investigation (see above) */
+            /* ------------------------------------------------------------------- */
+            /* COMMENT_OUT_BLOCK_START
             @media (min-aspect-ratio: 320/568) and (max-height: 568px) {
                 .forecast-grid .forecast-grid-hour {
                     grid-template-rows: auto;
@@ -713,6 +718,7 @@ export class SkyduckStyle {
                     grid-row: 1;
                 }
             }
+            COMMENT_OUT_BLOCK_END */
 
             @media (min-aspect-ratio: 100/133) {
                 .forecast-grid .forecast-data-grid {
