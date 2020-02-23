@@ -696,7 +696,8 @@ export class SkyduckStyle {
                 font-size: 22px;
             }
 
-            @media (min-aspect-ratio: 360/640) and (max-height: 640px) {
+            /* iPhone 5/SE and below */
+            @media (min-aspect-ratio: 320/568) and (max-height: 568px) {
                 .forecast-grid .forecast-grid-hour {
                     grid-template-rows: auto;
                 }
