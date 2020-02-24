@@ -48,7 +48,7 @@ export const setContent = async function setContent() {
     const {
         forecast,
         forecastExtended,
-        footer,
+        lastUpdatedInfo,
     } = weatherElements;
 
     StateAPotamus.dispatch('SET_READY');
@@ -70,7 +70,7 @@ export const setContent = async function setContent() {
 
     this.shadowRoot.appendChild(forecast);
     this.shadowRoot.appendChild(forecastExtended);
-    this.shadowRoot.appendChild(footer);
+    this.shadowRoot.appendChild(lastUpdatedInfo);
 
     if (!hasLoaded) {
         StateAPotamus.dispatch('HAS_LOADED', {

@@ -17,6 +17,7 @@ import { NotFoundTemplate } from './not-found.template';
 import { LocationSettingsControlTemplate } from './settings-location-settings-control.template';
 import { StateAPotamus } from '../state/stateapotamus';
 import { SettingsVersionInfoTemplate } from './settings-version-info.template';
+import { AttributionTemplate } from './attribution.template';
 
 export class SettingsTemplate {
     private _ACTIVE_CAROUSEL_SETTING_ID: string;
@@ -28,6 +29,7 @@ export class SettingsTemplate {
     private _SET_CURRENT_LOCATION_SETTING_ID: string;
     private _USE_CURRENT_LOCATION_SETTING_ID: string;
 
+    private _attribution: HTMLElement;
     private _clubs: SkydiveClub[];
     private _geolocationError: HTMLElement;
     private _googleMapsKey: string;
@@ -88,6 +90,7 @@ export class SettingsTemplate {
         this._useCurrentLocationControl = this._buildUseCurrentLocationControl();
         this._setCurrentLocationControl = this._buildLocationSettingsControl();
         this._includeNighttimeWeatherToggle = this._buildNighttimeWeatherToggle();
+        this._attribution = this._buildAttribution();
         this._versionInfo = this._buildVersionInfo();
 
         const settingsGrid = this._settingsPage.querySelector('.settings-grid');
@@ -104,7 +107,9 @@ export class SettingsTemplate {
         settingsGrid.appendChild(this._activeCarouselToggle);
         settingsGrid.appendChild(this._useCurrentLocationControl);
         settingsGrid.appendChild(this._setCurrentLocationControl);
+        settingsGrid.appendChild(this._attribution);
         settingsGrid.appendChild(this._versionInfo);
+
     }
 
     private _buildActiveCarouselToggle(): HTMLElement {
@@ -132,6 +137,10 @@ export class SettingsTemplate {
             false,
             eventHandler
         ).html;
+    }
+
+    private _buildAttribution(): HTMLElement {
+        return new AttributionTemplate('settings__attribution').html;
     }
 
     private _buildExtendedForecastToggle(): HTMLElement {
@@ -241,6 +250,10 @@ export class SettingsTemplate {
 
     public get activeCarouselToggle(): HTMLElement {
         return this._activeCarouselToggle;
+    }
+
+    public get attribution(): HTMLElement  {
+        return this._attribution;
     }
 
     public get extendedForecastToggle(): HTMLElement {

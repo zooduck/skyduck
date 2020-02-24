@@ -11,9 +11,9 @@ export class SettingsVersionInfoTemplate {
     private _buildVersionInfo(): void {
         this._versionInfo = new DOMParser().parseFromString(`
             <div
-                id="versioInfo"
+                id="versionInfo"
                 class="settings__version-info">
-                <span>Version ${this._version}</span>
+                <a href="https://github.com/zooduck/skyduck/" target="_blank">skyduck ${this._version}</a>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
     }

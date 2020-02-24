@@ -303,10 +303,10 @@ export type ToggleState = 'on'|'off';
 
 export interface WeatherElements {
     clubList: HTMLElement;
-    footer: HTMLElement;
     forecast: HTMLElement;
     forecastExtended: HTMLElement;
     forecastHeader: HTMLElement;
     header: HTMLElement;
     headerPlaceholder: HTMLElement;
+    lastUpdatedInfo: HTMLElement;
 }

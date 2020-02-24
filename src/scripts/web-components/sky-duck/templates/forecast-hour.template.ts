@@ -49,7 +49,7 @@ export class ForecastHourTemplate {
                     <span class="forecast-grid-hour-time-container__time ${averageRatingModifier}">${timeString.split(':')[0]}</span>
                 </h2>
 
-                <h4 class="forecast-grid-hour__summary">${summary || ''}</h4>
+                ${this._buildForecastHourSummary(summary)}
 
                 <div class="forecast-data-grid">
                     <div class="forecast-data-grid-type">
@@ -100,6 +100,16 @@ export class ForecastHourTemplate {
                 </div>
             </div>
         `, 'text/html').body.firstChild as HTMLElement;
+    }
+
+    private _buildForecastHourSummary(summary: string): string {
+        const wordsInSummary = summary.split(' ');
+
+        if (!summary || wordsInSummary.length < 3) {
+            return `<h4 class="forecast-grid-hour__summary">${summary}</h4>`;
+        }
+
+        return `<h5 class="forecast-grid-hour__summary">${summary}</h5>`;
     }
 
     private _getColorModifiers(colorModifiersData: ColorModifiersData): ColorModifiers {

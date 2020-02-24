@@ -8,7 +8,6 @@ import {
     GeocodeData,
     EventHandlers,
 } from '../interfaces/index';
-import { FooterTemplate } from '../templates/footer.template';
 import { ForecastCarouselTemplate } from '../templates/forecast-carousel.template';
 import { HeaderTemplate } from '../templates/header.template';
 import { ClubListCarouselTemplate } from '../templates/club-list-carousel.template';
@@ -16,6 +15,8 @@ import { NotFoundTemplate } from '../templates/not-found.template';
 import { HeaderPlaceholderTemplate } from '../templates/header-placeholder.template';
 import { StateAPotamus } from '../state/stateapotamus';
 import { ForecastHeaderTemplate } from '../templates/forecast-header.template';
+import { LastUpdatedInfoTemplate } from '../templates/last-updated-info.template';
+import { DateTime } from 'luxon';
 /* eslint-enable */
 
 export class SkyduckElements {
@@ -31,7 +32,6 @@ export class SkyduckElements {
     private _forecastHoursExtended: number[];
     private _hasClubList: boolean;
     private _locationDetails: LocationDetails;
-    private _version: string;
     private _userLocation: GeocodeData;
 
     constructor(eventHandlers: EventHandlers) {
@@ -42,7 +42,6 @@ export class SkyduckElements {
             forecast: dailyForecast,
             locationDetails,
             userLocation,
-            version,
         } = StateAPotamus.getState();
 
         this._currentForecastSlide = currentForecastSlide;
@@ -51,7 +50,6 @@ export class SkyduckElements {
         this._forecastHoursExtended = Array.from({ length: 24 }).map((_item, i) => i);
         this._hasClubList = clubsSortedByCountry && Object.keys(clubsSortedByCountry).length > 0;
         this._locationDetails = locationDetails;
-        this._version = version;
         this._clubsSortedByCountry = clubsSortedByCountry;
         this._clubCountries = clubCountries;
         this._userLocation = userLocation;
@@ -70,16 +68,6 @@ export class SkyduckElements {
             this._eventHandlers.onClubListCarouselSlideChangeHandler,
             this._eventHandlers.onClubChangeHandler,
         ).html;
-    }
-
-    public get footer(): HTMLElement {
-        if (!this._dailyForecast) {
-            return new NotFoundTemplate(this._FORECAST_NOT_FOUND).html;
-        }
-
-        const { requestTime } = this._dailyForecast.weather;
-
-        return new FooterTemplate(requestTime).html;
     }
 
     public get forecast(): HTMLElement {
@@ -134,5 +122,13 @@ export class SkyduckElements {
 
     public get headerPlaceholder(): HTMLElement {
         return new HeaderPlaceholderTemplate().html;
+    }
+
+    public get lastUpdatedInfo(): HTMLElement {
+        const lastUpdatedDate = DateTime
+            .fromMillis(this._dailyForecast.weather.requestTime)
+            .toLocaleString(DateTime.DATETIME_SHORT);
+
+        return new LastUpdatedInfoTemplate(lastUpdatedDate).html;
     }
 }

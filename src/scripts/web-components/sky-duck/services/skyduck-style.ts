@@ -87,7 +87,7 @@ export class SkyduckStyle {
                 --slide-selectors-height: 40px;
                 --header-height: 70px;
                 --forecast-header-height: 117px;
-                --footer-height: 40px;
+                --last-updated-info-height: 20px;
 
                 --red: rgb(255, 99, 71, .8);
                 --amber: rgba(255, 165, 0, .8);
@@ -369,6 +369,18 @@ export class SkyduckStyle {
                 color: var(--gray);
                 font-size: .9em;
             }
+            .settings__version-info a {
+                color: var(--gray);
+            }
+            .settings__attribution {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .settings__attribution img {
+                max-width: 100%;
+                height: auto;
+                background-color: var(--gray);
+            }
 
             .sub-settings {
                 z-index: var(--sub-settings-z-index);
@@ -491,7 +503,7 @@ export class SkyduckStyle {
             .forecast-grid {
                 display: grid;
                 grid-row-gap: 10px;
-                min-height: calc(100vh - var(--header-height) - var(--forecast-header-height) - var(--footer-height));
+                min-height: calc(100vh - var(--header-height) - var(--forecast-header-height) - var(--last-updated-info-height));
                 padding: 10px;
             }
             .forecast-grid-hours {
@@ -552,7 +564,7 @@ export class SkyduckStyle {
                 align-items: flex-end;
             }
             .forecast-grid-hour-time-container__time {
-                border-bottom: solid 20px var(--lightgray);
+                border-bottom: solid 12px var(--lightgray);
             }
             .forecast-grid-hour-time-container__time.--red {
                 border-color: var(--red);
@@ -629,14 +641,17 @@ export class SkyduckStyle {
                 color: var(--white);
             }
 
-            .footer {
+            .last-updated-info {
                 display: none;
-                grid-template-columns: 1fr auto;
-                padding: 10px;
-                height: var(--footer-height);
+                font-size: .75em;
+                color: var(--gray);
+                text-align: right;
+                margin-right: 10px;
+                height: var(--last-updated-info-height);
+                overflow: hidden;
             }
-            :host(.--active-carousel-forecast) .footer {
-                display: grid;
+            :host(.--active-carousel-forecast) .last-updated-info {
+                display: block;
             }
 
             .club-list-carousel {
@@ -650,7 +665,7 @@ export class SkyduckStyle {
             .club-list-container {
                 padding: 10px;
                 cursor: default;
-                min-height: calc(100vh - var(--header-height) - var(--footer-height));
+                min-height: calc(100vh - var(--header-height));
                 user-select: none;
             }
             .club-list-container__club-list {
