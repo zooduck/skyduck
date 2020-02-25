@@ -153,7 +153,7 @@ export class SkyduckStyle {
                 left: 0;
                 top: 0;
                 z-index: var(--loader-z-index);
-                grid-template-rows: 1fr auto 1fr;
+                grid-template-rows: .7fr auto 1fr;
                 grid-gap: 50px;
                 justify-content: center;
                 justify-items: center;
@@ -186,9 +186,13 @@ export class SkyduckStyle {
                 align-self: end;
                 width: 200px;
                 text-align: center;
+                transition: all ${transitionSpeedInMillis}ms;
             }
             :host(.--error) .loader-info {
                 display: none;
+            }
+            :host(.--ready) .loader-info {
+                transform: translateX(100vw);
             }
             .loader-info__place {
                 white-space: nowrap;
@@ -197,6 +201,10 @@ export class SkyduckStyle {
             }
             .loader__icon {
                 grid-row: 2;
+                transition: all ${transitionSpeedInMillis}ms;
+            }
+            :host(.--ready) .loader__icon {
+                transform: translateX(-100vw);
             }
             .loader-bar {
                 display: flex;

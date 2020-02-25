@@ -42,7 +42,7 @@ export class LoaderTemplate {
         this._spinner = new DOMParser().parseFromString(`
             <zooduck-icon-skyduck-in-flight
                 class="loader__icon"
-                size="200"
+                size="140"
                 color="var(--white)"
                 backgroundcolor="var(--lightskyblue)">
             </zooduck-icon-skyduck-in-flight>

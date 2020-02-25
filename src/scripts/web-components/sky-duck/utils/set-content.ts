@@ -53,6 +53,8 @@ export const setContent = async function setContent() {
 
     StateAPotamus.dispatch('SET_READY');
 
+    await wait(250); // Wait for CSS Loader Icon transition to complete before adding elements to DOM
+
     if (!hasLoaded) {
         // Render once only
         const {
