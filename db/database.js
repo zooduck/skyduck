@@ -10,7 +10,11 @@ const collections = [
 ];
 
 const createCollections = async (db) => {
-    Promise.all(collections.map((collection) => db.createCollection(collection)));
+    const collectionPromises = collections.map((collection) => {
+        return db.createCollection(collection);
+    });
+
+    await Promise.allSettled(collectionPromises);
 };
 
 const mongo = () => {

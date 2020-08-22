@@ -2,13 +2,11 @@ import { StateAPotamus } from '../state/stateapotamus';
 import { getImages } from './get-images';
 import { onFirstLoad } from './on-first-load';
 import { clearContent } from './clear-content';
-import { setLoaderInfoDisplay } from './set-loader-info-display';
 // eslint-disable-next-line no-unused-vars
 import { WeatherElements } from '../interfaces/index';
 import { generalEventHandlers } from '../event-handlers/general.event-handlers';
 import { wait } from './wait/wait';
 import { SkyduckElements } from '../services/skyduck-elements';
-import { getLoaderInfoElements } from './get-loader-info-elements';
 import { setLoaderError } from './set-loader-error';
 
 export const setContent = async function setContent() {
@@ -29,18 +27,9 @@ export const setContent = async function setContent() {
     }
 
     if (hasLoaded) {
+        await wait(1750); // Minimum loader time
+
         clearContent.call(this);
-
-        const loaderInfoElements = getLoaderInfoElements.call(this);
-
-        try {
-            await setLoaderInfoDisplay(
-                StateAPotamus.getState().forecast,
-                loaderInfoElements
-            );
-        } catch (err) {
-            console.error(err); // eslint-disable-line no-console
-        }
     }
 
     const weatherElements: WeatherElements = new SkyduckElements(generalEventHandlers.call(this));
@@ -50,10 +39,6 @@ export const setContent = async function setContent() {
         forecastExtended,
         lastUpdatedInfo,
     } = weatherElements;
-
-    StateAPotamus.dispatch('SET_READY');
-
-    await wait(250); // Wait for CSS Loader Icon transition to complete before adding elements to DOM
 
     if (!hasLoaded) {
         // Render once only
@@ -80,7 +65,22 @@ export const setContent = async function setContent() {
         });
     }
 
-    await wait(250); // Give content a chance to render before removing loader
+    // Give content a chance to render before removing loader
+    // ==========================================================
+    // @NOTE: This is necessary to prevent any stuttering effect
+    // from happening with the animation that removes the loader
+    // ==========================================================
+    await wait(250);
+
+
+    StateAPotamus.dispatch('SET_READY');
+
+    if (hasLoaded) {
+        const SKYDUCK_INTERVAL_LOADER_REMOVE_LAYERS_ANIMATION_MILLIS = 750;
+        this.shadowRoot.querySelector('skyduck-interval-loader').setAttribute('loaded', '');
+
+        await wait(SKYDUCK_INTERVAL_LOADER_REMOVE_LAYERS_ANIMATION_MILLIS);
+    }
 
     StateAPotamus.dispatch('SET_LOADED', {
         isLoading: false,

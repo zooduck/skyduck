@@ -48,7 +48,7 @@ export interface DailyData {
     cloudCover: number;
     dateString: string;
     day: string;
-    hourly:  Hourly;
+    hourly:  HourlyData[];
     humidity: number;
     icon: string;
     precipType: string;
@@ -161,10 +161,6 @@ export interface ImageMap {
     sleet: string;
     snow: string;
     wind: string;
-}
-
-export type LoaderInfoElements = {
-    [key: string]: HTMLElement;
 }
 
 export interface LocationDetails {

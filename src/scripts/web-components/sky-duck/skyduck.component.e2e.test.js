@@ -191,12 +191,20 @@ describe('zooduck-skyduck', () => {
                         ]);
                     });
 
-                    it('should display a loader', async () => {
-                        const loader = await page.evaluate((el) => {
-                            return el.shadowRoot.querySelector('#skyduckLoader');
+                    it('should display a splash screen loader', async () => {
+                        const splashScreenLoader = await page.evaluate((el) => {
+                            return el.shadowRoot.querySelector('skyduck-splash-screen-loader');
                         }, el);
 
-                        expect(loader).not.toBeNull();
+                        const splashScreenLoaderAttributes = await page.evaluate((el) => {
+                            return Array.from(el.shadowRoot.querySelector('skyduck-splash-screen-loader').attributes).map((attr) => {
+                                return attr.name;
+                            });
+                        }, el);
+
+
+                        expect(splashScreenLoader).not.toBeNull();
+                        expect(splashScreenLoaderAttributes.includes('active')).toBeTruthy();
                     });
 
                     it('should have a style tag', async () => {
@@ -388,40 +396,38 @@ describe('zooduck-skyduck', () => {
                         });
                     });
 
-                    it('should display the loader with an error', async () => {
-                        const error = await page.evaluate((el) => {
-                            return el.shadowRoot
-                                .querySelector('#skyduckLoader')
-                                .querySelector('#loaderError').innerHTML;
+                    it('should display a loader with an error that can be dismissed by the user', async () => {
+                        const skyduckLoaderErrorEl = await page.evaluateHandle((el) => {
+                            return el.shadowRoot.querySelector('skyduck-loader-error');
                         }, el);
 
-                        expect(error).toEqual('Error: Unable to resolve coordinates for location of \"DOMPER.\"');
-                    });
+                        expect(skyduckLoaderErrorEl).not.toBeNull();
 
-                    it('should display the loader with an error until dismissed by the user', async () => {
-                        let loaderDisplay = await page.evaluate((el) => {
-                            const loader = el.shadowRoot
-                                .querySelector('#skyduckLoader');
-
-                            return getComputedStyle(loader).getPropertyValue('display');
+                        const errorMessage = await page.evaluate((el) => {
+                            return el.shadowRoot.querySelector('skyduck-loader-error').getAttribute('message');
                         }, el);
 
-                        expect(loaderDisplay).toEqual('grid');
+                        expect(errorMessage).toEqual('Error: Unable to resolve coordinates for location of \"DOMPER.\"');
 
-                        const loader = await page.evaluateHandle((el) => {
-                            return el.shadowRoot.querySelector('#skyduckLoader');
-                        }, el);
+                        let skyduckLoaderErrorAttributes = await page.evaluate((skyduckLoaderErrorEl) => {
+                            return Array.from(skyduckLoaderErrorEl.attributes).map((attr) => {
+                                return attr.name;
+                            });
+                        }, skyduckLoaderErrorEl);
 
-                        await loader.tap();
+                        expect(skyduckLoaderErrorAttributes).toContain('active');
+
+                        await skyduckLoaderErrorEl.tap();
                         await page.waitFor(100);
 
-                        loaderDisplay = await page.evaluate((el) => {
-                            const loader = el.shadowRoot.querySelector('#skyduckLoader');
-
-                            return getComputedStyle(loader).getPropertyValue('display');
+                        skyduckLoaderErrorAttributes = await page.evaluate((el) => {
+                            const skyduckLoaderErrorEl = el.shadowRoot.querySelector('skyduck-loader-error');
+                            return Array.from(skyduckLoaderErrorEl.attributes).map((attr) => {
+                                return attr.name;
+                            });
                         }, el);
 
-                        expect(loaderDisplay).toEqual('none');
+                        expect(skyduckLoaderErrorAttributes).not.toContain('active');
                     });
 
                     it('should display a settings page', async () => {

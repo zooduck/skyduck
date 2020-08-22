@@ -4,8 +4,6 @@ import { SubSettingsCurrentLocationTemplate } from '../templates/sub-settings-cu
 import { getCurrentPosition } from '../utils/get-current-position';
 import { reverseGeocodeLookup } from '../fetch/reverse-geocode-lookup.fetch';
 import { formatAddress } from '../utils/format-address';
-import { clearLoaderInfoDisplay } from '../utils/clear-loader-info-display';
-
 /* eslint-disable no-unused-vars */
 import {
     GeocodeData,
@@ -13,7 +11,6 @@ import {
     HTMLZooduckCarouselElement,
 } from '../interfaces/index';
 /* eslint-enable no-unused-vars */
-
 import { ClubListCarouselTemplate } from '../templates/club-list-carousel.template';
 import { generalEventHandlers } from '../event-handlers/general.event-handlers';
 import { sortClubs } from '../utils/sort-clubs';
@@ -23,7 +20,6 @@ import { getForecast } from '../utils/get-forecast';
 import { revertContentOnError } from '../utils/revert-content-on-error';
 import { resetModifierClasses } from '../utils/reset-modifier-classes';
 import { getClubData } from '../utils/get-club-data';
-import { getLoaderInfoElements } from '../utils/get-loader-info-elements';
 import { setContent } from '../utils/set-content';
 import { subSettingsLocationSettingsEventHandlers } from '../event-handlers/sub-settings-location-settings.event-handlers';
 import { updateForecastHeader } from '../utils/update-forecast-header';
@@ -90,6 +86,7 @@ export const stateActions = function stateActions(): StateActions {
         },
         ERROR: () => {
             revertContentOnError.call(this);
+            updateSettingsPage.call(this, 'activeCarousel');
         },
         FORECAST_CAROUSEL_SLIDE_CHANGE: () => {
             const { currentForecastSlide, hasLoaded } = StateAPotamus.getState();
@@ -253,19 +250,30 @@ export const stateActions = function stateActions(): StateActions {
         SET_LOADED: () => {
             this.classList.remove(this._modifierClasses.loading);
 
-            const loaderInfoElements = getLoaderInfoElements.call(this);
-
-            clearLoaderInfoDisplay(loaderInfoElements);
+            this.shadowRoot.querySelector('skyduck-interval-loader').removeAttribute('active');
         },
         SET_LOADING: () => {
             this.classList.remove(this._modifierClasses.ready);
             this.classList.add(this._modifierClasses.loading);
+
+            const { hasLoaded } = StateAPotamus.getState();
+
+            if (!hasLoaded) {
+                return;
+            }
+
+            const skyduckIntervalLoader = this.shadowRoot.querySelector('skyduck-interval-loader');
+            skyduckIntervalLoader.setAttribute('active', '');
+            skyduckIntervalLoader.removeAttribute('loaded');
         },
         SET_POSITION: () => {
             // Do nothing
         },
-        SET_READY: () => {
+        SET_READY: async () => {
             resetModifierClasses.call(this);
+
+            this.shadowRoot.querySelector('skyduck-splash-screen-loader').removeAttribute('active');
+            this.shadowRoot.querySelector('skyduck-loader-error').removeAttribute('active');
 
             this.classList.add(this._modifierClasses.ready);
         },

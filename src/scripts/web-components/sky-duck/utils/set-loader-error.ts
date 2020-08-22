@@ -9,6 +9,7 @@ export const setLoaderError = function setLoaderError() {
 
     this.classList.add(this._modifierClasses.error);
 
-    const loaderError =  this.shadowRoot.querySelector('#loaderError');
-    loaderError.innerHTML = error;
+    const skyduckLoaderErrorEl =   this.shadowRoot.querySelector('skyduck-loader-error');
+    skyduckLoaderErrorEl.setAttribute('message', error);
+    skyduckLoaderErrorEl.setAttribute('active', '');
 };

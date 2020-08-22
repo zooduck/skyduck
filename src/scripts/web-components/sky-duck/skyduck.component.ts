@@ -14,6 +14,7 @@ import { state } from './state/state';
 import { StateAPotamus } from './state/stateapotamus';
 import { googleMapsKeyLookup } from './fetch/google-maps-key-lookup.fetch';
 import { stateActions } from './state/state-actions';
+import { version } from './fetch/version.fetch';
 
 const tagName = 'zooduck-skyduck';
 
@@ -183,8 +184,7 @@ class HTMLZooduckSkyduckElement extends HTMLElement {
             return;
         }
 
-        const versionResponse = await fetch('/version');
-        const version =  await versionResponse.text();
+        const skyduckVersion = await version();
         const googleMapsKey = await googleMapsKeyLookup();
 
         try {
@@ -214,7 +214,7 @@ class HTMLZooduckSkyduckElement extends HTMLElement {
         await this._initClubs();
 
         StateAPotamus.dispatch('SETUP', {
-            version,
+            version: skyduckVersion,
             googleMapsKey,
             setupStarted: true,
         });

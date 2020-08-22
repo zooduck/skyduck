@@ -27,20 +27,11 @@ export class DaylightHoursIndicatorTemplate {
         const minutesPerDay = 60 * 24;
         const sunriseDt = DateTime.fromSeconds(this._sunriseTime).setZone(this._timezone);
         const sunsetDt = DateTime.fromSeconds(this._sunsetTime).setZone(this._timezone);
-        const startOfDay = sunriseDt.set({ hour: 0, minute: 0, second: 0});
-        const endOfDay = sunriseDt.set({ hour: 23, minute: 59, second: 59});
-        const midnightToSunriseInterval = Interval.fromDateTimes(startOfDay, sunriseDt);
-        const minutesFromMidnightToSunrise = midnightToSunriseInterval.length('minutes');
-        const sunsetToMidnightInterval = Interval.fromDateTimes(sunsetDt, endOfDay);
-        const minutesFromSunsetToMidnight = sunsetToMidnightInterval.length('minutes');
-        const midnightToSunrisePercent = (minutesFromMidnightToSunrise / minutesPerDay) * 100;
-        const sunsetToMidnightPercent = (minutesFromSunsetToMidnight / minutesPerDay) * 100;
+        const sunriseToSunsetInterval = Interval.fromDateTimes(sunriseDt, sunsetDt);
+        const daylightMinutes = sunriseToSunsetInterval.length('minutes');
+        const daylightMinutesFraction = (daylightMinutes / minutesPerDay);
 
-        const style = `
-            grid-template-columns: minmax(auto, ${midnightToSunrisePercent}%) 1fr minmax(auto, ${sunsetToMidnightPercent}%);
-        `;
-
-        return style;
+        return `grid-template-columns: auto ${daylightMinutesFraction}fr auto;`;
     }
 
     private _buildDaylightHoursIndicator(): void {

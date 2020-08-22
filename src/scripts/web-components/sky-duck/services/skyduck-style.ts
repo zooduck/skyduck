@@ -58,6 +58,24 @@ export class SkyduckStyle {
                 }
             }
 
+            @keyframes icon-pulse {
+                0% {
+                    transform: scale(1)
+                }
+                25% {
+                    transform: scale(.9);
+                }
+                50% {
+                    transform: scale(1);
+                }
+                75% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
             :host {
                 position: relative;
                 display: block;
@@ -143,30 +161,20 @@ export class SkyduckStyle {
             a:hover {
                 text-decoration: underline;
             }
+
             zooduck-carousel {
                 transition: none;
             }
 
             .loader {
                 display: none;
+            }
+            :host(.--loading) .loader {
                 position: fixed;
                 left: 0;
                 top: 0;
+                display: block;
                 z-index: var(--loader-z-index);
-                grid-template-rows: .7fr auto 1fr;
-                grid-gap: 50px;
-                justify-content: center;
-                justify-items: center;
-                width: 100%;
-                max-width: var(--max-width);
-                height: 100vh;
-                background-color: var(--lightskyblue);
-                color: var(--white);
-                padding: 10px;
-                font-size: 1.2em;
-            }
-            :host(.--loading) .loader {
-                display: grid;
             }
             .loader__error {
                 display: none;
@@ -180,53 +188,6 @@ export class SkyduckStyle {
             }
             :host(.--error) .loader__error {
                 display: block;
-            }
-            .loader-info {
-                grid-row: 1;
-                align-self: end;
-                width: 200px;
-                text-align: center;
-                transition: all ${transitionSpeedInMillis}ms;
-            }
-            :host(.--error) .loader-info {
-                display: none;
-            }
-            :host(.--ready) .loader-info {
-                transform: translateX(100vw);
-            }
-            .loader-info__place {
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-            }
-            .loader__icon {
-                grid-row: 2;
-                transition: all ${transitionSpeedInMillis}ms;
-            }
-            :host(.--ready) .loader__icon {
-                transform: translateX(-100vw);
-            }
-            .loader-bar {
-                display: flex;
-                grid-row: 3;
-                display: flex;
-                align-items: center;
-                width: 100%;
-                height: 10px;
-                background-color: rgba(255, 255, 255, .5);
-            }
-            .loader-bar__inner {
-                background-color: var(--white);
-                width: 0;
-                height: 100%;
-                animation: loading-bar linear;
-            }
-            :host(:not(.--init)) .loader-bar {
-                visibility: hidden;
-            }
-            :host(.--error) .loader__icon,
-            :host(.--error) .loader-bar {
-                display: none;
             }
 
             .geolocation-error {
@@ -505,7 +466,8 @@ export class SkyduckStyle {
             .daylight-hours-indicator__daylight {
                 align-self: center;
                 height: 15px;
-                background-color: var(--lightgray);
+                background-color: var(--paleyellow);
+                border: solid 2px var(--black);
             }
 
             .forecast-grid {
