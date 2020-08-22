@@ -1,0 +1,16 @@
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 1366px;
+}
+@media (min-width: 824px) {
+  body {
+    background-color: whitesmoke;
+  }
+}
+
+/*# sourceMappingURL=/main.48b3db1d.css.map */
