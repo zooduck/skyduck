@@ -35,11 +35,12 @@ export const skyduckIntervalLoaderStyle = `
 
 :host([loaded]) .skyduck-interval-loader__layer-1 {
     animation: removeLayer1 .25s linear both;
-    animation-delay: .5s;
+    animation-delay: .75s;
 }
 
 :host([loaded]) .skyduck-interval-loader__layer-2 {
     animation: removeLayer2 .25s linear both;
+    animation-delay: .25s;
 }
 .skyduck-interval-loader {
     position: fixed;

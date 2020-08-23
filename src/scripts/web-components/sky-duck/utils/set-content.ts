@@ -76,7 +76,7 @@ export const setContent = async function setContent() {
     StateAPotamus.dispatch('SET_READY');
 
     if (hasLoaded) {
-        const SKYDUCK_INTERVAL_LOADER_REMOVE_LAYERS_ANIMATION_MILLIS = 750;
+        const SKYDUCK_INTERVAL_LOADER_REMOVE_LAYERS_ANIMATION_MILLIS = 1000;
         this.shadowRoot.querySelector('skyduck-interval-loader').setAttribute('loaded', '');
 
         await wait(SKYDUCK_INTERVAL_LOADER_REMOVE_LAYERS_ANIMATION_MILLIS);
