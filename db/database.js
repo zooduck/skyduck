@@ -1,3 +1,5 @@
+const { DBRef } = require('mongodb');
+
 /* eslint-disable no-console */
 require('dotenv').config();
 const mongodb = require('mongodb').MongoClient;
@@ -9,12 +11,10 @@ const collections = [
     'Weather',
 ];
 
-const createCollections = async (db) => {
-    const collectionPromises = collections.map((collection) => {
-        return db.createCollection(collection);
+const createCollections = (db) => {
+    collections.forEach((collection) => {
+        db.createCollection(collection, {}, () => {});
     });
-
-    await Promise.allSettled(collectionPromises);
 };
 
 const mongo = () => {
@@ -31,7 +31,7 @@ const mongo = () => {
 
                     const db = client.db(process.env.MONGODB_DATABASE);
 
-                    await createCollections(db);
+                    createCollections(db);
 
                     await db.collection('Log').createIndex({ ip: 1 }, { unique: true });
                     await db.collection('SkydiveClub').createIndex({ id: 1 }, {unique: true });
