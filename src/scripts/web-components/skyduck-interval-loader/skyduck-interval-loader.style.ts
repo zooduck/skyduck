@@ -34,12 +34,12 @@ export const skyduckIntervalLoaderStyle = `
 }
 
 :host([loaded]) .skyduck-interval-loader__layer-1 {
-    animation: removeLayer1 .25s linear both;
+    animation: removeLayer1 .5s linear both;
     animation-delay: .75s;
 }
 
 :host([loaded]) .skyduck-interval-loader__layer-2 {
-    animation: removeLayer2 .25s linear both;
+    animation: removeLayer2 .5s linear both;
     animation-delay: .25s;
 }
 .skyduck-interval-loader {
