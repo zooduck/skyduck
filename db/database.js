@@ -1,5 +1,3 @@
-const { DBRef } = require('mongodb');
-
 /* eslint-disable no-console */
 require('dotenv').config();
 const mongodb = require('mongodb').MongoClient;
