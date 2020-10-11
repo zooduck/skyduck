@@ -1,0 +1,1 @@
+{"version":3,"sources":["styles\\main.scss"],"names":[],"mappings":"AAAA,EACI,6BAAA,CAAA,sBAGJ,KACI,cAEA,yBAHJ,KAIQ","file":"main.f4c6fb2f.css","sourceRoot":"..\\src","sourcesContent":["* {\r\n    box-sizing: border-box;\r\n}\r\n\r\nbody {\r\n    margin: 0 auto;\r\n\r\n    @media (min-width: 824px) {\r\n        background-color: whitesmoke;\r\n    }\r\n}\r\n"]}
