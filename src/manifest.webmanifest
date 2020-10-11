@@ -1,6 +1,6 @@
 {
-  "name": "SkyDuck Weather",
-  "short_name": "SkyDuck",
+  "name": "Skyduck Weather",
+  "short_name": "Skyduck",
   "icons": [
     {
       "src": "assets/pwa-icon-192-maskable.png",
@@ -20,5 +20,7 @@
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "url": "https://skyduck.org",
+  "lang": "English"
 }
