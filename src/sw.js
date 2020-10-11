@@ -6,16 +6,7 @@ const CACHE_NAME = `cache-v${package.version}`;
 const preCacheList = [
     '/',
     'index.html',
-    'manifest.webmanifest',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/clear-day.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/clear-night.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/cloudy.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/partly-cloudy-day.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/fog.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/rain.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/sleet.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/snow.jpg',
-    'https://skyduck.s3.eu-west-2.amazonaws.com/img/wind.jpg'
+    'manifest.webmanifest'
 ];
 
 const cleanCache = async () => {
