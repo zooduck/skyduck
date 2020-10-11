@@ -12,6 +12,12 @@ const resolvers = (db) => {
             const result = await db.collection('SkydiveClub').findOne({
                 $or: [
                     {
+                        id: {
+                            $regex: args.name,
+                            $options: 'i'
+                        }
+                    },
+                    {
                         name: {
                             $regex: escapeSpecialChars(args.name),
                             $options: 'i',

@@ -21,5 +21,6 @@ export const skyduckLoaderErrorStyle = `
     color: var(--white);
     border: solid 3px var(--white);
     max-width: 450px;
+    cursor: pointer;
 }
 `;

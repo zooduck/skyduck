@@ -30,7 +30,7 @@ class HTMLZooduckSkyduckElement extends HTMLElement {
 
         this.attachShadow({ mode: 'open' });
 
-        this._defaultClub = 'Skydive Algarve';
+        this._defaultClub = 'skydive_algarve';
         this._modifierClasses = modifierClasses;
 
         StateAPotamus.setState({
@@ -151,6 +151,23 @@ class HTMLZooduckSkyduckElement extends HTMLElement {
 
     private _initClubOrLocation() {
         if (this._club || this._location) {
+            return;
+        }
+
+        const url = new URL(window.location.href);
+
+        const clubId = url.searchParams.get('club_id');
+        const location = url.searchParams.get('location');
+
+        if (clubId) {
+            this.club = clubId;
+
+            return;
+        }
+
+        if (location) {
+            this.location = location;
+
             return;
         }
 

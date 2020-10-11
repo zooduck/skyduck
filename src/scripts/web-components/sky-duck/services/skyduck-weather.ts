@@ -14,8 +14,8 @@ import { darkSkyLookup } from '../fetch/dark-sky-lookup.fetch';
 import { querySkydiveClub } from '../fetch/skydive-club.fetch';
 import { dbWeatherLookup } from '../fetch/db-weather-lookup.fetch';
 import { dbWeatherUpdate } from '../fetch/db-weather-update.fetch';
-import { escapeSpecialChars } from '../utils/escape-special-chars';
 import { StateAPotamus } from '../state/stateapotamus';
+import { findClub } from '../utils/find-club';
 
 export class SkyduckWeather {
     private _floatToInt(float: number): number {
@@ -158,11 +158,7 @@ export class SkyduckWeather {
         let skydiveClub: SkydiveClub;
 
         if (clubList) {
-            const clubEscaped = escapeSpecialChars(name);
-
-            skydiveClub = clubList.find((club: SkydiveClub) => {
-                return new RegExp(clubEscaped, 'i').test(club.name);
-            });
+            skydiveClub = findClub(clubList, name);
         } else {
             skydiveClub = await querySkydiveClub(name);
         }

@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import { SkydiveClub } from '../interfaces/index';
-import { escapeSpecialChars } from './escape-special-chars';
 import { StateAPotamus } from '../state/stateapotamus';
+import { findClub } from './find-club';
 
 export const getClubData = function getClubData(): SkydiveClub {
     const { club, clubs } = StateAPotamus.getState();
@@ -10,9 +10,5 @@ export const getClubData = function getClubData(): SkydiveClub {
         return;
     }
 
-    const clubEscaped = escapeSpecialChars(club);
-
-    return clubs.find((club: SkydiveClub) => {
-        return new RegExp(clubEscaped, 'i').test(club.name);
-    });
+    return findClub(clubs, club);
 };
