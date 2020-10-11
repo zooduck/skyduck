@@ -247,10 +247,20 @@ export const stateActions = function stateActions(): StateActions {
         SET_CURRENT_CLUB: () => {
             // Do nothing
         },
+        SET_INTERVAL_LOADER_LOADED: () => {
+            this.shadowRoot.querySelector('skyduck-interval-loader').setAttribute('loaded', '');
+        },
+        SET_INTERVAL_LOADER_READY: () => {
+            this.shadowRoot.querySelector('skyduck-interval-loader').setAttribute('ready', '');
+        },
         SET_LOADED: () => {
             this.classList.remove(this._modifierClasses.loading);
 
-            this.shadowRoot.querySelector('skyduck-interval-loader').removeAttribute('active');
+            const skyduckIntervalLoader = this.shadowRoot.querySelector('skyduck-interval-loader');
+
+            skyduckIntervalLoader.removeAttribute('active');
+            skyduckIntervalLoader.removeAttribute('ready');
+            skyduckIntervalLoader.removeAttribute('loaded');
         },
         SET_LOADING: () => {
             this.classList.remove(this._modifierClasses.ready);
@@ -262,9 +272,7 @@ export const stateActions = function stateActions(): StateActions {
                 return;
             }
 
-            const skyduckIntervalLoader = this.shadowRoot.querySelector('skyduck-interval-loader');
-            skyduckIntervalLoader.setAttribute('active', '');
-            skyduckIntervalLoader.removeAttribute('loaded');
+            this.shadowRoot.querySelector('skyduck-interval-loader').setAttribute('active', '');
         },
         SET_POSITION: () => {
             // Do nothing

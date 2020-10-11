@@ -64,7 +64,7 @@ export const skyduckSplashScreenLoaderStyle = () => {
     display: none;
 }
 .skyduck-splash-screen-loader {
-    position: fixed;
+    position: absolute;
     left: 0;
     top: 0;
     width: 100%;

@@ -286,6 +286,8 @@ export interface StateActions {
     USER_LOCATION_CHANGE: CallableFunction;
     SET_CLUBS: CallableFunction;
     SET_CURRENT_CLUB: CallableFunction;
+    SET_INTERVAL_LOADER_LOADED: CallableFunction;
+    SET_INTERVAL_LOADER_READY: CallableFunction;
     SET_LOADED: CallableFunction;
     SET_LOADING:CallableFunction;
     SET_POSITION: CallableFunction;

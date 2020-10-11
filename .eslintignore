@@ -6,3 +6,5 @@
 *.jpg
 *.png
 puppeteer.utils.js
+manifest.webmanifest
+dist/

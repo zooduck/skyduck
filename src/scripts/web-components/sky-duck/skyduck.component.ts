@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import {
-    ModifierClasses,
     GeocodeData,
+    ModifierClasses,
     StateActions,
 } from './interfaces/index';
 /* eslint-enable no-unused-vars */
@@ -16,7 +16,7 @@ import { googleMapsKeyLookup } from './fetch/google-maps-key-lookup.fetch';
 import { stateActions } from './state/state-actions';
 import { version } from './fetch/version.fetch';
 
-const tagName = 'zooduck-skyduck';
+const tagName = 'skyduck-weather';
 
 /* eslint-enable */
 class HTMLZooduckSkyduckElement extends HTMLElement {

@@ -7,10 +7,11 @@
   "repository": "git://github.com/zooduck/skyduck.git",
   "scripts": {
     "prebuild": "node clean && npm run lint",
-    "build": "parcel build src/index.html",
+    "build": "parcel build src/index.html copy src/sw.js dist",
     "build:test": "parcel build src/index.test.html",
     "lint": "eslint ./src/**/*.*",
-    "watch": "parcel watch src/index.html",
+    "prewatch": "node clean",
+    "watch": "parcel watch src/index.html copy src/sw.js dist",
     "start": "node server.js",
     "pretest": "npm run build:test",
     "test": "jest --verbose --coverage"

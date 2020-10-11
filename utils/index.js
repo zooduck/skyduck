@@ -71,7 +71,6 @@ const mergeTimeMachineResults = (darkSkyData, darkSkyTimeMachineDataToday, darkS
     return darkSkyData;
 };
 
-
 module.exports = {
     escapeSpecialChars,
     filterHourlyDataForDaylightHours,

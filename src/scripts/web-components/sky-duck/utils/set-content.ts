@@ -11,6 +11,10 @@ import { setLoaderError } from './set-loader-error';
 
 export const setContent = async function setContent() {
     const { error, hasLoaded, imagesReady } = StateAPotamus.getState();
+    const SKYDUCK_INTERVAL_LOADER_MINIMUM_SCREEN_TIME_MILLIS = 2000;
+    const SKYDUCK_INTERVAL_LOADER_READY_TRANSITION_MILLIS = 500;
+    const SKYDUCK_INTERVAL_LOADER_REMOVE_TRANSITION_MILLIS = 500;
+    const DOM_RENDER_TIME_MILLIS = 250;
 
     if (!hasLoaded) {
         await onFirstLoad.call(this);
@@ -27,7 +31,11 @@ export const setContent = async function setContent() {
     }
 
     if (hasLoaded) {
-        await wait(1750); // Minimum loader time
+        await wait(SKYDUCK_INTERVAL_LOADER_MINIMUM_SCREEN_TIME_MILLIS);
+
+        StateAPotamus.dispatch('SET_INTERVAL_LOADER_READY');
+
+        await wait(SKYDUCK_INTERVAL_LOADER_READY_TRANSITION_MILLIS);
 
         clearContent.call(this);
     }
@@ -70,16 +78,14 @@ export const setContent = async function setContent() {
     // @NOTE: This is necessary to prevent any stuttering effect
     // from happening with the animation that removes the loader
     // ==========================================================
-    await wait(250);
-
+    await wait(DOM_RENDER_TIME_MILLIS);
 
     StateAPotamus.dispatch('SET_READY');
 
     if (hasLoaded) {
-        const SKYDUCK_INTERVAL_LOADER_REMOVE_LAYERS_ANIMATION_MILLIS = 1250;
-        this.shadowRoot.querySelector('skyduck-interval-loader').setAttribute('loaded', '');
+        StateAPotamus.dispatch('SET_INTERVAL_LOADER_LOADED');
 
-        await wait(SKYDUCK_INTERVAL_LOADER_REMOVE_LAYERS_ANIMATION_MILLIS);
+        await wait(SKYDUCK_INTERVAL_LOADER_REMOVE_TRANSITION_MILLIS);
     }
 
     StateAPotamus.dispatch('SET_LOADED', {

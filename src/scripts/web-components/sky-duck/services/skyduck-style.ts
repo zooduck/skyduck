@@ -20,8 +20,6 @@ export class SkyduckStyle {
         const { transitionSpeedInMillis } = this._styleOptions;
 
         this._style = `
-            @import url('https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i&display=swap');
-
             @keyframes hide-carousel {
                 0% {
                     height: auto;
@@ -87,7 +85,7 @@ export class SkyduckStyle {
                 background-color: var(--white);
                 user-select: none;
                 overflow: hidden;
-                font-family: Roboto, sans-serif;
+                font-family: 'Roboto', sans-serif;
                 font-size: var(--font-size-base);
                 color: var(--black);
 
@@ -170,11 +168,13 @@ export class SkyduckStyle {
                 display: none;
             }
             :host(.--loading) .loader {
-                position: fixed;
-                left: 0;
-                top: 0;
+                position: absolute;
                 display: block;
                 z-index: var(--loader-z-index);
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
             }
             .loader__error {
                 display: none;

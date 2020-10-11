@@ -44,7 +44,6 @@ database.connect().then((result) => {
     console.error(err);
 });
 
-
 const serverConfig = {
     port: process.env.PORT || 3333, // process.env.PORT (heroku port)
 };

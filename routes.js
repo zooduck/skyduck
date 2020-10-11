@@ -66,7 +66,7 @@ const connectPut = {
         };
 
         if (connectDataFromCache && connectDataFromCache.lastConnectionTime > oneMinuteAgo) {
-            response.status(httpStatusCodes.FORBIDDEN).send('CONNECT_LIMIT_EXCEEDED');
+            // response.status(httpStatusCodes.BAD_REQUEST).send('CONNECT_LIMIT_EXCEEDED');
 
             return;
         }

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 
-describe('zooduck-skyduck', () => {
+describe('skyduck-weather', () => {
     let el;
     const timeoutToConnectToDOM = 100;
     const timeoutToFirstLoadStarted = 2000;
@@ -23,10 +23,10 @@ describe('zooduck-skyduck', () => {
             describe('load completed', () => {
                 beforeAll(async () => {
                     await page.setContent(`
-                        <zooduck-skyduck></zooduck-skyduck>
+                        <skyduck-weather></skyduck-weather>
                     `);
 
-                    el = await page.$('zooduck-skyduck');
+                    el = await page.$('skyduck-weather');
 
                     await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadCompleted);
                 });
@@ -91,10 +91,10 @@ describe('zooduck-skyduck', () => {
                 describe('load completed', () => {
                     beforeAll(async () => {
                         await page.setContent(`
-                            <zooduck-skyduck club="skydive algarve"></zooduck-skyduck>
+                            <skyduck-weather club="skydive algarve"></skyduck-weather>
                         `);
 
-                        el = await page.$('zooduck-skyduck');
+                        el = await page.$('skyduck-weather');
 
                         await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadCompleted);
                     });
@@ -121,10 +121,10 @@ describe('zooduck-skyduck', () => {
                 describe('load completed', () => {
                     beforeAll(async () => {
                         await page.setContent(`
-                            <zooduck-skyduck club="SKYDIVEAPOTAMUS"></zooduck-skyduck>
+                            <skyduck-weather club="SKYDIVEAPOTAMUS"></skyduck-weather>
                         `);
 
-                        el = await page.$('zooduck-skyduck');
+                        el = await page.$('skyduck-weather');
 
                         await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadCompleted);
                     });
@@ -153,9 +153,9 @@ describe('zooduck-skyduck', () => {
                 describe('init', () => {
                     beforeAll(async () => {
                         await page.setContent(`
-                            <zooduck-skyduck location="tokyo"></zooduck-skyduck>
+                            <skyduck-weather location="tokyo"></skyduck-weather>
                         `);
-                        el = await page.$('zooduck-skyduck');
+                        el = await page.$('skyduck-weather');
                         await page.waitFor(timeoutToConnectToDOM);
                     });
 
@@ -174,9 +174,9 @@ describe('zooduck-skyduck', () => {
                 describe('load started', () => {
                     beforeAll(async () => {
                         await page.setContent(`
-                            <zooduck-skyduck location="tokyo"></zooduck-skyduck>
+                            <skyduck-weather location="tokyo"></skyduck-weather>
                         `);
-                        el = await page.$('zooduck-skyduck');
+                        el = await page.$('skyduck-weather');
                         await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadStarted);
                     });
 
@@ -219,10 +219,10 @@ describe('zooduck-skyduck', () => {
                 describe('load completed', () => {
                     beforeAll(async () => {
                         await page.setContent(`
-                            <zooduck-skyduck location="tokyo"></zooduck-skyduck>
+                            <skyduck-weather location="tokyo"></skyduck-weather>
                         `);
 
-                        el = await page.$('zooduck-skyduck');
+                        el = await page.$('skyduck-weather');
 
                         await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadCompleted);
                     });
@@ -354,9 +354,9 @@ describe('zooduck-skyduck', () => {
                 describe('load completed', () => {
                     beforeAll(async () => {
                         await page.setContent(`
-                            <zooduck-skyduck location="DOMPER"></zooduck-skyduck>
+                            <skyduck-weather location="DOMPER"></skyduck-weather>
                         `);
-                        el = await page.$('zooduck-skyduck');
+                        el = await page.$('skyduck-weather');
                         await page.waitFor(timeoutToConnectToDOM + timeoutToFirstLoadCompleted);
                     });
 

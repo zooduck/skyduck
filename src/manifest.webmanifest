@@ -1,0 +1,24 @@
+{
+  "name": "SkyDuck Weather",
+  "short_name": "SkyDuck",
+  "icons": [
+    {
+      "src": "assets/pwa-icon-192-maskable.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/pwa-icon-512-maskable.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "scope": "/",
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait"
+}
