@@ -21,6 +21,6 @@
   "theme_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
-  "url": "https://skyduck.org",
-  "lang": "English"
+  "description": "Skydivng weather made simple - with 7 day lookahead and easy to read color coded reports. Search by location or your favorite club.",
+  "lang": "en-us"
 }
